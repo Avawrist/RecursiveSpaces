@@ -1,4 +1,0 @@
-﻿  renderer.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
-C:\Users\fullm\Desktop\First Game\include\glad/glad.h(32): message : see previous definition of 'APIENTRY'
-  FirstGame.vcxproj -> C:\Users\fullm\Desktop\First Game\build\Debug\FirstGame.exe
