@@ -1,0 +1,10 @@
+^C:\USERS\FULLM\DESKTOP\FIRST GAME\BUILD\CMAKEFILES\E725D07DD9BDF10423C92327B7ABBFF4\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/fullm/Desktop/First Game/build" "-BC:/Users/fullm/Desktop/First Game/build" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/fullm/Desktop/First Game/build/FirstGame.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

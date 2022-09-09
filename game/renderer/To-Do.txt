@@ -1,0 +1,16 @@
+# Name:         Renderer To-Do
+# Last Updated: 9.6.22
+
+-Initialize OpenGL/GLFW settings
+	-Fix window hints
+-Set up render loop with test vertices
+-Implement lighting:
+	-Shadow mapping
+	-Directional, point lights
+	-Gamma correction
+	-Normal mapping
+	-HDR
+	-Bloom
+	-SSAO
+	-Transparency
+-Create shaders for cel-shaded effects

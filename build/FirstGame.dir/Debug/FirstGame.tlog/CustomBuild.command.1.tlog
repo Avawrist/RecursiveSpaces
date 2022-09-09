@@ -1,0 +1,10 @@
+^C:\USERS\FULLM\DESKTOP\FIRST GAME\BUILD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/fullm/Desktop/First Game/build" "-BC:/Users/fullm/Desktop/First Game/build" --check-stamp-file "C:/Users/fullm/Desktop/First Game/build/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

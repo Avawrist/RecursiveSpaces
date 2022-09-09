@@ -1,0 +1,3 @@
+C:/Users/fullm/Desktop/First Game/build/CMakeFiles/FirstGame.dir
+C:/Users/fullm/Desktop/First Game/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/fullm/Desktop/First Game/build/CMakeFiles/ZERO_CHECK.dir
