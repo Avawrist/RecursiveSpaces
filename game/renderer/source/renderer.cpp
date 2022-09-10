@@ -31,10 +31,10 @@ main()
         odGLFWError();
 	
 	// Set Window Hints
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-	glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	//glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+	//glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+	//glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
         
 	// Set Context Hints
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -42,7 +42,7 @@ main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	// Create window & context
-	GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", glfwGetPrimaryMonitor(), NULL);
+	GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
 	odGLFWError();
 
 	if(window)
