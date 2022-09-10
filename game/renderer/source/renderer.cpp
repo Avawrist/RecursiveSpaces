@@ -21,6 +21,9 @@ odGLFWError();
 void
 printGLFWError();
 
+void
+keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 int
 main()
 {
@@ -29,12 +32,6 @@ main()
     {
 	// Get any errors from initialization
         odGLFWError();
-	
-	// Set Window Hints
-	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	//glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-	//glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-	//glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
         
 	// Set Context Hints
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -47,9 +44,19 @@ main()
 
 	if(window)
 	{
-	    while(true)
+	    // Set keyboard input callback
+	    glfwSetKeyCallback(window, keyCallback);
+	    
+	    // Prep test render data
+
+	    // Render loop
+	    while(!glfwWindowShouldClose(window))
 	    {
-		
+		// Render pass 1
+
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	    }
 
 	    // Delete window
@@ -92,5 +99,14 @@ printGLFWError()
     if(errorMsg)
     {
 	cout << "GLFW Error: " << errorMsg << "ID: " << errorCode << endl;
+    }
+}
+
+void
+keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    {
+	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 }

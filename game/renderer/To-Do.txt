@@ -2,7 +2,11 @@
 # Last Updated: 9.6.22
 
 -Initialize OpenGL/GLFW settings
-	-Fix window hints
+	# Fix debug stall issue in VS2019 # Updated Debugger options/load only needed symbols
+	# Test window hints # Window hints seemingly made no difference to the window
+	- Setup keyboard input callback
+	- Setup mouse callback
+	- Setup mouse scroll callback
 -Set up render loop with test vertices
 -Implement lighting:
 	-Shadow mapping
