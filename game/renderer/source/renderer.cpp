@@ -11,7 +11,7 @@
 
 #include <windows.h>
 #include <iostream>
-#include <string.h>
+#include <string.h>>
 
 using namespace std;
 
@@ -27,61 +27,106 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void
 mousePosCallback(GLFWwindow* window, double xpos, double ypos);
 
+void
+mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
+
+void
+mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
 int
 main()
 {
+    //////////////////////
+    // Window & Context //
+    //////////////////////
+    
     // Initialize GLFW (Enumerates windows, joysticks, starts the timer)
-    if(glfwInit())
-    {
-	// Get any errors from initialization
-        odGLFWError();
-        
-	// Set Context Hints
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	
-	// Create window & context
-	GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
-       	odGLFWError();
-
-	if(window)
-	{
-	    // Set input callbacks
-	    glfwSetKeyCallback(window, keyCallback);
-	    glfwSetCursorPosCallback(window, mousePosCallback);
-	    
-	    // Prep test render data
-
-	    // Render loop
-	    while(!glfwWindowShouldClose(window))
-	    {
-		// Render pass 1
-		
-		// Swap buffers
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	    }
-
-	    // Delete window
-	    glfwDestroyWindow(window);
-	}
-	else
-	{
-	    OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
-	}
-	
-	// Terminate GLFW on program exit:
-	glfwTerminate();
-    }
-    else
+    if(!glfwInit())
     {
 	OutputDebugStringA("ERROR: Failed to initialize GLFW\n");
+	return -1;
     }
+    odGLFWError();
+        
+    // Set Context Hints
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	
+    // Create window & context
+    GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
+    if(!window)
+    {
+	OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
+	return -1;
+    }
+    odGLFWError();
+
+    // Set input callbacks
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetCursorPosCallback(window, mousePosCallback);
+    glfwSetMouseButtonCallback(window, mouseBtnCallback);
+    glfwSetScrollCallback(window, mouseScrollCallback);
+    odGLFWError();
+    
+    // Make created window/context the current context
+    glfwMakeContextCurrent(window);
+    odGLFWError();
+
+    ////////////////////////////////////////
+    // Load OpenGL Functions & Extensions //
+    ////////////////////////////////////////
+    
+    // Load OpenGL functions with glad
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    {
+	OutputDebugStringA("ERROR: Glad failed to load the OpenGL functions/extensions\n");
+	return -1;
+    }
+	    
+    ////////////////////////////
+    // Initialize Render Data //
+    ////////////////////////////
+    
+    // Vertex data
+    float testVertices[] = {
+	// Positions
+	1.0f, 1.0f, 0.0f,
+	0.0f, 0.0f, 0.0f,
+	0.0f, 1.0f, 0.0f
+    };
+
+    // VBOs
+
+    // VAOs
+
+    ////////////////////
+    // Create Shaders //
+    ////////////////////
+    
+    /////////////////
+    // Render Loop //
+    /////////////////
+
+    while(!glfwWindowShouldClose(window))
+    {
+	// Render pass 1
+	
+		
+	// Swap buffers
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+	odGLFWError();
+    }
+
+    // Delete window
+    glfwDestroyWindow(window);
+	
+    // Terminate GLFW on program exit:
+    glfwTerminate();
     
     return 0;
 }
-
 
 void
 odGLFWError()
@@ -118,5 +163,17 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 void
 mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    // ?
+    // Test passed
+}
+
+void
+mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    // Test passed
+}
+
+void
+mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    // Not tested
 }
