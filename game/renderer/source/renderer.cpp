@@ -24,6 +24,9 @@ printGLFWError();
 void
 keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+void
+mousePosCallback(GLFWwindow* window, double xpos, double ypos);
+
 int
 main()
 {
@@ -40,12 +43,13 @@ main()
 	
 	// Create window & context
 	GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
-	odGLFWError();
+       	odGLFWError();
 
 	if(window)
 	{
-	    // Set keyboard input callback
+	    // Set input callbacks
 	    glfwSetKeyCallback(window, keyCallback);
+	    glfwSetCursorPosCallback(window, mousePosCallback);
 	    
 	    // Prep test render data
 
@@ -53,7 +57,7 @@ main()
 	    while(!glfwWindowShouldClose(window))
 	    {
 		// Render pass 1
-
+		
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -109,4 +113,10 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+}
+
+void
+mousePosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    // ?
 }
