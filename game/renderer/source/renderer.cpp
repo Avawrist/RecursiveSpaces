@@ -11,7 +11,8 @@
 
 #include <windows.h>
 #include <iostream>
-#include <string.h>>
+#include <string.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -32,6 +33,8 @@ mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
 
 void
 mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+char* fileToBuf(char* file);
 
 int
 main()
@@ -83,7 +86,15 @@ main()
 	OutputDebugStringA("ERROR: Glad failed to load the OpenGL functions/extensions\n");
 	return -1;
     }
-	    
+
+    ////////////////////////////
+    // Configure OpenGL State //
+    ////////////////////////////
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
+    
     ////////////////////////////
     // Initialize Render Data //
     ////////////////////////////
@@ -97,9 +108,14 @@ main()
     };
 
     // VBOs
-
+    GLuint testVBO;
+    glGenBuffers(1, &testVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, testVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(testVertices), testVertices, GL_STATIC_DRAW);
+    
     // VAOs
-
+    
+    
     ////////////////////
     // Create Shaders //
     ////////////////////
@@ -119,6 +135,9 @@ main()
 	odGLFWError();
     }
 
+    // Delete buffers
+    glDeleteBuffers(1, &testVBO);
+    
     // Delete window
     glfwDestroyWindow(window);
 	
@@ -176,4 +195,29 @@ void
 mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Not tested
+}
+
+char* fileToBuf(char* file)
+{
+    FILE *fptr;
+    int length;
+    char* buffer;
+
+    // open file and get file length
+    fptr = fopen(file, "rb");
+    if(!fptr)
+      return NULL;
+    fseek(fptr, 0, SEEK_END);
+    length = ftell(fptr);
+    fseek(fptr, 0, SEEK_SET);
+    
+    // allocate buffer memory on heap
+    buffer = (char*)malloc(length + 1);
+
+    // read file stream into buffer
+    fread(buffer, length, 1, fptr);
+    fclose(fptr);
+    
+    buffer[length] = 0;
+    return buffer;
 }
