@@ -24,7 +24,7 @@ set(LIBS glfw3 opengl32)
 #set(LIBS ${LIBS} GLAD)
 
 # Create & Link Executable to Libs
-set(SOURCES "${CMAKE_SOURCE_DIR}/game/renderer/source/renderer.cpp" "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c")
+set(SOURCES "${CMAKE_SOURCE_DIR}/game/renderer/source/renderer.cpp" "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c" "${CMAKE_SOURCE_DIR}/game/renderer/source/shader.cpp")
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
@@ -37,3 +37,4 @@ include_directories(${CMAKE_SOURCE_DIR}/include/glm/glm)
 include_directories(${CMAKE_SOURCE_DIR}/include/glm/cmake)
 include_directories(${CMAKE_SOURCE_DIR}/include/KHR)
 include_directories(${CMAKE_SOURCE_DIR}/game/renderer/source)
+include_directories(${CMAKE_SOURCE_DIR}/game/renderer/include)
