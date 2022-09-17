@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <shader.h>
+
 using namespace std;
 
 void
@@ -33,8 +35,6 @@ mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
 
 void
 mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-char* fileToBuf(char* file);
 
 int
 main()
@@ -110,15 +110,24 @@ main()
     // VBOs
     GLuint testVBO;
     glGenBuffers(1, &testVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, testVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(testVertices), testVertices, GL_STATIC_DRAW);
     
     // VAOs
-    
+    GLuint testVAO;
+    glGenVertexArrays(1, &testVAO);
+
+    glBindVertexArray(testVAO); // Bind VAO
+    glBindBuffer(GL_ARRAY_BUFFER, testVBO); // Bind VBO while VAO is bound
+    glBufferData(GL_ARRAY_BUFFER, sizeof(testVertices), testVertices, GL_STATIC_DRAW); // Copy array to buffer
+    // Tell OpenGL how the vertex array is divided into attribute arrays: 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0); 
+    glEnableVertexAttribArray(0); // Enable the first attribute array (position)
+    glBindVertexArray(0); // Unbind until we are ready to draw
     
     ////////////////////
     // Create Shaders //
     ////////////////////
+
+    Shader myShader(GL_VERTEX_SHADER);
     
     /////////////////
     // Render Loop //
@@ -197,27 +206,3 @@ mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     // Not tested
 }
 
-char* fileToBuf(char* file)
-{
-    FILE *fptr;
-    int length;
-    char* buffer;
-
-    // open file and get file length
-    fptr = fopen(file, "rb");
-    if(!fptr)
-      return NULL;
-    fseek(fptr, 0, SEEK_END);
-    length = ftell(fptr);
-    fseek(fptr, 0, SEEK_SET);
-    
-    // allocate buffer memory on heap
-    buffer = (char*)malloc(length + 1);
-
-    // read file stream into buffer
-    fread(buffer, length, 1, fptr);
-    fclose(fptr);
-    
-    buffer[length] = 0;
-    return buffer;
-}
