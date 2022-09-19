@@ -14,6 +14,11 @@
 
 #include <shader.h>
 
+// # Struct Shader
+// A basic struct that holds the vertex, fragment and shader program ids.
+// On creation, the struct will create the required vertex and fragment shaders,
+// set the shader source code, compile and link the shader program.
+
 Shader::Shader(const char* _vertPath, const char* _fragPath)
 {
     // Create Shader Program
@@ -97,7 +102,10 @@ Shader::Shader(const char* _vertPath, const char* _fragPath)
 	glDeleteShader(frag_id);
     }
 
-    // Attach shaders & link program
+    ///////////////////////////////////
+    // Attach shaders & link program //
+    ///////////////////////////////////
+    
     glAttachShader(program_id, vert_id);
     glAttachShader(program_id, frag_id);
     glLinkProgram(program_id);
@@ -108,12 +116,18 @@ Shader::Shader(const char* _vertPath, const char* _fragPath)
     else
 	// TO-DO: Output error info from glGetProgramInfoLog
 	OutputDebugStringA("ERROR: SHADER PROGRAM FAILED TO LINK\n");
+
+    /////////////
+    // Cleanup //
+    /////////////
+    
+    glDeleteShader(vert_id);
+    glDeleteShader(frag_id);
 }
 
 Shader::~Shader()
 {
     glDetachShader(program_id, vert_id);
     glDetachShader(program_id, frag_id);
-    glDeleteShader(vert_id);
-    glDeleteShader(frag_id);
+    glDeleteProgram(program_id);
 }
