@@ -127,7 +127,7 @@ main()
     // Create Shaders //
     ////////////////////
 
-    Shader myShader(GL_VERTEX_SHADER);
+    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs", "F:\\assets\\shaders\\basic.fs");
     
     /////////////////
     // Render Loop //
@@ -135,9 +135,15 @@ main()
 
     while(!glfwWindowShouldClose(window))
     {
-	// Render pass 1
+	// Clear screen
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 	
-		
+	// Render pass 1
+	glUseProgram(basicShaderProgram.program_id);
+	glBindVertexArray(testVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	
 	// Swap buffers
 	glfwSwapBuffers(window);
 	glfwPollEvents();

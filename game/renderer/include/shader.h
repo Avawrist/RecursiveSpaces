@@ -8,10 +8,11 @@
 #define SHADER_H
 
 typedef struct Shader {
-    GLuint id;
-    GLenum type;
-    char*  pFileSource;
-    Shader(GLenum _type);
+    GLuint program_id;
+    GLuint vert_id;
+    GLuint frag_id;
+    Shader(const char* _vertPath, const char* _fragPath);
+    ~Shader();
 } Shader;
 
 #endif 
