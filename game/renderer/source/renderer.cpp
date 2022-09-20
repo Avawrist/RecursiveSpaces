@@ -152,7 +152,7 @@ main()
     // Create Shaders //
     ////////////////////
 
-    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs", "F:\\assets\\shaders\\basic.fs");
+    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs", "F:\\assets\\shaders\\basic.fs"); // TO-DO: Make generic path
     
     /////////////////
     // Render Loop //
