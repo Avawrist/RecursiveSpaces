@@ -4,16 +4,18 @@
 // Last Modified: 9/19 /2022 MDC
 // ======================================================================
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
+// Win libs
 #include <windows.h>
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
-
+// 3rd party libs
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+// My libs
+#include <mdcla.h>
 #include <shader.h>
 
 using namespace std;

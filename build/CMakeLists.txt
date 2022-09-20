@@ -13,7 +13,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # Find & add third party libs:
 #find_package(OPENGL REQUIRED)
-find_package(GLM REQUIRED)
+#find_package(GLM REQUIRED)
 find_package(GLFW3 REQUIRED)
 set(LIBS glfw3 opengl32)
 
@@ -24,10 +24,14 @@ set(LIBS glfw3 opengl32)
 #set(LIBS ${LIBS} GLAD)
 
 # Create & Link Executable to Libs
-set(SOURCES "${CMAKE_SOURCE_DIR}/game/renderer/source/renderer.cpp" "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c" "${CMAKE_SOURCE_DIR}/game/renderer/source/shader.cpp")
+set(SOURCES "${CMAKE_SOURCE_DIR}/game/renderer/source/renderer.cpp"
+            "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c"
+	    "${CMAKE_SOURCE_DIR}/game/renderer/source/shader.cpp"
+	    "${CMAKE_SOURCE_DIR}/game/source/mdcla.cpp")	
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
+# Include directories 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/glad)
 include_directories(${CMAKE_SOURCE_DIR}/include/GLFW)
@@ -36,5 +40,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include/glm)
 include_directories(${CMAKE_SOURCE_DIR}/include/glm/glm)
 include_directories(${CMAKE_SOURCE_DIR}/include/glm/cmake)
 include_directories(${CMAKE_SOURCE_DIR}/include/KHR)
+include_directories(${CMAKE_SOURCE_DIR}/include/mdcla)
 include_directories(${CMAKE_SOURCE_DIR}/game/renderer/source)
 include_directories(${CMAKE_SOURCE_DIR}/game/renderer/include)
