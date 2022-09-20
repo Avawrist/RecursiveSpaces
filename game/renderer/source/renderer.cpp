@@ -1,7 +1,7 @@
 // ======================================================================
 // Title: renderer.cpp
 // Description: The primary source file for an untitled renderer.
-// Last Modified: 9/6/2022 MDC
+// Last Modified: 9/19 /2022 MDC
 // ======================================================================
 
 #include <glad/glad.h>
@@ -59,7 +59,7 @@ main()
     odGLFWError();
         
     // Set Context Hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release 
@@ -106,6 +106,12 @@ main()
     glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_CULL_FACE);
+    // TO-DO: Remove following lines for release build
+    glEnable(GL_DEBUG_OUTPUT); 
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(glDebugOutput, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    // END TO-DO
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
