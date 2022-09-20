@@ -4,10 +4,15 @@
 -Initialize OpenGL/GLFW settings
 	# Fix debug stall issue in VS2019 # Updated Debugger options/load only needed symbols
 	# Test window hints # Window hints seemingly made no difference to the window
-	- Setup keyboard input callback
-	- Setup mouse callback
-	- Setup mouse scroll callback
--Set up render loop with test vertices
+	# Setup keyboard input callback # Added esc key to close window
+	# Setup mouse callback
+	# Setup mouse scroll callback
+	# Set up vertices for rendering
+		# Vertex buffer objects
+		# Vertex array objects
+		# Write shaders
+		# Link shader program
+	- Implement 4.3 core debugger / set callback
 -Implement lighting:
 	-Shadow mapping
 	-Directional, point lights
