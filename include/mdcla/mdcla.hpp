@@ -7,39 +7,43 @@
 #ifndef MDCLA_H
 #define MDCLA_H
 
-namespace mdcla;
-{
-    typedef struct Vec2F() {
-        
-    } Vec2;
+typedef struct Vec2F {
+    float x;
+    float y;
+    Vec2F();
+    Vec2F(float _x, float _y);
+    float& operator [](int i);
+    const float& operator [](int i) const;
+} Vec2F;
 
-    typedef struct Vec3F() {
-	    
-    } Vec3;
+/*
+typedef struct Vec3F() {
+	
+} Vec3F;
 
-    typedef struct Vec4F() {
+typedef struct Vec4F() {
+	
+} Vec4F;
 
-    } Vec4;
+typedef struct Mat33F() {
+	
+} Mat33F;
 
-    typedef struct Mat33F() {
+typedef struct Mat44F() {
+	
+} Mat44F;
 
-    } Mat33F;
+float dotVec2();
 
-    typedef struct Mat44F() {
-
-    } Mat44F;
-
-    float dotVec2();
-
-    float dotVec3();
+float dotVec3();
     
-    float dotVec4();
+float dotVec4();
 
-    Vec2 crossVec2();
+Vec2 crossVec2();
     
-    Vec3 crossVec3();
+Vec3 crossVec3();
 
-    Vec4 crossVec4();
-}
+Vec4 crossVec4();
+*/
 
 #endif

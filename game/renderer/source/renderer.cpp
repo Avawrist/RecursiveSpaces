@@ -15,8 +15,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 // My libs
-#include <mdcla.h>
-#include <shader.h>
+#include <mdcla.hpp>
+#include <shader.hpp>
 
 using namespace std;
 
@@ -153,6 +153,14 @@ main()
     ////////////////////
 
     Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs", "F:\\assets\\shaders\\basic.fs"); // TO-DO: Make generic path
+
+    ////////////////
+    // Math Tests //
+    ////////////////
+
+    Vec2F myVec2;
+    for(int i = 0; i < 2; i++)
+	std::cout << myVec2[i] << std::endl;
     
     /////////////////
     // Render Loop //

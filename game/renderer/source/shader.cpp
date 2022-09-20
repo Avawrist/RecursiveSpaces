@@ -12,7 +12,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <shader.h>
+#include <shader.hpp>
 
 // # Struct Shader
 // A basic struct that holds the vertex, fragment and shader program ids.
