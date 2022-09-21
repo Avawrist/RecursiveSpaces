@@ -15,21 +15,37 @@ typedef struct Vec2F {
     float& operator [](int i);
     const float& operator [](int i) const;
 } Vec2F;
+Vec2F operator *(const Vec2F& vec2, float s);
+
+typedef struct Vec3F {
+    float x;
+    float y;
+    float z;
+    Vec3F();
+    Vec3F(float _x, float _y, float _z);
+    float& operator [](int i);
+    const float& operator [](int i) const;
+} Vec3F;
+Vec3F operator *(const Vec3F& vec3, float s);
+
+typedef struct Vec4F {
+    float x;
+    float y;
+    float z;
+    float w;
+    Vec4F();
+    Vec4F(float _x, float _y, float _z, float _w);
+    float& operator [](int i);
+    const float& operator [](int i) const;
+} Vec4F;
+Vec4F operator *(const Vec4F& vec4, float s);
 
 /*
-typedef struct Vec3F() {
-	
-} Vec3F;
-
-typedef struct Vec4F() {
-	
-} Vec4F;
-
-typedef struct Mat33F() {
+typedef struct Mat33F {
 	
 } Mat33F;
 
-typedef struct Mat44F() {
+typedef struct Mat44F {
 	
 } Mat44F;
 
