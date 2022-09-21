@@ -158,16 +158,9 @@ main()
     // Math Tests //
     ////////////////
 
-    Vec4F vec4a(1.2f, 3.4f, 9.0f, 5.35f);
-    for(int i = 0; i < 4; i++)
-	std::cout << vec4a[i] << std::endl;
-    
-    Vec4F vec4b = vec4a * 2.0f;
-    for(int i = 0; i < 4; i++)
-	std::cout << vec4b[i] << std::endl;
-
-    for(int i = 0; i < 4; i++)
-	std::cout << vec4a[i] << std::endl;
+    Vec2F myVec2(3.0f, 4.5f);
+    std::cout << dot2F(myVec2) << std::endl;
+    std::cout << magnitude2F(myVec2) << std::endl;
     
     /////////////////
     // Render Loop //
