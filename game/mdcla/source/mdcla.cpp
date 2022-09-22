@@ -65,6 +65,11 @@ const float& Vec2F::operator [](int i) const
     return *(&x + i);
 }
 
+void Vec2F::print()
+{
+    printf("\n(%f, %f)\n", x, y);
+}
+
 // Vec2F Non-members
 
 Vec2F operator +(const Vec2F& a, const Vec2F& b)
@@ -178,6 +183,11 @@ float& Vec3F::operator [](int i)
 const float& Vec3F::operator [](int i) const
 {
     return *(&x + i);
+}
+
+void Vec3F::print()
+{
+    printf("\n(%f, %f, %f)\n", x, y, z);
 }
 
 // Vec3F Non-Members
@@ -315,6 +325,11 @@ const float& Vec4F::operator [](int i) const
     return *(&x + i);
 }
 
+void Vec4F::print()
+{
+    printf("\n(%f, %f, %f, %f)\n", x, y, z, w);
+}
+
 // Vec4F Non-Members
 
 Vec4F operator +(const Vec4F& a, const Vec4F& b)
@@ -391,8 +406,8 @@ Mat3F::Mat3F()
 }
 
 Mat3F::Mat3F(float n00, float n01, float n02,
-      float n10, float n11, float n12,
-      float n20, float n21, float n22)
+	     float n10, float n11, float n12,
+	     float n20, float n21, float n22)
 {
     n[0][0] = n00; n[0][1] = n01; n[0][2] = n02; 
     n[1][0] = n10; n[1][1] = n11; n[1][2] = n12;
@@ -423,39 +438,35 @@ const Vec3F Mat3F::operator [](int j) const
     return Vec3F(n[0][j], n[1][j], n[2][j]);
 }
 
-void Mat3F::operator *=(const Mat3F& m)
+void Mat3F::operator *=(float s)
 {
-    Vec3F temp_r1(n[0][0], n[0][1], n[0][2]);
-    Vec3F temp_r2(n[1][0], n[1][1], n[1][2]);
-    Vec3F temp_r3(n[2][0], n[2][1], n[2][2]);
-
-    n[0][0] = dot3F(temp_r1, m[0]); n[0][1] = dot3F(temp_r1, m[1]); n[0][2] = dot3F(temp_r1, m[2]);
-    n[1][0] = dot3F(temp_r2, m[0]); n[1][1] = dot3F(temp_r2, m[1]); n[1][2] = dot3F(temp_r2, m[2]);
-    n[2][0] = dot3F(temp_r3, m[0]); n[2][1] = dot3F(temp_r3, m[1]); n[2][2] = dot3F(temp_r3, m[2]); 
+    n[0][0] *= s; n[0][1] *= s; n[0][2] *= s;
+    n[1][0] *= s; n[1][1] *= s; n[1][2] *= s;
+    n[2][0] *= s; n[2][1] *= s; n[2][2] *= s;
 }
 
 void Mat3F::operator +=(const Mat3F& m)
 {
-    n[0][0] += m(0, 0); n[0][1] += m(1, 0); n[0][2] += m(2, 0);
-    n[1][0] += m(0, 1); n[1][1] += m(1, 1); n[1][2] += m(2, 1);
-    n[2][0] += m(0, 2); n[2][1] += m(1, 2); n[2][2] += m(2, 2);
+    n[0][0] += m(0, 0); n[0][1] += m(0, 1); n[0][2] += m(0, 2);
+    n[1][0] += m(1, 0); n[1][1] += m(1, 1); n[1][2] += m(1, 2);
+    n[2][0] += m(2, 0); n[2][1] += m(2, 1); n[2][2] += m(2, 2);
 }
 
 void Mat3F::operator -=(const Mat3F& m)
 {
-    n[0][0] -= m(0, 0); n[0][1] -= m(1, 0); n[0][2] -= m(2, 0);
-    n[1][0] -= m(0, 1); n[1][1] -= m(1, 1); n[1][2] -= m(2, 1);
-    n[2][0] -= m(0, 2); n[2][1] -= m(1, 2); n[2][2] -= m(2, 2);
+    n[0][0] -= m(0, 0); n[0][1] -= m(0, 1); n[0][2] -= m(0, 2);
+    n[1][0] -= m(1, 0); n[1][1] -= m(1, 1); n[1][2] -= m(1, 2);
+    n[2][0] -= m(2, 0); n[2][1] -= m(2, 1); n[2][2] -= m(2, 2);
 }
 
 float& Mat3F::operator ()(int i, int j)
 {
-    return n[j][i];
+    return n[i][j];
 }
 
 const float& Mat3F::operator ()(int i, int j) const
 {
-    return n[j][i];
+    return n[i][j];
 }
 
 void Mat3F::print()
@@ -473,35 +484,44 @@ void Mat3F::transpose()
 {
     Mat3F temp = *this;
 
-    
+    n[0][0] = temp(0, 0); n[0][1] = temp(1, 0); n[0][2] = temp(2, 0);
+    n[1][0] = temp(0, 1); n[1][1] = temp(1, 1); n[1][2] = temp(2, 1);
+    n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2);
 }
 
 // Mat3F Non-Members
 
 Mat3F operator +(const Mat3F& a, const Mat3F& b)
 {
-    return Mat3F(a(0, 0) + b(0, 0), a(1, 0) + b(1, 0), a(2, 0) + b(2, 0),
-	         a(0, 1) + b(0, 1), a(1, 1) + b(1, 1), a(2, 1) + b(2, 1),
-	         a(0, 2) + b(0, 2), a(1, 2) + b(1, 2), a(2, 2) + b(2, 2));
+    return Mat3F(a(0, 0) + b(0, 0), a(0, 1) + b(0, 1), a(0, 2) + b(0, 2),
+	         a(1, 0) + b(1, 0), a(1, 1) + b(1, 1), a(1, 2) + b(1, 2),
+	         a(2, 0) + b(2, 0), a(2, 1) + b(2, 1), a(2, 2) + b(2, 2));
 }
 
 Mat3F operator -(const Mat3F& a, const Mat3F& b)
 {
-    return Mat3F(a(0, 0) - b(0, 0), a(1, 0) - b(1, 0), a(2, 0) - b(2, 0),
-	         a(0, 1) - b(0, 1), a(1, 1) - b(1, 1), a(2, 1) - b(2, 1),
-	         a(0, 2) - b(0, 2), a(1, 2) - b(1, 2), a(2, 2) - b(2, 2));
+    return Mat3F(a(0, 0) - b(0, 0), a(0, 1) - b(0, 1), a(0, 2) - b(0, 2),
+	         a(1, 0) - b(1, 0), a(1, 1) - b(1, 1), a(1, 2) - b(1, 2),
+	         a(2, 0) - b(2, 0), a(2, 1) - b(2, 1), a(2, 2) - b(2, 2));
 }
 
 Mat3F operator *(const Mat3F& a, const Mat3F& b)
 {
-    Vec3F a_r1(a(0, 0), a(1, 0), a(2, 0));
-    Vec3F a_r2(a(0, 1), a(1, 1), a(2, 1));
-    Vec3F a_r3(a(0, 2), a(1, 2), a(2, 2));
-    Vec3F b_c1 = b[0];
-    Vec3F b_c2 = b[1];
-    Vec3F b_c3 = b[2];
+    return Mat3F(a(0, 0) * b(0, 0) + a(0, 1) * b(1, 0) + a(0, 2) * b(2, 0),
+	         a(0, 0) * b(0, 1) + a(0, 1) * b(1, 1) + a(0, 2) * b(2, 1),
+	         a(0, 0) * b(0, 2) + a(0, 1) * b(1, 2) + a(0, 2) * b(2, 2),
+	         a(1, 0) * b(0, 0) + a(1, 1) * b(1, 0) + a(1, 2) * b(2, 0),
+		 a(1, 0) * b(0, 1) + a(1, 1) * b(1, 1) + a(1, 2) * b(2, 1),
+		 a(1, 0) * b(0, 2) + a(1, 1) * b(1, 2) + a(1, 2) * b(2, 2),
+		 a(2, 0) * b(0, 0) + a(2, 1) * b(1, 0) + a(2, 2) * b(2, 0),
+		 a(2, 0) * b(0, 1) + a(2, 1) * b(1, 1) + a(2, 2) * b(2, 1),
+		 a(2, 0) * b(0, 2) + a(2, 1) * b(1, 2) + a(2, 2) * b(2, 2));
 
-    return Mat3F(dot3F(a_r1, b[0]), dot3F(a_r1, b[1]), dot3F(a_r1, b[2]),
-	         dot3F(a_r2, b[0]), dot3F(a_r2, b[1]), dot3F(a_r2, b[2]),
-	         dot3F(a_r3, b[0]), dot3F(a_r3, b[1]), dot3F(a_r3, b[2]));
+}
+
+Vec3F operator *(const Mat3F& m, const Vec3F& v)
+{
+    return Vec3F(m(0, 0) * v.x + m(0, 1) * v.y + m(0, 2) * v.z,
+		 m(1, 0) * v.x + m(1, 1) * v.y + m(1, 2) * v.z,
+		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z);
 }

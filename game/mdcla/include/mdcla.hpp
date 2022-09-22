@@ -22,6 +22,7 @@ typedef struct Vec2F
     void         operator -=(const Vec2F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
+    void print();
 } Vec2F;
 Vec2F operator +(const Vec2F& a, const Vec2F& b);
 Vec2F operator -(const Vec2F& a, const Vec2F& b);
@@ -46,6 +47,7 @@ typedef struct Vec3F
     void         operator -=(const Vec3F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
+    void print();
 } Vec3F;
 Vec3F operator +(const Vec3F& a, const Vec3F& b);
 Vec3F operator -(const Vec3F& a, const Vec3F& b);
@@ -72,6 +74,7 @@ typedef struct Vec4F
     void         operator -=(const Vec4F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
+    void print();
 } Vec4F;
 Vec4F operator +(const Vec4F& a, const Vec4F& b);
 Vec4F operator -(const Vec4F& a, const Vec4F& b);
@@ -93,7 +96,7 @@ public:
 	  float n20, float n21, float n22);
     Mat3F(float f);
     Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c);
-    void         operator *=(const Mat3F& m);
+    void         operator *=(float s);
     void         operator +=(const Mat3F& m);
     void         operator -=(const Mat3F& m);
     Vec3F        operator [](int j);
@@ -106,13 +109,14 @@ public:
 Mat3F operator +(const Mat3F& a, const Mat3F& b);
 Mat3F operator -(const Mat3F& a, const Mat3F& b);
 Mat3F operator *(const Mat3F& a, const Mat3F& b);
+Vec3F operator *(const Mat3F& m, const Vec3F& v);
 
-/*
 typedef struct Mat4F
 {
-	
+private:
+    float n[4][4];
+public:
+    
 } Mat4F;
-
-*/
 
 #endif
