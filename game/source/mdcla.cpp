@@ -1,7 +1,6 @@
 // ======================================================================
 // Title: mdcla.cpp
 // Description: The implementation file for my personal linear algebra library.
-// Last Modified: 9/20/2022 MDC
 // ======================================================================
 
 #include <mdcla.hpp>
@@ -24,32 +23,36 @@ Vec2F::Vec2F(float _x, float _y)
 
 Vec2F Vec2F::operator /(float d)
 {
-    return Vec2F((*this).x / d,
-	         (*this).y / d);
+    d = 1.0f / d;
+    
+    return Vec2F(x * d,
+	         y * d);
 }
 
 void Vec2F::operator /=(float d)
 {
-    this->x /= d;
-    this->y /= d;
+    d = 1.0f / d;
+    
+    x *= d;
+    y *= d;
 }
 
 void Vec2F::operator *=(float s)
 {
-    this->x *= s;
-    this->y *= s;
+    x *= s;
+    y *= s;
 }
 
-void Vec2F::operator +=(const Vec2F& vec2a)
+void Vec2F::operator +=(const Vec2F& v)
 {
-    this->x += vec2a.x;
-    this->y += vec2a.y;
+    x += v.x;
+    y += v.y;
 }
 
-void Vec2F::operator -=(const Vec2F& vec2s)
+void Vec2F::operator -=(const Vec2F& v)
 {
-    this->x -= vec2s.x;
-    this->y -= vec2s.y;
+    x -= v.x;
+    y -= v.y;
 }
 
 float& Vec2F::operator [](int i)
@@ -64,50 +67,50 @@ const float& Vec2F::operator [](int i) const
 
 // Vec2F Non-members
 
-Vec2F operator +(const Vec2F& vec2a, const Vec2F& vec2b)
+Vec2F operator +(const Vec2F& a, const Vec2F& b)
 {
-    return Vec2F(vec2a.x + vec2b.x,
-	         vec2a.y + vec2b.y);
+    return Vec2F(a.x + b.x,
+	         a.y + b.y);
 }
 
-Vec2F operator -(const Vec2F& vec2a, const Vec2F& vec2b)
+Vec2F operator -(const Vec2F& a, const Vec2F& b)
 {
-    return Vec2F(vec2a.x - vec2b.x,
-	         vec2a.y - vec2b.y);
+    return Vec2F(a.x - b.x,
+	         a.y - b.y);
 }
 
-Vec2F operator *(const Vec2F& vec2, float s)
+Vec2F operator *(const Vec2F& v, float s)
 {
-    return Vec2F(vec2.x * s,
-	         vec2.y * s);
+    return Vec2F(v.x * s,
+	         v.y * s);
 }
 
-Vec2F operator *(float s, const Vec2F& vec2)
+Vec2F operator *(float s, const Vec2F& v)
 {
-    return Vec2F(vec2.x * s,
-	         vec2.y * s);
+    return Vec2F(v.x * s,
+	         v.y * s);
 }
 
-float dot2F(const Vec2F& vec2a, const Vec2F& vec2b)
+float dot2F(const Vec2F& a, const Vec2F& b)
 {
-    return ((vec2a.x * vec2b.x) +
-	    (vec2a.y * vec2b.y));
+    return ((a.x * b.x) +
+	    (a.y * b.y));
 }
 
-float dot2F(const Vec2F& vec2)
+float dot2F(const Vec2F& v)
 {
-    return ((vec2.x * vec2.x) +
-	    (vec2.y * vec2.y));
+    return ((v.x * v.x) +
+	    (v.y * v.y));
 }
 
-float magnitude2F(const Vec2F& vec2)
+float magnitude2F(const Vec2F& v)
 {
-    return sqrt(dot2F(vec2));
+    return sqrt(dot2F(v));
 }
 
-Vec2F normalize2F(const Vec2F& vec2)
+Vec2F normalize2F(const Vec2F& v)
 {
-    
+    return (v * (1.0f / magnitude2F(v)));
 }
 
 //////////////////
@@ -130,37 +133,41 @@ Vec3F::Vec3F(float _x, float _y, float _z)
 
 Vec3F Vec3F::operator /(float d)
 {
-    return Vec3F((*this).x / d,
-	         (*this).y / d,
-		 (*this).z / d);
+    d = 1.0f / d;
+    
+    return Vec3F(x * d,
+	         y * d,
+		 z * d);
 }
 
 void Vec3F::operator /=(float d)
 {
-    this->x /= d;
-    this->y /= d;
-    this->z /= d;
+    d = 1.0f / d;
+    
+    x *= d;
+    y *= d;
+    z *= d;
 }
 
 void Vec3F::operator *=(float s)
 {
-    this->x *= s;
-    this->y *= s;
-    this->z *= s;
+    x *= s;
+    y *= s;
+    z *= s;
 }
 
-void Vec3F::operator +=(const Vec3F& vec3a)
+void Vec3F::operator +=(const Vec3F& v)
 {
-    this->x += vec3a.x;
-    this->y += vec3a.y;
-    this->z += vec3a.z;
+    x += v.x;
+    y += v.y;
+    z += v.z;
 }
 
-void Vec3F::operator -=(const Vec3F& vec3s)
+void Vec3F::operator -=(const Vec3F& v)
 {
-    this->x -= vec3s.x;
-    this->y -= vec3s.y;
-    this->z -= vec3s.z;
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
 }
 
 float& Vec3F::operator [](int i)
@@ -175,32 +182,63 @@ const float& Vec3F::operator [](int i) const
 
 // Vec3F Non-Members
 
-Vec3F operator +(const Vec3F& vec3a, const Vec3F& vec3b)
+Vec3F operator +(const Vec3F& a, const Vec3F& b)
 {
-    return Vec3F(vec3a.x + vec3b.x,
-	         vec3a.y + vec3b.y,
-	         vec3a.z + vec3b.z);
+    return Vec3F(a.x + b.x,
+	         a.y + b.y,
+	         a.z + b.z);
 }
 
-Vec3F operator -(const Vec3F& vec3a, const Vec3F& vec3b)
+Vec3F operator -(const Vec3F& a, const Vec3F& b)
 {
-    return Vec3F(vec3a.x - vec3b.x,
-	         vec3a.y - vec3b.y,
-	         vec3a.z - vec3b.z);
+    return Vec3F(a.x - b.x,
+	         a.y - b.y,
+	         a.z - b.z);
 }
 
-Vec3F operator *(const Vec3F& vec3, float s)
+Vec3F operator *(const Vec3F& v, float s)
 {
-    return Vec3F(vec3.x * s,
-	         vec3.y * s,
-	         vec3.z * s);
+    return Vec3F(v.x * s,
+	         v.y * s,
+	         v.z * s);
 }
 
-Vec3F operator *(float s, const Vec3F& vec3)
+Vec3F operator *(float s, const Vec3F& v)
 {
-    return Vec3F(vec3.x * s,
-	         vec3.y * s,
-	         vec3.z * s);
+    return Vec3F(v.x * s,
+	         v.y * s,
+	         v.z * s);
+}
+
+Vec3F cross3F(const Vec3F& a, const Vec3F& b)
+{
+    return Vec3F((a.y * b.z) - (a.z * b.y),
+		 (a.z * b.x) - (a.x * b.z),
+		 (a.x * b.y) - (a.y * b.x));
+}
+
+float dot3F(const Vec3F& a, const Vec3F& b)
+{
+    return ((a.x * b.x) +
+	    (a.y * b.y) +
+	    (a.z * b.z));
+}
+
+float dot3F(const Vec3F& v)
+{
+    return ((v.x * v.x) +
+	    (v.y * v.y) +
+	    (v.z * v.z));
+}
+
+float magnitude3F(const Vec3F& v)
+{
+    return (sqrt(dot3F(v)));
+}
+
+Vec3F normalize3F(const Vec3F& v)
+{
+    return (v * (1.0f / magnitude3F(v)));
 }
 
 //////////////////
@@ -225,42 +263,46 @@ Vec4F::Vec4F(float _x, float _y, float _z, float _w)
 
 Vec4F Vec4F::operator /(float d)
 {
-    return Vec4F((*this).x / d,
-	         (*this).y / d,
-		 (*this).z / d,
-	         (*this).w / d);
+    d = 1.0f / d;
+    
+    return Vec4F(x * d,
+	         y * d,
+		 z * d,
+	         w * d);
 }
 
 void Vec4F::operator /=(float d)
 {
-    this->x /= d;
-    this->y /= d;
-    this->z /= d;
-    this->w /= d;
+    d = 1.0f / d;
+    
+    x *= d;
+    y *= d;
+    z *= d;
+    w *= d;
 }
 
 void Vec4F::operator *=(float s)
 {
-    this->x *= s;
-    this->y *= s;
-    this->z *= s;
-    this->w *= s;
+    x *= s;
+    y *= s;
+    z *= s;
+    w *= s;
 }
 
-void Vec4F::operator +=(const Vec4F& vec4a)
+void Vec4F::operator +=(const Vec4F& v)
 {
-    this->x += vec4a.x;
-    this->y += vec4a.y;
-    this->z += vec4a.z;
-    this->w += vec4a.w;
+    x += v.x;
+    y += v.y;
+    z += v.z;
+    w += v.w;
 }
 
-void Vec4F::operator -=(const Vec4F& vec4s)
+void Vec4F::operator -=(const Vec4F& v)
 {
-    this->x -= vec4s.x;
-    this->y -= vec4s.y;
-    this->z -= vec4s.z;
-    this->w -= vec4s.w;
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
+    w -= v.w;
 }
 
 float& Vec4F::operator [](int i)
@@ -275,35 +317,117 @@ const float& Vec4F::operator [](int i) const
 
 // Vec4F Non-Members
 
-Vec4F operator +(const Vec4F& vec4a, const Vec4F& vec4b)
+Vec4F operator +(const Vec4F& a, const Vec4F& b)
 {
-    return Vec4F(vec4a.x + vec4b.x,
-	         vec4a.y + vec4b.y,
-	         vec4a.z + vec4b.z,
-	         vec4a.w + vec4b.w);
+    return Vec4F(a.x + b.x,
+	         a.y + b.y,
+	         a.z + b.z,
+	         a.w + b.w);
 }
 
-Vec4F operator -(const Vec4F& vec4a, const Vec4F& vec4b)
+Vec4F operator -(const Vec4F& a, const Vec4F& b)
 {
-    return Vec4F(vec4a.x - vec4b.x,
-	         vec4a.y - vec4b.y,
-	         vec4a.z - vec4b.z,
-	         vec4a.w - vec4b.w);
+    return Vec4F(a.x - b.x,
+	         a.y - b.y,
+	         a.z - b.z,
+	         a.w - b.w);
 }
 
-Vec4F operator *(const Vec4F& vec4, float s)
+Vec4F operator *(const Vec4F& v, float s)
 {
-    return Vec4F(vec4.x * s,
-	         vec4.y * s,
-	         vec4.z * s,
-	         vec4.w * s);
+    return Vec4F(v.x * s,
+	         v.y * s,
+	         v.z * s,
+	         v.w * s);
 }
 
-Vec4F operator *(float s, const Vec4F& vec4)
+Vec4F operator *(float s, const Vec4F& v)
 {
-    return Vec4F(vec4.x * s,
-	         vec4.y * s,
-	         vec4.z * s,
-	         vec4.w * s);
+    return Vec4F(v.x * s,
+	         v.y * s,
+	         v.z * s,
+	         v.w * s);
 }
  
+float dot4F(const Vec4F& a, const Vec4F& b)
+{
+    return ((a.x * b.x) +
+	    (a.y * b.y) +
+	    (a.z * b.z) +
+	    (a.w * b.w));
+}
+
+float dot4F(const Vec4F& v)
+{
+    return ((v.x * v.x) +
+	    (v.y * v.y) +
+	    (v.z * v.z) +
+	    (v.w * v.w));
+}
+
+float magnitude4F(const Vec4F& v)
+{
+    return(sqrt(dot4F(v)));
+}
+
+Vec4F normalize4F(const Vec4F& v)
+{
+    return (v * (1.0f / magnitude4F(v)));
+}
+
+//////////////////
+// Struct Mat3F //
+//////////////////
+
+Mat3F::Mat3F()
+{
+    for(int x = 0; x < 3; x++)
+    {
+	for(int y = 0; y < 3; y++)
+	{
+	    n[x][y] = 0.0f;
+	}
+    }    
+}
+
+Mat3F::Mat3F(float n00, float n01, float n02,
+      float n10, float n11, float n12,
+      float n20, float n21, float n22)
+{
+    n[0][0] = n00; n[0][1] = n01; n[0][2] = n02; 
+    n[1][0] = n10; n[1][1] = n11; n[1][2] = n12;
+    n[2][0] = n20; n[2][1] = n21; n[2][2] = n22;
+}
+
+Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
+{
+    n[0][0] = a.x; n[0][1] = b.x; n[0][2] = c.x; 
+    n[1][0] = a.y; n[1][1] = b.y; n[1][2] = c.y;
+    n[2][0] = a.z; n[2][1] = b.z; n[2][2] = c.z;
+}
+
+Vec3F Mat3F::operator [](int j)
+{
+    return Vec3F(n[0][j], n[1][j], n[2][j]);
+}
+
+float& Mat3F::operator ()(int i, int j)
+{
+    return n[j][i];
+}
+
+const float& Mat3F::operator ()(int i, int j) const
+{
+    return n[j][i];
+}
+
+void Mat3F::print()
+{
+    for(int x = 0; x < 3; x++)
+    {
+	printf("\n");
+	for(int y = 0; y < 3; y++)
+	    printf("%f, ", n[x][y]);
+    }
+    printf("\n");
+}

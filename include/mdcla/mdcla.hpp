@@ -1,15 +1,16 @@
 // ======================================================================
 // Title: mdcla.hpp
 // Description: The header file for my personal linear algebra library.
-// Last Modified: 9/20/2022 MDC
 // ======================================================================
 
 #ifndef MDCLA_H
 #define MDCLA_H
 
 #include <cmath>
+#include <stdio.h> // TO-DO: Remove from release ver w/ print functions
 
-typedef struct Vec2F {
+typedef struct Vec2F
+{
     float x;
     float y;
     Vec2F();
@@ -17,21 +18,22 @@ typedef struct Vec2F {
     Vec2F        operator /(float d);
     void         operator /=(float d);
     void         operator *=(float s);
-    void         operator +=(const Vec2F& vec2a);
-    void         operator -=(const Vec2F& vec2s);
+    void         operator +=(const Vec2F& v);
+    void         operator -=(const Vec2F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
 } Vec2F;
-Vec2F operator +(const Vec2F& vec2a, const Vec2F& vec2b);
-Vec2F operator -(const Vec2F& vec2a, const Vec2F& vec2b);
-Vec2F operator *(const Vec2F& vec2, float s);
-Vec2F operator *(float s, const Vec2F& vec2);
-float dot2F(const Vec2F& vec2a, const Vec2F& vec2b);
-float dot2F(const Vec2F& vec2);
-float magnitude2F(const Vec2F& vec2);
-Vec2F normalize2F(const Vec2F& vec2);
+Vec2F operator +(const Vec2F& a, const Vec2F& b);
+Vec2F operator -(const Vec2F& a, const Vec2F& b);
+Vec2F operator *(const Vec2F& v, float s);
+Vec2F operator *(float s, const Vec2F& v);
+float dot2F(const Vec2F& a, const Vec2F& b);
+float dot2F(const Vec2F& v);
+float magnitude2F(const Vec2F& v);
+Vec2F normalize2F(const Vec2F& v);
 
-typedef struct Vec3F {
+typedef struct Vec3F
+{
     float x;
     float y;
     float z;
@@ -40,17 +42,23 @@ typedef struct Vec3F {
     Vec3F        operator /(float d);
     void         operator /=(float d);
     void         operator *=(float s);
-    void         operator +=(const Vec3F& vec3a);
-    void         operator -=(const Vec3F& vec3s);
+    void         operator +=(const Vec3F& v);
+    void         operator -=(const Vec3F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
 } Vec3F;
-Vec3F operator +(const Vec3F& vec3a, const Vec3F& vec3b);
-Vec3F operator -(const Vec3F& vec3a, const Vec3F& vec3b);
-Vec3F operator *(const Vec3F& vec3, float s);
-Vec3F operator *(float s, const Vec3F& vec3);
+Vec3F operator +(const Vec3F& a, const Vec3F& b);
+Vec3F operator -(const Vec3F& a, const Vec3F& b);
+Vec3F operator *(const Vec3F& v, float s);
+Vec3F operator *(float s, const Vec3F& v);
+Vec3F cross3F(const Vec3F& a, const Vec3F& b);
+float dot3F(const Vec3F& a, const Vec3F& b);
+float dot3F(const Vec3F& v);
+float magnitude3F(const Vec3F& v);
+Vec3F normalize3F(const Vec3F& v);
 
-typedef struct Vec4F {
+typedef struct Vec4F
+{
     float x;
     float y;
     float z;
@@ -60,36 +68,42 @@ typedef struct Vec4F {
     Vec4F        operator /(float d);
     void         operator /=(float d);
     void         operator *=(float s);
-    void         operator +=(const Vec4F& vec4a);
-    void         operator -=(const Vec4F& vec4s);
+    void         operator +=(const Vec4F& v);
+    void         operator -=(const Vec4F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
 } Vec4F;
-Vec4F operator +(const Vec4F& vec4a, const Vec4F& vec4b);
-Vec4F operator -(const Vec4F& vec4a, const Vec4F& vec4b);
-Vec4F operator *(const Vec4F& vec4, float s);
-Vec4F operator *(float s, const Vec4F& vec4);
+Vec4F operator +(const Vec4F& a, const Vec4F& b);
+Vec4F operator -(const Vec4F& a, const Vec4F& b);
+Vec4F operator *(const Vec4F& v, float s);
+Vec4F operator *(float s, const Vec4F& v);
+float dot4F(const Vec4F& a, const Vec4F& b);
+float dot4F(const Vec4F& v);
+float magnitude4F(const Vec4F& v);
+Vec4F normalize4F(const Vec4F& v);
+
+typedef struct Mat3F
+{
+private:
+    float n[3][3];
+public:
+    Mat3F();
+    Mat3F(float n00, float n01, float n02,
+	  float n10, float n11, float n12,
+	  float n20, float n21, float n22);
+    Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c);
+    Vec3F        operator [](int j);
+    float&       operator ()(int i, int j);
+    const float& operator ()(int i, int j) const;
+    void print();
+} Mat3F;
 
 /*
-typedef struct Mat33F {
+typedef struct Mat4F
+{
 	
-} Mat33F;
+} Mat4F;
 
-typedef struct Mat44F {
-	
-} Mat44F;
-
-float dotVec2();
-
-float dotVec3();
-    
-float dotVec4();
-
-Vec2 crossVec2();
-    
-Vec3 crossVec3();
-
-Vec4 crossVec4();
 */
 
 #endif

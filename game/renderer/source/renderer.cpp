@@ -1,7 +1,6 @@
 // ======================================================================
 // Title: renderer.cpp
 // Description: The primary source file for an untitled renderer.
-// Last Modified: 9/19 /2022 MDC
 // ======================================================================
 
 // Win libs
@@ -158,10 +157,11 @@ main()
     // Math Tests //
     ////////////////
 
-    Vec2F myVec2(3.0f, 4.5f);
-    std::cout << dot2F(myVec2) << std::endl;
-    std::cout << magnitude2F(myVec2) << std::endl;
-    
+    Mat3F m(1.0f, 2.0f, 3.0f,
+	    4.0f, 5.0f, 6.0f,
+	    7.0f, 8.0f, 9.0f);
+    m.print();
+   
     /////////////////
     // Render Loop //
     /////////////////
