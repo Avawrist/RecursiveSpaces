@@ -399,6 +399,13 @@ Mat3F::Mat3F(float n00, float n01, float n02,
     n[2][0] = n20; n[2][1] = n21; n[2][2] = n22;
 }
 
+Mat3F::Mat3F(float f)
+{
+    n[0][0] = f;    n[0][1] = 0.0f; n[0][2] = 0.0f; 
+    n[1][0] = 0.0f; n[1][1] = f;    n[1][2] = 0.0f;
+    n[2][0] = 0.0f; n[2][1] = 0.0f; n[2][2] = f;
+}
+
 Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
 {
     n[0][0] = a.x; n[0][1] = b.x; n[0][2] = c.x; 
@@ -409,6 +416,36 @@ Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
 Vec3F Mat3F::operator [](int j)
 {
     return Vec3F(n[0][j], n[1][j], n[2][j]);
+}
+
+const Vec3F Mat3F::operator [](int j) const
+{
+    return Vec3F(n[0][j], n[1][j], n[2][j]);
+}
+
+void Mat3F::operator *=(const Mat3F& m)
+{
+    Vec3F temp_r1(n[0][0], n[0][1], n[0][2]);
+    Vec3F temp_r2(n[1][0], n[1][1], n[1][2]);
+    Vec3F temp_r3(n[2][0], n[2][1], n[2][2]);
+
+    n[0][0] = dot3F(temp_r1, m[0]); n[0][1] = dot3F(temp_r1, m[1]); n[0][2] = dot3F(temp_r1, m[2]);
+    n[1][0] = dot3F(temp_r2, m[0]); n[1][1] = dot3F(temp_r2, m[1]); n[1][2] = dot3F(temp_r2, m[2]);
+    n[2][0] = dot3F(temp_r3, m[0]); n[2][1] = dot3F(temp_r3, m[1]); n[2][2] = dot3F(temp_r3, m[2]); 
+}
+
+void Mat3F::operator +=(const Mat3F& m)
+{
+    n[0][0] += m(0, 0); n[0][1] += m(1, 0); n[0][2] += m(2, 0);
+    n[1][0] += m(0, 1); n[1][1] += m(1, 1); n[1][2] += m(2, 1);
+    n[2][0] += m(0, 2); n[2][1] += m(1, 2); n[2][2] += m(2, 2);
+}
+
+void Mat3F::operator -=(const Mat3F& m)
+{
+    n[0][0] -= m(0, 0); n[0][1] -= m(1, 0); n[0][2] -= m(2, 0);
+    n[1][0] -= m(0, 1); n[1][1] -= m(1, 1); n[1][2] -= m(2, 1);
+    n[2][0] -= m(0, 2); n[2][1] -= m(1, 2); n[2][2] -= m(2, 2);
 }
 
 float& Mat3F::operator ()(int i, int j)
@@ -430,4 +467,41 @@ void Mat3F::print()
 	    printf("%f, ", n[x][y]);
     }
     printf("\n");
+}
+
+void Mat3F::transpose()
+{
+    Mat3F temp = *this;
+
+    
+}
+
+// Mat3F Non-Members
+
+Mat3F operator +(const Mat3F& a, const Mat3F& b)
+{
+    return Mat3F(a(0, 0) + b(0, 0), a(1, 0) + b(1, 0), a(2, 0) + b(2, 0),
+	         a(0, 1) + b(0, 1), a(1, 1) + b(1, 1), a(2, 1) + b(2, 1),
+	         a(0, 2) + b(0, 2), a(1, 2) + b(1, 2), a(2, 2) + b(2, 2));
+}
+
+Mat3F operator -(const Mat3F& a, const Mat3F& b)
+{
+    return Mat3F(a(0, 0) - b(0, 0), a(1, 0) - b(1, 0), a(2, 0) - b(2, 0),
+	         a(0, 1) - b(0, 1), a(1, 1) - b(1, 1), a(2, 1) - b(2, 1),
+	         a(0, 2) - b(0, 2), a(1, 2) - b(1, 2), a(2, 2) - b(2, 2));
+}
+
+Mat3F operator *(const Mat3F& a, const Mat3F& b)
+{
+    Vec3F a_r1(a(0, 0), a(1, 0), a(2, 0));
+    Vec3F a_r2(a(0, 1), a(1, 1), a(2, 1));
+    Vec3F a_r3(a(0, 2), a(1, 2), a(2, 2));
+    Vec3F b_c1 = b[0];
+    Vec3F b_c2 = b[1];
+    Vec3F b_c3 = b[2];
+
+    return Mat3F(dot3F(a_r1, b[0]), dot3F(a_r1, b[1]), dot3F(a_r1, b[2]),
+	         dot3F(a_r2, b[0]), dot3F(a_r2, b[1]), dot3F(a_r2, b[2]),
+	         dot3F(a_r3, b[0]), dot3F(a_r3, b[1]), dot3F(a_r3, b[2]));
 }

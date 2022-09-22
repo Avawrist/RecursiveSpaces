@@ -91,12 +91,21 @@ public:
     Mat3F(float n00, float n01, float n02,
 	  float n10, float n11, float n12,
 	  float n20, float n21, float n22);
+    Mat3F(float f);
     Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c);
+    void         operator *=(const Mat3F& m);
+    void         operator +=(const Mat3F& m);
+    void         operator -=(const Mat3F& m);
     Vec3F        operator [](int j);
+    const Vec3F  operator [](int j) const;
     float&       operator ()(int i, int j);
     const float& operator ()(int i, int j) const;
     void print();
+    void transpose();
 } Mat3F;
+Mat3F operator +(const Mat3F& a, const Mat3F& b);
+Mat3F operator -(const Mat3F& a, const Mat3F& b);
+Mat3F operator *(const Mat3F& a, const Mat3F& b);
 
 /*
 typedef struct Mat4F
