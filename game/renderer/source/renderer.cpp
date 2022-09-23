@@ -147,15 +147,35 @@ main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind buffer (it is tied to the vertex array object now)
     glBindVertexArray(0); // Unbind until we are ready to draw
     
+    /////////////////////////////
+    // Transformation Matrices //
+    /////////////////////////////
+
+    // Model Matrix (Local space -> world space)
+    Mat4F model(1.0f);
+
+    // View Matrix (World space -> view space)
+    Mat4F view(1.0f, 1.0f, 1.0f, 0.0f,
+	       1.0f, 1.0f, 1.0f, 0.0f,
+	       1.0f, 1.0f, 1.0f, -3.0f,
+	       1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Projection Matrix (View space -> clip space/NDC)
+    Mat4F projection = getPerspectiveMat();
+    
     ////////////////////
     // Create Shaders //
     ////////////////////
 
-    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs", "F:\\assets\\shaders\\basic.fs"); // TO-DO: Make generic path
+    // TO-DO: Make generic path
+    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs",
+			      "F:\\assets\\shaders\\basic.fs");
 
-    ////////////////
-    // Math Tests //
-    ////////////////
+    // Load uniform values to GPU
+    glUseProgram(basicShaderProgram.program_id);
+    basicShaderProgram.addMat4Uniform("model", model.getPointer());
+    basicShaderProgram.addMat4Uniform("view", view.getPointer());
+    basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
     
     /////////////////
     // Render Loop //

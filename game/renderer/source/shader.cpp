@@ -131,3 +131,10 @@ Shader::~Shader()
     glDetachShader(program_id, frag_id);
     glDeleteProgram(program_id);
 }
+
+void Shader::addMat4Uniform(const char* name, const float* m)
+{
+    int loc = glGetUniformLocation(program_id, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, m);
+}
+

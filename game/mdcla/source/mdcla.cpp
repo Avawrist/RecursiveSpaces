@@ -489,6 +489,11 @@ void Mat3F::transpose()
     n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2);
 }
 
+const float* Mat3F::getPointer()
+{
+    return &(n[0][0]);
+}
+
 // Mat3F Non-Members
 
 Mat3F operator +(const Mat3F& a, const Mat3F& b)
@@ -628,4 +633,23 @@ void Mat4F::transpose()
     n[1][0] = temp(0, 1); n[1][1] = temp(1, 1); n[1][2] = temp(2, 1); n[1][3] = temp(3, 1);
     n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2); n[2][3] = temp(3, 2);
     n[3][0] = temp(0, 3); n[3][1] = temp(1, 3); n[3][2] = temp(2, 3); n[3][3] = temp(3, 3);    
+}
+
+const float* Mat4F::getPointer()
+{
+    return &(n[0][0]);
+}
+
+//////////////////////
+// Matrix functions //
+//////////////////////
+
+Mat4F getPerspectiveMat()
+{
+    
+}
+
+Mat4F getOrthographicMat()
+{
+    printf("Function not implemented");
 }

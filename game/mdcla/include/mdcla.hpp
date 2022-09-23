@@ -105,6 +105,7 @@ public:
     const float& operator ()(int i, int j) const;
     void print();
     void transpose();
+    const float* getPointer();
 } Mat3F;
 Mat3F operator +(const Mat3F& a, const Mat3F& b);
 Mat3F operator -(const Mat3F& a, const Mat3F& b);
@@ -132,6 +133,10 @@ public:
     const float& operator ()(int i, int j) const;
     void print();
     void transpose();
+    const float* getPointer();
 } Mat4F;
+
+Mat4F getPerspectiveMat();
+Mat4F getOrthographicMat();
 
 #endif

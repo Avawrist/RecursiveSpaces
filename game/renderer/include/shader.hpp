@@ -13,6 +13,7 @@ typedef struct Shader {
     GLuint frag_id;
     Shader(const char* _vertPath, const char* _fragPath);
     ~Shader();
+    void addMat4Uniform(const char* name, const float* m);
 } Shader;
 
 #endif 
