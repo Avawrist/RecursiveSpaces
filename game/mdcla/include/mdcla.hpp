@@ -116,7 +116,22 @@ typedef struct Mat4F
 private:
     float n[4][4];
 public:
-    
+    Mat4F();
+    Mat4F(float n00, float n01, float n02, float n03,
+	  float n10, float n11, float n12, float n13,
+	  float n20, float n21, float n22, float n23,
+	  float n30, float n31, float n32, float n33);
+    Mat4F(float f);
+    Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d);
+    void         operator *=(float s);
+    void         operator +=(const Mat4F& m);
+    void         operator -=(const Mat4F& m);
+    Vec4F        operator [](int j);
+    const Vec4F  operator [](int j) const;
+    float&       operator ()(int i, int j);
+    const float& operator ()(int i, int j) const;
+    void print();
+    void transpose();
 } Mat4F;
 
 #endif

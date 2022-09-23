@@ -428,16 +428,6 @@ Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
     n[2][0] = a.z; n[2][1] = b.z; n[2][2] = c.z;
 }
 
-Vec3F Mat3F::operator [](int j)
-{
-    return Vec3F(n[0][j], n[1][j], n[2][j]);
-}
-
-const Vec3F Mat3F::operator [](int j) const
-{
-    return Vec3F(n[0][j], n[1][j], n[2][j]);
-}
-
 void Mat3F::operator *=(float s)
 {
     n[0][0] *= s; n[0][1] *= s; n[0][2] *= s;
@@ -457,6 +447,16 @@ void Mat3F::operator -=(const Mat3F& m)
     n[0][0] -= m(0, 0); n[0][1] -= m(0, 1); n[0][2] -= m(0, 2);
     n[1][0] -= m(1, 0); n[1][1] -= m(1, 1); n[1][2] -= m(1, 2);
     n[2][0] -= m(2, 0); n[2][1] -= m(2, 1); n[2][2] -= m(2, 2);
+}
+
+Vec3F Mat3F::operator [](int j)
+{
+    return Vec3F(n[0][j], n[1][j], n[2][j]);
+}
+
+const Vec3F Mat3F::operator [](int j) const
+{
+    return Vec3F(n[0][j], n[1][j], n[2][j]);
 }
 
 float& Mat3F::operator ()(int i, int j)
@@ -524,4 +524,108 @@ Vec3F operator *(const Mat3F& m, const Vec3F& v)
     return Vec3F(m(0, 0) * v.x + m(0, 1) * v.y + m(0, 2) * v.z,
 		 m(1, 0) * v.x + m(1, 1) * v.y + m(1, 2) * v.z,
 		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z);
+}
+
+//////////////////
+// Struct Mat4F //
+//////////////////
+
+Mat4F::Mat4F()
+{
+    n[0][0] = 0.0f; n[0][1] = 0.0f; n[0][2] = 0.0f; n[0][3] = 0.0f;
+    n[1][0] = 0.0f; n[1][1] = 0.0f; n[1][2] = 0.0f; n[1][3] = 0.0f;
+    n[2][0] = 0.0f; n[2][1] = 0.0f; n[2][2] = 0.0f; n[2][3] = 0.0f;
+    n[3][0] = 0.0f; n[3][1] = 0.0f; n[3][2] = 0.0f; n[3][3] = 0.0f;
+}
+
+Mat4F::Mat4F(float n00, float n01, float n02, float n03,
+	     float n10, float n11, float n12, float n13,
+	     float n20, float n21, float n22, float n23,
+	     float n30, float n31, float n32, float n33)
+{
+    n[0][0] = n00; n[0][1] = n01; n[0][2] = n02; n[0][3] = n03;
+    n[1][0] = n10; n[1][1] = n11; n[1][2] = n12; n[1][3] = n13;
+    n[2][0] = n20; n[2][1] = n21; n[2][2] = n22; n[2][3] = n23;
+    n[3][0] = n30; n[3][1] = n31; n[3][2] = n32; n[3][3] = n33;
+}
+
+Mat4F::Mat4F(float f)
+{
+    n[0][0] = f;    n[0][1] = 0.0f; n[0][2] = 0.0f; n[0][3] = 0.0f;
+    n[1][0] = 0.0f; n[1][1] = f;    n[1][2] = 0.0f; n[1][3] = 0.0f;
+    n[2][0] = 0.0f; n[2][1] = 0.0f; n[2][2] = f;    n[2][3] = 0.0f;
+    n[3][0] = 0.0f; n[3][1] = 0.0f; n[3][2] = 0.0f; n[3][3] = f;
+}
+
+Mat4F::Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d)
+{
+    n[0][0] = a.x; n[0][1] = b.x; n[0][2] = c.x; n[0][3] = d.x;
+    n[1][0] = a.y; n[1][1] = b.y; n[1][2] = c.y; n[1][3] = d.y;
+    n[2][0] = a.z; n[2][1] = b.z; n[2][2] = c.z; n[2][3] = d.z;
+    n[3][0] = a.w; n[3][1] = b.w; n[3][2] = c.w; n[3][3] = d.w;    
+}
+
+void Mat4F::operator *=(float s)
+{
+    n[0][0] *= s; n[0][1] *= s; n[0][2] *= s; n[0][3] *= s;
+    n[1][0] *= s; n[1][1] *= s; n[1][2] *= s; n[1][3] *= s;
+    n[2][0] *= s; n[2][1] *= s; n[2][2] *= s; n[2][3] *= s;
+    n[3][0] *= s; n[3][1] *= s; n[3][2] *= s; n[3][3] *= s;
+}
+
+void Mat4F::operator +=(const Mat4F& m)
+{
+    n[0][0] += m(0, 0); n[0][1] += m(0, 1); n[0][2] += m(0, 2); n[0][3] += m(0, 3);
+    n[1][0] += m(1, 0); n[1][1] += m(1, 1); n[1][2] += m(1, 2); n[1][3] += m(1, 3);
+    n[2][0] += m(2, 0); n[2][1] += m(2, 1); n[2][2] += m(2, 2); n[2][3] += m(2, 3);
+    n[3][0] += m(3, 0); n[3][1] += m(3, 1); n[3][2] += m(3, 2); n[3][3] += m(3, 3);
+}
+
+void Mat4F::operator -=(const Mat4F& m)
+{
+    n[0][0] -= m(0, 0); n[0][1] -= m(0, 1); n[0][2] -= m(0, 2); n[0][3] -= m(0, 3);
+    n[1][0] -= m(1, 0); n[1][1] -= m(1, 1); n[1][2] -= m(1, 2); n[1][3] -= m(1, 3);
+    n[2][0] -= m(2, 0); n[2][1] -= m(2, 1); n[2][2] -= m(2, 2); n[2][3] -= m(2, 3);
+    n[3][0] -= m(3, 0); n[3][1] -= m(3, 1); n[3][2] -= m(3, 2); n[3][3] -= m(3, 3);
+}
+
+Vec4F Mat4F::operator [](int j)
+{
+    return Vec4F(n[0][j], n[1][j], n[2][j], n[3][j]);
+}
+
+const Vec4F Mat4F::operator [](int j) const
+{
+    return Vec4F(n[0][j], n[1][j], n[2][j], n[3][j]);
+}
+
+float& Mat4F::operator ()(int i, int j)
+{
+    return n[i][j];
+}
+
+const float& Mat4F::operator ()(int i, int j) const
+{
+    return n[i][j];
+}
+
+void Mat4F::print()
+{
+    for(int x = 0; x < 4; x++)
+    {
+	printf("\n");
+	for(int y = 0; y < 4; y++)
+	    printf("%f, ", n[x][y]);
+    }
+    printf("\n");
+}
+
+void Mat4F::transpose()
+{
+    Mat4F temp = *this;
+
+    n[0][0] = temp(0, 0); n[0][1] = temp(1, 0); n[0][2] = temp(2, 0); n[0][3] = temp(3, 0);
+    n[1][0] = temp(0, 1); n[1][1] = temp(1, 1); n[1][2] = temp(2, 1); n[1][3] = temp(3, 1);
+    n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2); n[2][3] = temp(3, 2);
+    n[3][0] = temp(0, 3); n[3][1] = temp(1, 3); n[3][2] = temp(2, 3); n[3][3] = temp(3, 3);    
 }
