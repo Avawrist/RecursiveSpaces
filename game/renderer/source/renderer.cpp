@@ -17,6 +17,12 @@
 #include <mdcla.hpp>
 #include <shader.hpp>
 
+//test
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 using namespace std;
 
 void
@@ -155,14 +161,15 @@ main()
     Mat4F model(1.0f);
 
     // View Matrix (World space -> view space)
-    Mat4F view(1.0f, 1.0f, 1.0f, 0.0f,
-	       1.0f, 1.0f, 1.0f, 0.0f,
-	       1.0f, 1.0f, 1.0f, -3.0f,
-	       1.0f, 1.0f, 1.0f, 1.0f);
-
+    Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
+	       0.0f, 1.0f, 0.0f, 0.0f,
+	       0.0f, 0.0f, 1.0f, 0.0f,
+	       0.0f, 0.0f, -3.0f, 1.0f);
+  
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = getPerspectiveMat();
-    
+    Mat4F projection = getPerspectiveMat(0.785f, 640.0f/480.0f, 1.0f, 100.0f);
+    projection.print();
+   
     ////////////////////
     // Create Shaders //
     ////////////////////

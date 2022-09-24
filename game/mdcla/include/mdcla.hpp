@@ -136,7 +136,7 @@ public:
     const float* getPointer();
 } Mat4F;
 
-Mat4F getPerspectiveMat();
-Mat4F getOrthographicMat();
+Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
+//Mat4F getOrthographicMat();
 
 #endif

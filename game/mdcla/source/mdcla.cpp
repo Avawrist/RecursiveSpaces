@@ -644,12 +644,20 @@ const float* Mat4F::getPointer()
 // Matrix functions //
 //////////////////////
 
-Mat4F getPerspectiveMat()
+Mat4F getPerspectiveMat(float vfov, float ar, float n, float f)
 {
-    
+    float range = n - f;
+    float tanHalfFOV = tan(vfov * 0.5f);
+
+    return Mat4F(1.0f/(ar * tanHalfFOV), 0.0f,            0.0f,           0.0f,
+	         0.0f,                   1.0f/tanHalfFOV, 0.0f,           0.0f,
+	         0.0f,                   0.0f,            (-n - f)/range, (2.0f * f * n)/range,
+	         0.0f,                   0.0f,            -1.0f,           0.0f);
 }
 
+/*
 Mat4F getOrthographicMat()
 {
     printf("Function not implemented");
 }
+*/
