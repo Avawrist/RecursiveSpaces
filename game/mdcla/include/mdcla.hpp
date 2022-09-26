@@ -156,7 +156,7 @@ Mat3F quatToMat3(const Quaternion& q);
 
 Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
 
-//Mat4F getOrthographicMat();
+Mat4F getOrthographicMat();
 
 float degToRads(float d);
 

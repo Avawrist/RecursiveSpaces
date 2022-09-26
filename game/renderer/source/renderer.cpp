@@ -29,9 +29,14 @@ using namespace std;
 // Globals //
 /////////////
 
+// Window
 const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
 float WIN_AR = (float)WIN_WIDTH / (float)WIN_HEIGHT;
+
+// Time
+float prevTime = 0.0f;
+float dTime    = 0.0f;
 
 ///////////////
 // Functions //
@@ -81,7 +86,8 @@ main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release 
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
+    glfwWindowHint(GLFW_SAMPLES, 4); // multisame buffer with 4 samples
 	
     // Create window & context
     GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
@@ -124,17 +130,17 @@ main()
     
     glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
-    glEnable(GL_CULL_FACE);
-    // TO-DO: Remove following lines for release build
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // Cull Faces
+    //glEnable(GL_CULL_FACE);
+    //glFrontFace(GL_CCW);
+    //glCullFace(GL_BACK);
+    // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(glDebugOutput, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-    // END TO-DO
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     ////////////////////////////
     // Initialize Render Data //
@@ -218,16 +224,7 @@ main()
     
     // Projection Matrix (View space -> clip space/NDC)
     Mat4F projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
-    projection.print();
     
-    ////////////////
-    // Math Tests //
-    ////////////////
-
-    Quaternion q(degToRads(45.0f), 0.0f, 1.0f, 0.0f);
-    Mat4F R(quatToMat3(q));
-    //view = view * R; // TO-DO: implement Mat4F * operator
-   
     ////////////////////
     // Create Shaders //
     ////////////////////
@@ -248,6 +245,24 @@ main()
 
     while(!glfwWindowShouldClose(window))
     {
+	// Update delta time
+	float currTime = glfwGetTime();
+	dTime = currTime - prevTime;
+	prevTime = currTime;
+	
+	// Update quaternion with dTime and apply rotation to model matrix
+	Quaternion q(degToRads(90.0f * dTime), 0.0f, 1.0f, 0.0f);
+	Mat4F R(quatToMat3(q));
+	model = R * model;
+
+	glUseProgram(basicShaderProgram.program_id);
+	basicShaderProgram.addMat4Uniform("model", model.getPointer());
+
+	// Update perspective matrix with potential new AR
+	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
+        projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
+	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
+	
 	// Clear screen
         glClear(GL_COLOR_BUFFER_BIT);
 	
