@@ -1,3 +1,0 @@
-# Name:         Renderer To-Do
-# Last Updated: 9.6.22
-
