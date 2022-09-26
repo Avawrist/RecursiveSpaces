@@ -570,6 +570,14 @@ Mat4F::Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d)
     n[3][0] = a.w; n[3][1] = b.w; n[3][2] = c.w; n[3][3] = d.w;    
 }
 
+Mat4F::Mat4F(const Mat3F& m)
+{
+    n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2); n[0][3] = 0.0f;
+    n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2); n[1][3] = 0.0f;
+    n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2); n[2][3] = 0.0f;
+    n[3][0] = 0.0f;    n[3][1] = 0.0f;    n[3][2] = 0.0f;    n[3][3] = 1.0f;
+}
+
 void Mat4F::operator *=(float s)
 {
     n[0][0] *= s; n[0][1] *= s; n[0][2] *= s; n[0][3] *= s;
@@ -640,9 +648,100 @@ const float* Mat4F::getPointer()
     return &(n[0][0]);
 }
 
-//////////////////////
-// Matrix functions //
-//////////////////////
+// Mat4F Non-members
+
+// TO-DO: implement all
+Mat4F operator +(const Mat4F& a, const Mat4F& b)
+{
+    Mat4F m;
+    return m;
+}
+
+Mat4F operator -(const Mat4F& a, const Mat4F& b)
+{
+    Mat4F m;
+    return m;
+}
+
+Mat4F operator *(const Mat4F& a, const Mat4F& b)
+{
+    Mat4F m;
+    return m;
+}
+
+Vec4F operator *(const Mat4F& m, const Vec4F& v)
+{
+    Vec4F v;
+    return v;
+}
+
+///////////////////////
+// Struct Quaternion //
+///////////////////////
+
+Quaternion::Quaternion()
+{
+    w = 1.0f;
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+}
+
+Quaternion::Quaternion(float theta, float _x, float _y, float _z)
+{
+    float sinThetaHalf = sin(theta * 0.5f);
+    
+    // normalize the input vector 
+    Vec3F v(_x, _y, _z);
+    v = normalize3F(v);
+    
+    w = cos(theta * 0.5f);
+    x = sinThetaHalf * v.x;
+    y = sinThetaHalf * v.y;
+    z = sinThetaHalf * v.z;
+}
+
+Quaternion::Quaternion(float theta, const Vec3F& v)
+{
+    float sinThetaHalf = sin(theta * 0.5f);
+
+    // normalize the input vector
+    Vec3F n = normalize3F(v);
+    
+    w = cos(theta * 0.5f);
+    x = sinThetaHalf * n.x;
+    y = sinThetaHalf * n.y;
+    z = sinThetaHalf * n.z;
+}
+
+// Quaternion non-members
+
+Quaternion operator *(const Quaternion& q1, const Quaternion& q2)
+{
+    // TO-DO: Implement function
+    Quaternion q;
+    return q;
+}
+
+///////////////////////////////
+// Additional math functions //
+///////////////////////////////
+
+Mat3F quatToMat3(const Quaternion& q)
+{
+    float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
+
+    s = 2.0f / (q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+
+    xs = s * q.x; ys = s * q.y; zs = s * q.z;
+    wx = q.w * xs; wy = q.w * ys; wz = q.w * zs;
+    xx = q.x * xs; xy = q.x * ys; xz = q.x * zs;
+    yy = q.y * ys; yz = q.y * zs; zz = q.z * zs;
+
+    return Mat3F(1.0f - (yy + zz), xy + wz,          xz - wy,
+	         xy - wz,          1.0f - (xx + zz), yz + wx,
+	         xz + wy,          yz - wx,          1.0f - (xx + yy));
+}
 
 Mat4F getPerspectiveMat(float vfov, float ar, float n, float f)
 {
@@ -652,12 +751,17 @@ Mat4F getPerspectiveMat(float vfov, float ar, float n, float f)
     return Mat4F(1.0f/(ar * tanHalfFOV), 0.0f,            0.0f,           0.0f,
 	         0.0f,                   1.0f/tanHalfFOV, 0.0f,           0.0f,
 	         0.0f,                   0.0f,            (-n - f)/range, (2.0f * f * n)/range,
-	         0.0f,                   0.0f,            -1.0f,           0.0f);
+	         0.0f,                   0.0f,            1.0f,           0.0f);
 }
 
-/*
+/* TO-DO: Implement
 Mat4F getOrthographicMat()
 {
     printf("Function not implemented");
 }
 */
+
+float degToRads(float d)
+{
+    return (d * 0.0174532925);
+}

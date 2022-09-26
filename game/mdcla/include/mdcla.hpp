@@ -124,6 +124,7 @@ public:
 	  float n30, float n31, float n32, float n33);
     Mat4F(float f);
     Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d);
+    Mat4F(const Mat3F& m);
     void         operator *=(float s);
     void         operator +=(const Mat4F& m);
     void         operator -=(const Mat4F& m);
@@ -135,8 +136,28 @@ public:
     void transpose();
     const float* getPointer();
 } Mat4F;
+Mat4F operator +(const Mat4F& a, const Mat4F& b);
+Mat4F operator -(const Mat4F& a, const Mat4F& b);
+Mat4F operator *(const Mat4F& a, const Mat4F& b);
+Vec4F operator *(const Mat4F& m, const Vec4F& v);
+
+typedef struct Quaternion {
+    float w;
+    float x;
+    float y;
+    float z;
+    Quaternion();
+    Quaternion(float theta, float _x, float _y, float _z);
+    Quaternion(float theta, const Vec3F& v);
+} Quaternion;
+Quaternion operator *(const Quaternion& q1, const Quaternion& q2);
+
+Mat3F quatToMat3(const Quaternion& q);
 
 Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
+
 //Mat4F getOrthographicMat();
+
+float degToRads(float d);
 
 #endif

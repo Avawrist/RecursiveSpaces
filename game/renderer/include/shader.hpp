@@ -1,7 +1,6 @@
 // ======================================================================
 // Title: shader.hpp
-// Description: The header file for shader & shader program objects
-// Last Modified: 9/17/2022 MDC
+// Description: The header file for shader program objects
 // ======================================================================
 
 #ifndef SHADER_H

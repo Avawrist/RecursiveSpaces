@@ -25,6 +25,18 @@
 
 using namespace std;
 
+/////////////
+// Globals //
+/////////////
+
+const unsigned int WIN_WIDTH  = 640;
+const unsigned int WIN_HEIGHT = 480;
+float WIN_AR = (float)WIN_WIDTH / (float)WIN_HEIGHT;
+
+///////////////
+// Functions //
+///////////////
+
 void
 odGLFWError();
 
@@ -131,9 +143,47 @@ main()
     // Vertex data
     float testVertices[] = {
 	// Positions
-	-0.5f, -0.5f, 0.0f,
-	0.5f, -0.5f, 0.0f,
-	0.0f,  0.5f, 0.0f
+	-0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
     };
 
     // VBOs
@@ -165,10 +215,18 @@ main()
 	       0.0f, 1.0f, 0.0f, 0.0f,
 	       0.0f, 0.0f, 1.0f, 0.0f,
 	       0.0f, 0.0f, -3.0f, 1.0f);
-  
+    
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = getPerspectiveMat(0.785f, 640.0f/480.0f, 1.0f, 100.0f);
+    Mat4F projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
     projection.print();
+    
+    ////////////////
+    // Math Tests //
+    ////////////////
+
+    Quaternion q(degToRads(45.0f), 0.0f, 1.0f, 0.0f);
+    Mat4F R(quatToMat3(q));
+    //view = view * R; // TO-DO: implement Mat4F * operator
    
     ////////////////////
     // Create Shaders //
@@ -196,7 +254,7 @@ main()
 	// Render pass 1
 	glUseProgram(basicShaderProgram.program_id);
 	glBindVertexArray(testVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	
 	// Swap buffers
 	glfwSwapBuffers(window);
@@ -250,6 +308,7 @@ void
 framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    WIN_AR = (float)width / (float)height; // Update the global
 }
 
 void
