@@ -1,5 +1,0 @@
-# Name:         Loader To-Do
-# Last Updated: 9.6.22
-
--Implement engine that uncompresses all asset data types relevant to the project
--Determine how unpacked data is stored in active memory
