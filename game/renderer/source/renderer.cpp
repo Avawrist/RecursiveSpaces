@@ -130,12 +130,13 @@ main()
     
     glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Cull Faces
-    //glEnable(GL_CULL_FACE);
-    //glFrontFace(GL_CCW);
-    //glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -149,47 +150,47 @@ main()
     // Vertex data
     float testVertices[] = {
 	// Positions
-	-0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f, 
+	0.5f,  0.5f, -0.5f,  
+	0.5f, -0.5f, -0.5f,           
+	0.5f,  0.5f, -0.5f,  
+	-0.5f, -0.5f, -0.5f,  
+	-0.5f,  0.5f, -0.5f,  
+	// Front face
+	-0.5f, -0.5f,  0.5f,  
+	0.5f, -0.5f,  0.5f,  
+	0.5f,  0.5f,  0.5f,  
+	0.5f,  0.5f,  0.5f,  
+	-0.5f,  0.5f,  0.5f,  
+	-0.5f, -0.5f,  0.5f,  
+	// Left face
+	-0.5f,  0.5f,  0.5f,  
+	-0.5f,  0.5f, -0.5f,  
+	-0.5f, -0.5f, -0.5f,  
+	-0.5f, -0.5f, -0.5f,  
+	-0.5f, -0.5f,  0.5f,  
+	-0.5f,  0.5f,  0.5f,  
+	// Right face
+	0.5f,  0.5f,  0.5f,  
+	0.5f, -0.5f, -0.5f,  
+	0.5f,  0.5f, -0.5f,           
+	0.5f, -0.5f, -0.5f,  
+	0.5f,  0.5f,  0.5f,  
+	0.5f, -0.5f,  0.5f,       
+	// Bottom face
+	-0.5f, -0.5f, -0.5f,  
+	0.5f, -0.5f, -0.5f,  
+	0.5f, -0.5f,  0.5f,  
+	0.5f, -0.5f,  0.5f,  
+	-0.5f, -0.5f,  0.5f,  
+	-0.5f, -0.5f, -0.5f,  
+	// Top face
+	-0.5f,  0.5f, -0.5f,  
+	0.5f,  0.5f,  0.5f,  
+	0.5f,  0.5f, -0.5f,       
+	0.5f,  0.5f,  0.5f,  
+	-0.5f,  0.5f, -0.5f,  
+	-0.5f,  0.5f,  0.5f
     };
 
     // VBOs
@@ -215,6 +216,14 @@ main()
 
     // Model Matrix (Local space -> world space)
     Mat4F model(1.0f);
+    Vec3F axis(1.0f, 1.0f, -1.0f);
+    axis = normalize(axis);
+
+    float thetaHalf = degToRads(45.0f) * 0.5f;
+    Quaternion q1(cos(thetaHalf), 0.0f, 0.0f, sin(thetaHalf));
+    Quaternion q2(cos(thetaHalf), sin(thetaHalf), 0.0f, 0.0f);
+    Mat4F rot(quatToMat3(q2 * q1));
+    model = rot * model;
     
     // View Matrix (World space -> view space)
     Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
@@ -253,7 +262,10 @@ main()
 	// Update quaternion with dTime and apply rotation to model matrix
 	
 	float dHalfAngleRads = degToRads(90.0f) * 0.5f * dTime;
-	Quaternion q(cos(dHalfAngleRads), 0.0f, sin(dHalfAngleRads), 0.0f);
+	Quaternion q(cos(dHalfAngleRads),
+		     axis.x * sin(dHalfAngleRads),
+		     axis.y * sin(dHalfAngleRads),
+	             axis.z * sin(dHalfAngleRads));
 	Mat4F R(quatToMat3(q));
 	model = R * model;
 
@@ -267,7 +279,7 @@ main()
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
 	
 	// Clear screen
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	// Render pass 1
 	glUseProgram(basicShaderProgram.program_id);
