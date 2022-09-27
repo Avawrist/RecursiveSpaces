@@ -9,6 +9,10 @@
 #include <cmath>
 #include <stdio.h> // TO-DO: Remove from release ver w/ print functions
 
+//////////////////
+// Struct Vec2F //
+//////////////////
+
 typedef struct Vec2F
 {
     float x;
@@ -28,10 +32,14 @@ Vec2F operator +(const Vec2F& a, const Vec2F& b);
 Vec2F operator -(const Vec2F& a, const Vec2F& b);
 Vec2F operator *(const Vec2F& v, float s);
 Vec2F operator *(float s, const Vec2F& v);
-float dot2F(const Vec2F& a, const Vec2F& b);
-float dot2F(const Vec2F& v);
-float magnitude2F(const Vec2F& v);
-Vec2F normalize2F(const Vec2F& v);
+float dot(const Vec2F& a, const Vec2F& b);
+float dot(const Vec2F& v);
+float magnitude(const Vec2F& v);
+Vec2F normalize(const Vec2F& v);
+
+//////////////////
+// Struct Vec3F //
+//////////////////
 
 typedef struct Vec3F
 {
@@ -53,11 +61,15 @@ Vec3F operator +(const Vec3F& a, const Vec3F& b);
 Vec3F operator -(const Vec3F& a, const Vec3F& b);
 Vec3F operator *(const Vec3F& v, float s);
 Vec3F operator *(float s, const Vec3F& v);
-Vec3F cross3F(const Vec3F& a, const Vec3F& b);
-float dot3F(const Vec3F& a, const Vec3F& b);
-float dot3F(const Vec3F& v);
-float magnitude3F(const Vec3F& v);
-Vec3F normalize3F(const Vec3F& v);
+Vec3F cross(const Vec3F& a, const Vec3F& b);
+float dot(const Vec3F& a, const Vec3F& b);
+float dot(const Vec3F& v);
+float magnitude(const Vec3F& v);
+Vec3F normalize(const Vec3F& v);
+
+//////////////////
+// Struct Vec4F //
+//////////////////
 
 typedef struct Vec4F
 {
@@ -80,10 +92,14 @@ Vec4F operator +(const Vec4F& a, const Vec4F& b);
 Vec4F operator -(const Vec4F& a, const Vec4F& b);
 Vec4F operator *(const Vec4F& v, float s);
 Vec4F operator *(float s, const Vec4F& v);
-float dot4F(const Vec4F& a, const Vec4F& b);
-float dot4F(const Vec4F& v);
-float magnitude4F(const Vec4F& v);
-Vec4F normalize4F(const Vec4F& v);
+float dot(const Vec4F& a, const Vec4F& b);
+float dot(const Vec4F& v);
+float magnitude(const Vec4F& v);
+Vec4F normalize(const Vec4F& v);
+
+//////////////////
+// Struct Mat3F //
+//////////////////
 
 typedef struct Mat3F
 {
@@ -111,6 +127,10 @@ Mat3F operator +(const Mat3F& a, const Mat3F& b);
 Mat3F operator -(const Mat3F& a, const Mat3F& b);
 Mat3F operator *(const Mat3F& a, const Mat3F& b);
 Vec3F operator *(const Mat3F& m, const Vec3F& v);
+
+//////////////////
+// Struct Mat4F //
+//////////////////
 
 typedef struct Mat4F
 {
@@ -141,22 +161,36 @@ Mat4F operator -(const Mat4F& a, const Mat4F& b);
 Mat4F operator *(const Mat4F& a, const Mat4F& b);
 Vec4F operator *(const Mat4F& m, const Vec4F& v);
 
+///////////////////////
+// Struct Quaternion //
+///////////////////////
+
 typedef struct Quaternion {
     float w;
     float x;
     float y;
     float z;
     Quaternion();
-    Quaternion(float theta, float _x, float _y, float _z);
-    Quaternion(float theta, const Vec3F& v);
+    Quaternion(float _w, float _x, float _y, float _z);
+    Quaternion(float _W, const Vec3F& v);
 } Quaternion;
-Quaternion operator *(const Quaternion& q1, const Quaternion& q2);
-
+Quaternion operator *(const Quaternion& q2, const Quaternion& q1);
+float      dot(const Quaternion& q1, const Quaternion& q2);
+float      dot(const Quaternion& q);
+float      magnitude(const Quaternion& q);
+Quaternion normalize(const Quaternion& q);
 Mat3F quatToMat3(const Quaternion& q);
 
-Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
+/////////////////////////////
+// Transformation Matrices //
+/////////////////////////////
 
+Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
 Mat4F getOrthographicMat();
+
+///////////
+// Misc. //
+///////////
 
 float degToRads(float d);
 

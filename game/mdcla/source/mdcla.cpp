@@ -96,26 +96,26 @@ Vec2F operator *(float s, const Vec2F& v)
 	         v.y * s);
 }
 
-float dot2F(const Vec2F& a, const Vec2F& b)
+float dot(const Vec2F& a, const Vec2F& b)
 {
     return ((a.x * b.x) +
 	    (a.y * b.y));
 }
 
-float dot2F(const Vec2F& v)
+float dot(const Vec2F& v)
 {
     return ((v.x * v.x) +
 	    (v.y * v.y));
 }
 
-float magnitude2F(const Vec2F& v)
+float magnitude(const Vec2F& v)
 {
-    return sqrt(dot2F(v));
+    return sqrt(dot(v));
 }
 
-Vec2F normalize2F(const Vec2F& v)
+Vec2F normalize(const Vec2F& v)
 {
-    return (v * (1.0f / magnitude2F(v)));
+    return (v * (1.0f / magnitude(v)));
 }
 
 //////////////////
@@ -220,35 +220,35 @@ Vec3F operator *(float s, const Vec3F& v)
 	         v.z * s);
 }
 
-Vec3F cross3F(const Vec3F& a, const Vec3F& b)
+Vec3F cross(const Vec3F& a, const Vec3F& b)
 {
     return Vec3F((a.y * b.z) - (a.z * b.y),
 		 (a.z * b.x) - (a.x * b.z),
 		 (a.x * b.y) - (a.y * b.x));
 }
 
-float dot3F(const Vec3F& a, const Vec3F& b)
+float dot(const Vec3F& a, const Vec3F& b)
 {
     return ((a.x * b.x) +
 	    (a.y * b.y) +
 	    (a.z * b.z));
 }
 
-float dot3F(const Vec3F& v)
+float dot(const Vec3F& v)
 {
     return ((v.x * v.x) +
 	    (v.y * v.y) +
 	    (v.z * v.z));
 }
 
-float magnitude3F(const Vec3F& v)
+float magnitude(const Vec3F& v)
 {
-    return (sqrt(dot3F(v)));
+    return (sqrt(dot(v)));
 }
 
-Vec3F normalize3F(const Vec3F& v)
+Vec3F normalize(const Vec3F& v)
 {
-    return (v * (1.0f / magnitude3F(v)));
+    return (v * (1.0f / magnitude(v)));
 }
 
 //////////////////
@@ -364,7 +364,7 @@ Vec4F operator *(float s, const Vec4F& v)
 	         v.w * s);
 }
  
-float dot4F(const Vec4F& a, const Vec4F& b)
+float dot(const Vec4F& a, const Vec4F& b)
 {
     return ((a.x * b.x) +
 	    (a.y * b.y) +
@@ -372,7 +372,7 @@ float dot4F(const Vec4F& a, const Vec4F& b)
 	    (a.w * b.w));
 }
 
-float dot4F(const Vec4F& v)
+float dot(const Vec4F& v)
 {
     return ((v.x * v.x) +
 	    (v.y * v.y) +
@@ -380,14 +380,14 @@ float dot4F(const Vec4F& v)
 	    (v.w * v.w));
 }
 
-float magnitude4F(const Vec4F& v)
+float magnitude(const Vec4F& v)
 {
-    return(sqrt(dot4F(v)));
+    return(sqrt(dot(v)));
 }
 
-Vec4F normalize4F(const Vec4F& v)
+Vec4F normalize(const Vec4F& v)
 {
-    return (v * (1.0f / magnitude4F(v)));
+    return (v * (1.0f / magnitude(v)));
 }
 
 //////////////////
@@ -711,44 +711,58 @@ Quaternion::Quaternion()
     z = 0.0f;
 }
 
-Quaternion::Quaternion(float theta, float _x, float _y, float _z)
+Quaternion::Quaternion(float _w, float _x, float _y, float _z)
 {
-    float sinThetaHalf = sin(theta * 0.5f);
-    
-    // normalize the input vector 
-    Vec3F v(_x, _y, _z);
-    v = normalize3F(v);
-    
-    w = cos(theta * 0.5f);
-    x = sinThetaHalf * v.x;
-    y = sinThetaHalf * v.y;
-    z = sinThetaHalf * v.z;
+    w = _w;
+    x = _x;
+    y = _y;
+    z = _z;
 }
 
-Quaternion::Quaternion(float theta, const Vec3F& v)
+Quaternion::Quaternion(float _w, const Vec3F& v)
 {
-    float sinThetaHalf = sin(theta * 0.5f);
-
-    // normalize the input vector
-    Vec3F n = normalize3F(v);
-    
-    w = cos(theta * 0.5f);
-    x = sinThetaHalf * n.x;
-    y = sinThetaHalf * n.y;
-    z = sinThetaHalf * n.z;
+    w = _w;
+    x = v.x;
+    y = v.y;
+    z = v.z;
 }
 
 // Quaternion non-members
 
-Quaternion operator *(const Quaternion& q1, const Quaternion& q2)
+Quaternion operator *(const Quaternion& q2, const Quaternion& q1)
 {
-    Quaternion q;
-    return q;
+    Vec3F v1(q1.x, q1.y, q1.z);
+    Vec3F v2(q2.x, q2.y, q2.z);
+
+    float w = (q1.w * q2.w) - dot(v1, v2);
+    Vec3F v = (q1.w * v2) + (q2.w * v1) + cross(v2, v1);
+
+    return Quaternion(w, v);
 }
 
-///////////////////////////////
-// Additional math functions //
-///////////////////////////////
+float dot(const Quaternion& q1, const Quaternion& q2)
+{
+    return (q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z);
+}
+
+float dot(const Quaternion& q)
+{
+    return (q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+}
+
+float magnitude(const Quaternion& q)
+{
+    return sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+}
+
+Quaternion normalize(const Quaternion& q)
+{
+    float lengthRecip = (1.0f / magnitude(q));
+    return Quaternion(q.w * lengthRecip,
+		      q.x * lengthRecip,
+		      q.y * lengthRecip,
+		      q.z * lengthRecip);
+}
 
 Mat3F quatToMat3(const Quaternion& q)
 {
@@ -765,6 +779,10 @@ Mat3F quatToMat3(const Quaternion& q)
 	         xy - wz,          1.0f - (xx + zz), yz + wx,
 	         xz + wy,          yz - wx,          1.0f - (xx + yy));
 }
+
+/////////////////////////////
+// Transformation Matrices //
+/////////////////////////////
 
 Mat4F getPerspectiveMat(float vfov, float ar, float n, float f)
 {
@@ -783,6 +801,10 @@ Mat4F getOrthographicMat()
     printf("Function not implemented");
     return Mat4F(1.0f);
 }
+
+///////////
+// Misc. //
+///////////
 
 float degToRads(float d)
 {

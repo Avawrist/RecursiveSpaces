@@ -215,7 +215,7 @@ main()
 
     // Model Matrix (Local space -> world space)
     Mat4F model(1.0f);
-
+    
     // View Matrix (World space -> view space)
     Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
 	       0.0f, 1.0f, 0.0f, 0.0f,
@@ -251,13 +251,16 @@ main()
 	prevTime = currTime;
 	
 	// Update quaternion with dTime and apply rotation to model matrix
-	Quaternion q(degToRads(90.0f * dTime), 0.0f, 1.0f, 0.0f);
+	
+	float dHalfAngleRads = degToRads(90.0f) * 0.5f * dTime;
+	Quaternion q(cos(dHalfAngleRads), 0.0f, sin(dHalfAngleRads), 0.0f);
 	Mat4F R(quatToMat3(q));
 	model = R * model;
 
 	glUseProgram(basicShaderProgram.program_id);
 	basicShaderProgram.addMat4Uniform("model", model.getPointer());
-
+	
+	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
         projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
