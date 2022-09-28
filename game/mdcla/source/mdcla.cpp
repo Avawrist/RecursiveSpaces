@@ -65,11 +65,6 @@ const float& Vec2F::operator [](int i) const
     return *(&x + i);
 }
 
-void Vec2F::print()
-{
-    printf("\n(%f, %f)\n", x, y);
-}
-
 // Vec2F Non-members
 
 Vec2F operator +(const Vec2F& a, const Vec2F& b)
@@ -116,6 +111,11 @@ float magnitude(const Vec2F& v)
 Vec2F normalize(const Vec2F& v)
 {
     return (v * (1.0f / magnitude(v)));
+}
+
+void print(const Vec2F& v)
+{
+    printf("(%f, %f)\n", v.x, v.y);
 }
 
 //////////////////
@@ -185,11 +185,6 @@ const float& Vec3F::operator [](int i) const
     return *(&x + i);
 }
 
-void Vec3F::print()
-{
-    printf("\n(%f, %f, %f)\n", x, y, z);
-}
-
 // Vec3F Non-Members
 
 Vec3F operator +(const Vec3F& a, const Vec3F& b)
@@ -249,6 +244,11 @@ float magnitude(const Vec3F& v)
 Vec3F normalize(const Vec3F& v)
 {
     return (v * (1.0f / magnitude(v)));
+}
+
+void print(const Vec3F& v)
+{
+    printf("(%f, %f, %f)\n", v.x, v.y, v.z);
 }
 
 //////////////////
@@ -325,11 +325,6 @@ const float& Vec4F::operator [](int i) const
     return *(&x + i);
 }
 
-void Vec4F::print()
-{
-    printf("\n(%f, %f, %f, %f)\n", x, y, z, w);
-}
-
 // Vec4F Non-Members
 
 Vec4F operator +(const Vec4F& a, const Vec4F& b)
@@ -388,6 +383,11 @@ float magnitude(const Vec4F& v)
 Vec4F normalize(const Vec4F& v)
 {
     return (v * (1.0f / magnitude(v)));
+}
+
+void print(const Vec4F& v)
+{
+    printf("(%f, %f, %f, %f)\n", v.x, v.y, v.z, v.w);
 }
 
 //////////////////
@@ -469,26 +469,6 @@ const float& Mat3F::operator ()(int i, int j) const
     return n[i][j];
 }
 
-void Mat3F::print()
-{
-    for(int x = 0; x < 3; x++)
-    {
-	printf("\n");
-	for(int y = 0; y < 3; y++)
-	    printf("%f, ", n[x][y]);
-    }
-    printf("\n");
-}
-
-void Mat3F::transpose()
-{
-    Mat3F temp = *this;
-
-    n[0][0] = temp(0, 0); n[0][1] = temp(1, 0); n[0][2] = temp(2, 0);
-    n[1][0] = temp(0, 1); n[1][1] = temp(1, 1); n[1][2] = temp(2, 1);
-    n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2);
-}
-
 const float* Mat3F::getPointer()
 {
     return &(n[0][0]);
@@ -529,6 +509,24 @@ Vec3F operator *(const Mat3F& m, const Vec3F& v)
     return Vec3F(m(0, 0) * v.x + m(0, 1) * v.y + m(0, 2) * v.z,
 		 m(1, 0) * v.x + m(1, 1) * v.y + m(1, 2) * v.z,
 		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z);
+}
+
+Mat3F tranpose(const Mat3F& m)
+{
+    return Mat3F(m(0, 0), m(1, 0), m(2, 0),
+		 m(0, 1), m(1, 1), m(2, 1),
+		 m(0, 2), m(2, 1), m(2, 2));
+}
+
+void print(const Mat3F& m)
+{
+    for(int x = 0; x < 3; x++)
+    {
+	printf("\n");
+	for(int y = 0; y < 3; y++)
+	    printf("%f, ", m(x, y));
+    }
+    printf("\n");
 }
 
 //////////////////
@@ -622,27 +620,6 @@ const float& Mat4F::operator ()(int i, int j) const
     return n[i][j];
 }
 
-void Mat4F::print()
-{
-    for(int x = 0; x < 4; x++)
-    {
-	printf("\n");
-	for(int y = 0; y < 4; y++)
-	    printf("%f, ", n[x][y]);
-    }
-    printf("\n");
-}
-
-void Mat4F::transpose()
-{
-    Mat4F temp = *this;
-
-    n[0][0] = temp(0, 0); n[0][1] = temp(1, 0); n[0][2] = temp(2, 0); n[0][3] = temp(3, 0);
-    n[1][0] = temp(0, 1); n[1][1] = temp(1, 1); n[1][2] = temp(2, 1); n[1][3] = temp(3, 1);
-    n[2][0] = temp(0, 2); n[2][1] = temp(1, 2); n[2][2] = temp(2, 2); n[2][3] = temp(3, 2);
-    n[3][0] = temp(0, 3); n[3][1] = temp(1, 3); n[3][2] = temp(2, 3); n[3][3] = temp(3, 3);    
-}
-
 const float* Mat4F::getPointer()
 {
     return &(n[0][0]);
@@ -699,6 +676,25 @@ Vec4F operator *(const Mat4F& m, const Vec4F& v)
 		 m(3, 0) * v.x + m(3, 1) * v.y + m(3, 2) * v.z + m(3, 3) * v.w);
 }
 
+Mat4F tranpose(const Mat4F& m)
+{
+    return Mat4F(m(0, 0), m(1, 0), m(2, 0), m(3, 0),
+		 m(0, 1), m(1, 1), m(2, 1), m(3, 1),
+		 m(0, 2), m(1, 2), m(2, 2), m(3, 2),
+		 m(0, 3), m(1, 3), m(2, 3), m(3, 3));
+}
+
+void print(const Mat4F& m)
+{
+    for(int x = 0; x < 4; x++)
+    {
+	printf("\n");
+	for(int y = 0; y < 4; y++)
+	    printf("%f, ", m(x, y));
+    }
+    printf("\n");
+}
+
 ///////////////////////
 // Struct Quaternion //
 ///////////////////////
@@ -737,7 +733,8 @@ Quaternion operator *(const Quaternion& q2, const Quaternion& q1)
     float w = (q1.w * q2.w) - dot(v1, v2);
     Vec3F v = (q1.w * v2) + (q2.w * v1) + cross(v2, v1);
 
-    return Quaternion(w, v);
+    Quaternion q3(w, v);
+    return normalize(q3);
 }
 
 float dot(const Quaternion& q1, const Quaternion& q2)
@@ -780,6 +777,11 @@ Mat3F quatToMat3(const Quaternion& q)
 	         xz + wy,          yz - wx,          1.0f - (xx + yy));
 }
 
+void print(const Quaternion& q)
+{
+    printf("(%f, (%f, %f, %f))\n", q.w, q.x, q.y, q.z);
+}
+
 /////////////////////////////
 // Transformation Matrices //
 /////////////////////////////
@@ -802,6 +804,12 @@ Mat4F getOrthographicMat()
     return Mat4F(1.0f);
 }
 
+///////////////////
+// Interpolation //
+///////////////////
+
+
+
 ///////////
 // Misc. //
 ///////////
@@ -809,4 +817,15 @@ Mat4F getOrthographicMat()
 float degToRads(float d)
 {
     return (d * 0.0174532925);
+}
+
+Vec3F rotate(const Vec3F& v, const Quaternion& q)
+{
+    float vMult     = 2.0f * (q.x * v.x + q.y * v.y * q.z * v.z);
+    float crossMult = 2.0f * q.w;
+    float pMult     = crossMult * q.w - 1.0f;
+
+    return Vec3F(pMult * v.x + vMult * q.x + crossMult * (q.y * v.z - q.z * v.y),
+	         pMult * v.y + vMult * q.y + crossMult * (q.z * v.x - q.x * v.z),
+	         pMult * v.z + vMult * q.z + crossMult * (q.x * v.y - q.y * v.x));
 }

@@ -26,7 +26,6 @@ typedef struct Vec2F
     void         operator -=(const Vec2F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
-    void print();
 } Vec2F;
 Vec2F operator +(const Vec2F& a, const Vec2F& b);
 Vec2F operator -(const Vec2F& a, const Vec2F& b);
@@ -36,6 +35,7 @@ float dot(const Vec2F& a, const Vec2F& b);
 float dot(const Vec2F& v);
 float magnitude(const Vec2F& v);
 Vec2F normalize(const Vec2F& v);
+void  print(const Vec2F& v);
 
 //////////////////
 // Struct Vec3F //
@@ -55,7 +55,6 @@ typedef struct Vec3F
     void         operator -=(const Vec3F& v);
     float&       operator [](int i);
     const float& operator [](int i) const;
-    void print();
 } Vec3F;
 Vec3F operator +(const Vec3F& a, const Vec3F& b);
 Vec3F operator -(const Vec3F& a, const Vec3F& b);
@@ -66,6 +65,7 @@ float dot(const Vec3F& a, const Vec3F& b);
 float dot(const Vec3F& v);
 float magnitude(const Vec3F& v);
 Vec3F normalize(const Vec3F& v);
+void  print(const Vec3F& v);
 
 //////////////////
 // Struct Vec4F //
@@ -96,6 +96,7 @@ float dot(const Vec4F& a, const Vec4F& b);
 float dot(const Vec4F& v);
 float magnitude(const Vec4F& v);
 Vec4F normalize(const Vec4F& v);
+void  print(const Vec4F& v);
 
 //////////////////
 // Struct Mat3F //
@@ -119,14 +120,14 @@ public:
     const Vec3F  operator [](int j) const;
     float&       operator ()(int i, int j);
     const float& operator ()(int i, int j) const;
-    void print();
-    void transpose();
     const float* getPointer();
 } Mat3F;
 Mat3F operator +(const Mat3F& a, const Mat3F& b);
 Mat3F operator -(const Mat3F& a, const Mat3F& b);
 Mat3F operator *(const Mat3F& a, const Mat3F& b);
 Vec3F operator *(const Mat3F& m, const Vec3F& v);
+Mat3F transpose(const Mat3F& m);
+void  print(const Mat3F& m);
 
 //////////////////
 // Struct Mat4F //
@@ -152,14 +153,14 @@ public:
     const Vec4F  operator [](int j) const;
     float&       operator ()(int i, int j);
     const float& operator ()(int i, int j) const;
-    void print();
-    void transpose();
     const float* getPointer();
 } Mat4F;
 Mat4F operator +(const Mat4F& a, const Mat4F& b);
 Mat4F operator -(const Mat4F& a, const Mat4F& b);
 Mat4F operator *(const Mat4F& a, const Mat4F& b);
 Vec4F operator *(const Mat4F& m, const Vec4F& v);
+Mat4F transpose(const Mat4F& m);
+void  print(const Mat4F& m);
 
 ///////////////////////
 // Struct Quaternion //
@@ -179,7 +180,8 @@ float      dot(const Quaternion& q1, const Quaternion& q2);
 float      dot(const Quaternion& q);
 float      magnitude(const Quaternion& q);
 Quaternion normalize(const Quaternion& q);
-Mat3F quatToMat3(const Quaternion& q);
+Mat3F      quatToMat3(const Quaternion& q);
+void       print(const Quaternion& q);
 
 /////////////////////////////
 // Transformation Matrices //
@@ -188,10 +190,18 @@ Mat3F quatToMat3(const Quaternion& q);
 Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
 Mat4F getOrthographicMat();
 
+///////////////////
+// Interpolation //
+///////////////////
+
+
+
 ///////////
 // Misc. //
 ///////////
 
 float degToRads(float d);
+
+Vec3F rotate(const Vec3F& v, const Quaternion& q);
 
 #endif

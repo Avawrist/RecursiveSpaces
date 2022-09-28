@@ -132,7 +132,7 @@ main()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Cull Faces
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -224,7 +224,7 @@ main()
     Quaternion q2(cos(thetaHalf), sin(thetaHalf), 0.0f, 0.0f);
     Mat4F rot(quatToMat3(q2 * q1));
     model = rot * model;
-    
+
     // View Matrix (World space -> view space)
     Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
 	       0.0f, 1.0f, 0.0f, 0.0f,
@@ -260,12 +260,11 @@ main()
 	prevTime = currTime;
 	
 	// Update quaternion with dTime and apply rotation to model matrix
-	
-	float dHalfAngleRads = degToRads(90.0f) * 0.5f * dTime;
-	Quaternion q(cos(dHalfAngleRads),
-		     axis.x * sin(dHalfAngleRads),
-		     axis.y * sin(dHalfAngleRads),
-	             axis.z * sin(dHalfAngleRads));
+	float dHalfAngleRads = degToRads(90.0f * dTime) * 0.5f;
+        Quaternion q(cos(dHalfAngleRads),
+		     -axis.x * sin(dHalfAngleRads),
+		     -axis.y * sin(dHalfAngleRads),
+	             -axis.z * sin(dHalfAngleRads));
 	Mat4F R(quatToMat3(q));
 	model = R * model;
 
