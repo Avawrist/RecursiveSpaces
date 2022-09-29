@@ -723,7 +723,39 @@ Quaternion::Quaternion(float _w, const Vec3F& v)
     z = v.z;
 }
 
+void Quaternion::operator +=(const Quaternion& q)
+{
+    w += q.w;
+    x += q.x;
+    y += q.y;
+    z += q.z;
+}
+
+void Quaternion::operator -=(const Quaternion& q)
+{
+    w -= q.w;
+    x -= q.x;
+    y -= q.y;
+    z -= q.z;
+}
+
 // Quaternion non-members
+
+Quaternion operator +(const Quaternion& q1, const Quaternion& q2)
+{
+    return Quaternion(q1.w + q2.w,
+	              q1.x + q2.x,
+		      q1.y + q2.y,
+		      q1.z + q2.z);
+}
+
+Quaternion operator -(const Quaternion& q1, const Quaternion& q2)
+{
+    return Quaternion(q1.w - q2.w,
+	              q1.x - q2.x,
+		      q1.y - q2.y,
+		      q1.z - q2.z);
+}
 
 Quaternion operator *(const Quaternion& q1, const Quaternion& q2)
 {
@@ -733,8 +765,23 @@ Quaternion operator *(const Quaternion& q1, const Quaternion& q2)
     float w = (q1.w * q2.w) - dot(v1, v2);
     Vec3F v = (q1.w * v2) + (q2.w * v1) + cross(v1, v2);
 
-    Quaternion q3(w, v);
-    return normalize(q3);
+    return Quaternion(w, v);
+}
+
+Quaternion operator *(const Quaternion& q, float s)
+{
+    return Quaternion(q.w * s,
+	              q.x * s,
+	              q.y * s,
+	              q.z * s);
+}
+
+Quaternion operator *(float s, const Quaternion& q)
+{
+    return Quaternion(q.w * s,
+	              q.x * s,
+	              q.y * s,
+	              q.z * s);
 }
 
 float dot(const Quaternion& q1, const Quaternion& q2)
@@ -761,8 +808,16 @@ Quaternion normalize(const Quaternion& q)
 		      q.z * lengthRecip);
 }
 
+Quaternion inverse(const Quaternion& q)
+{
+    // Assumes a unit quaternion is given
+    return Quaternion(q.w, -q.x, -q.y, -q.z);
+}
+
 Mat3F quatToMat3(const Quaternion& q)
 {
+    // Assumes a unit quaternion is given
+    
     float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
 
     s = 2.0f / (q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
@@ -808,11 +863,37 @@ Mat4F getOrthographicMat()
 // Interpolation //
 ///////////////////
 
+Quaternion slerp(const Quaternion& q1, const Quaternion& q2, float t)
+{
+    // An unoptimized slerp implementation from Jonathan Blow,
+    // altered from Shoemake
+    float cosTheta = clamp(dot(q1, q2), -1, 1);
 
+    // If quaternions are nearly parallel, linearly interpolate instead
+    if(cosTheta > 0.99f)
+    {
+	Quaternion result = q1 + t * (q2 - q1);
+	normalize(result);
+	return result;
+    }
+
+    float theta_0 = acos(cosTheta); // angle between input quaternions
+    float theta_1 = t * theta_0; // interpolated angle
+    Quaternion q3 = q2 - (q1 * cosTheta);
+    q3 = normalize(q3);
+
+    return q1 * cos(theta_1) + q3 * (sin(theta_1));
+}
 
 ///////////
 // Misc. //
 ///////////
+
+float clamp(float n, float min, float max)
+{
+    float t = n < min ? min : n;
+    return t > max ? max : t;
+}
 
 float degToRads(float d)
 {

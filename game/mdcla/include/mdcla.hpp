@@ -174,12 +174,19 @@ typedef struct Quaternion {
     Quaternion();
     Quaternion(float _w, float _x, float _y, float _z);
     Quaternion(float _W, const Vec3F& v);
+    void operator +=(const Quaternion& q);
+    void operator -=(const Quaternion& q);
 } Quaternion;
+Quaternion operator +(const Quaternion& q1, const Quaternion& q2);
+Quaternion operator -(const Quaternion& q1, const Quaternion& q2);
 Quaternion operator *(const Quaternion& q1, const Quaternion& q2);
+Quaternion operator *(const Quaternion& q, float s);
+Quaternion operator *(float s, const Quaternion& q);
 float      dot(const Quaternion& q1, const Quaternion& q2);
 float      dot(const Quaternion& q);
 float      magnitude(const Quaternion& q);
 Quaternion normalize(const Quaternion& q);
+Quaternion inverse(const Quaternion& q);
 Mat3F      quatToMat3(const Quaternion& q);
 void       print(const Quaternion& q);
 
@@ -194,11 +201,13 @@ Mat4F getOrthographicMat();
 // Interpolation //
 ///////////////////
 
-
+Quaternion slerp(const Quaternion& q1, const Quaternion& q2, double t);
 
 ///////////
 // Misc. //
 ///////////
+
+float clamp(float n, float min, float max);
 
 float degToRads(float d);
 

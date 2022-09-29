@@ -219,15 +219,7 @@ main()
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f);
-    Vec3F axis(1.0f, 1.0f, -1.0f);
-    axis = normalize(axis);
-
-    float thetaHalf = degToRads(45.0f) * 0.5f;
-    Quaternion q1(cos(thetaHalf), 0.0f, 0.0f, sin(thetaHalf));
-    Quaternion q2(cos(thetaHalf), sin(thetaHalf), 0.0f, 0.0f);
-    Mat4F rot(quatToMat3(q2 * q1));
-    model = rot * model;
-
+    
     // View Matrix (World space -> view space)
     Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
 	       0.0f, 1.0f, 0.0f, 0.0f,
@@ -261,20 +253,7 @@ main()
 	float currTime = glfwGetTime();
 	dTime = currTime - prevTime;
 	prevTime = currTime;
-	
-	// Update quaternion with dTime and apply rotation to model matrix
-	float dHalfAngleRads = degToRads(90.0f * dTime) * 0.5f;
-        Quaternion q(cos(dHalfAngleRads),
-		     -axis.x * sin(dHalfAngleRads),
-		     -axis.y * sin(dHalfAngleRads),
-	             -axis.z * sin(dHalfAngleRads));
-	Mat4F R(quatToMat3(q));
-	model = R * model;
-
-	glUseProgram(basicShaderProgram.program_id);
-	basicShaderProgram.addMat4Uniform("model", model.getPointer());
-	
-	
+        
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
         projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
