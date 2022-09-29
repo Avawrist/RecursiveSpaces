@@ -175,7 +175,7 @@ typedef struct Quaternion {
     Quaternion(float _w, float _x, float _y, float _z);
     Quaternion(float _W, const Vec3F& v);
 } Quaternion;
-Quaternion operator *(const Quaternion& q2, const Quaternion& q1);
+Quaternion operator *(const Quaternion& q1, const Quaternion& q2);
 float      dot(const Quaternion& q1, const Quaternion& q2);
 float      dot(const Quaternion& q);
 float      magnitude(const Quaternion& q);

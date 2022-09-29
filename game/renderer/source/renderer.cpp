@@ -215,7 +215,10 @@ main()
     /////////////////////////////
 
     // Model Matrix (Local space -> world space)
-    Mat4F model(1.0f);
+    Mat4F model(1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f);
     Vec3F axis(1.0f, 1.0f, -1.0f);
     axis = normalize(axis);
 

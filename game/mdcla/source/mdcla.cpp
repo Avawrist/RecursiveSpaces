@@ -725,13 +725,13 @@ Quaternion::Quaternion(float _w, const Vec3F& v)
 
 // Quaternion non-members
 
-Quaternion operator *(const Quaternion& q2, const Quaternion& q1)
+Quaternion operator *(const Quaternion& q1, const Quaternion& q2)
 {
     Vec3F v1(q1.x, q1.y, q1.z);
     Vec3F v2(q2.x, q2.y, q2.z);
 
     float w = (q1.w * q2.w) - dot(v1, v2);
-    Vec3F v = (q1.w * v2) + (q2.w * v1) + cross(v2, v1);
+    Vec3F v = (q1.w * v2) + (q2.w * v1) + cross(v1, v2);
 
     Quaternion q3(w, v);
     return normalize(q3);
