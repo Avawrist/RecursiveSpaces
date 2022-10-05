@@ -16,12 +16,7 @@
 // My libs
 #include <mdcla.hpp>
 #include <shader.hpp>
-
-//test
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
+#include <camera.hpp>
 
 using namespace std;
 
@@ -32,11 +27,20 @@ using namespace std;
 // Window
 const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
+const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
+const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
+unsigned int last_x = X_CENTER;
+unsigned int last_y = Y_CENTER;
 float WIN_AR = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
-float prevTime = 0.0f;
-float dTime    = 0.0f;
+float prevTime   = 0.0f;
+float dTime      = 0.0f;
+float FRAME_RATE = 30.0f;
+
+// Camera
+Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f),
+                 Quaternion(1.0f, 0.0f, 0.0f, 0.0f));
 
 ///////////////
 // Functions //
@@ -107,6 +111,7 @@ main()
     glfwSetCursorPosCallback(window, mousePosCallback);
     glfwSetMouseButtonCallback(window, mouseBtnCallback);
     glfwSetScrollCallback(window, mouseScrollCallback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     odGLFWError();
     
     // Make created window/context the current context
@@ -221,10 +226,7 @@ main()
 		0.0f, 0.0f, 0.0f, 1.0f);
     
     // View Matrix (World space -> view space)
-    Mat4F view(1.0f, 0.0f, 0.0f, 0.0f,
-	       0.0f, 1.0f, 0.0f, 0.0f,
-	       0.0f, 0.0f, 1.0f, 0.0f,
-	       0.0f, 0.0f, -3.0f, 1.0f);
+    Mat4F view = getView(globalCam);
     
     // Projection Matrix (View space -> clip space/NDC)
     Mat4F projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
@@ -253,21 +255,37 @@ main()
 	float currTime = glfwGetTime();
 	dTime = currTime - prevTime;
 	prevTime = currTime;
-        
+
+	////////////////////////////////////
+	// Update Transformation Matrices //
+	////////////////////////////////////
+	
+	glUseProgram(basicShaderProgram.program_id);
+
+	// Update View
+	view = getView(globalCam);
+	basicShaderProgram.addMat4Uniform("view", view.getPointer());
+	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
         projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
-	
-	// Clear screen
+
+	//////////////////
+	// Clear screen //
+	//////////////////
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	// Render pass 1
+
+	///////////////////
+	// Render pass 1 //
+	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
 	glBindVertexArray(testVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	
-	// Swap buffers
+
+	//////////////////
+	// Swap buffers //
+	//////////////////
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 	odGLFWError();
@@ -334,7 +352,13 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 void
 mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    // Test passed
+    const float X_DIST = xpos - last_x;
+    const float Y_DIST = ypos - last_y;
+    last_x = xpos;
+    last_y = ypos;
+
+    Vec2F distance = normalize(Vec2F(X_DIST, Y_DIST));
+    updateRotFromMouse(globalCam, distance);
 }
 
 void
