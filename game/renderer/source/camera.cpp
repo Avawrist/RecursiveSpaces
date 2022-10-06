@@ -12,46 +12,51 @@
 Camera::Camera()
 {
     pos         = Vec3F(0.0f, 0.0f, 0.0f);
-    orientation = Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
 }
 
-Camera::Camera(const Vec3F& _pos, const Quaternion& _orientation)
+Camera::Camera(const Vec3F& _pos)
 {
     pos = _pos;
-    orientation = _orientation;
 }
 
 ////////////////////////
 // Camera Non-Members //
 ////////////////////////
 
-void updateRotFromMouse(Camera& cam, const Vec2F& mouseDist)
+void cameraOffsetAngles(Camera& cam, float oYaw, float oPitch)
 {
-    // **Assumes mouseDist is normalized**
+    cam.yaw   += oYaw;
+    cam.pitch += oPitch;
+}
 
-    // radians scaled by distance mouse traveled, halved for quaternion:
-    float half_x_degrees = mouseDist.x * cam.rot_speed * 0.5f;
-    float half_y_degrees = mouseDist.y * cam.rot_speed * 0.5f;
+Mat4F getOrientation(const Camera& cam)
+{
+    float halfYawRads   = degToRads(cam.yaw) * 0.5f;
+    float halfPitchRads = degToRads(cam.pitch) * 0.5f;
+    Quaternion x_rot(cos(halfYawRads), 0.0f, sin(halfYawRads), 0.0f);
+    Quaternion y_rot(cos(halfPitchRads), sin(halfPitchRads), 0.0f, 0.0f);
+    Quaternion o = normalize(y_rot * x_rot);
 
-    // rotations as quaternions
-    Quaternion x_rot(cos(half_x_degrees), 0.0f, sin(half_x_degrees), 0.0f);
-    Quaternion y_rot(cos(half_y_degrees), sin(half_y_degrees), 0.0f, 0.0f);
-    
-    // Apply new rotation to orientation
-    printf("rotation applied: ");
-    print(normalize(y_rot * x_rot));
-    cam.orientation   = normalize(cam.orientation * x_rot * y_rot);
-    cam.orientation.z = 0.0f;
+    return Mat4F(quatToMat3(o));
+}
+
+Mat4F getTranslation(const Camera& cam)
+{
+    return Mat4F(1.0f,      0.0f,      0.0f,      0.0f,
+	         0.0f,      1.0f,      0.0f,      0.0f,
+	         0.0f,      0.0f,      1.0f,      0.0f,
+	         cam.pos.x, cam.pos.y, cam.pos.z, 1.0f);
+}
+
+Mat4F getTranslationInverse(const Camera& cam)
+{
+    return Mat4F(1.0f,       0.0f,       0.0f,       0.0f,
+	         0.0f,       1.0f,       0.0f,       0.0f,
+	         0.0f,       0.0f,       1.0f,       0.0f,
+	         -cam.pos.x, -cam.pos.y, -cam.pos.z, 1.0f);
 }
 
 Mat4F getView(const Camera& cam)
 {
-    Mat4F R = Mat4F(quatToMat3(cam.orientation));
-    Mat4F T = Mat4F(1.0f,       0.0f,       0.0f,       0.0f,
-	            0.0f,       1.0f,       0.0f,       0.0f,
-	            0.0f,       0.0f,       1.0f,       0.0f,
-	            -cam.pos.x, -cam.pos.y, -cam.pos.z, 1.0f);
-    return T * R; // The inverse of the rotation matrix
-                  // by the inverse of the translation matrix
-                  // gives the inverse of the camera's model matrix
+    return (getTranslationInverse(cam) * getOrientation(cam));
 }

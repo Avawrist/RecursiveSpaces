@@ -11,14 +11,16 @@
 typedef struct Camera
 {
     Vec3F pos;
-    Quaternion orientation;
-    float move_speed = 2.0f;
-    float rot_speed  = degToRads(2.0f);
+    float pitch          = 0.0f;
+    float yaw            = 0.0f;
+    float move_speed     = 2.0f;
+    float rot_speed_deg  = 2.0f;
     Camera();
-    Camera(const Vec3F& _pos, const Quaternion& _orientation);
+    Camera(const Vec3F& _pos);
 } Camera;
-void updateRotFromMouse(Camera& cam, const Vec2F& mouseDist);
-void updateCamPos(Camera& cam);
+void  cameraOffsetAngles(Camera& cam, float oYaw, float oPitch);
+Mat4F getOrientation(const Camera& cam);
+Mat4F getTranslation(const Camera& cam);
 Mat4F getView(const Camera& cam);
 
 #endif

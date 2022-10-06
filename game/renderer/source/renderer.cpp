@@ -39,8 +39,7 @@ float dTime      = 0.0f;
 float FRAME_RATE = 30.0f;
 
 // Camera
-Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f),
-                 Quaternion(1.0f, 0.0f, 0.0f, 0.0f));
+Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f));
 
 ///////////////
 // Functions //
@@ -348,23 +347,23 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
-    Mat3F camRot   = quatToMat3(globalCam.orientation);
+    Mat4F O        = getOrientation(globalCam);
     float dTimeSpd = dTime * globalCam.move_speed;
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-	globalCam.pos -= (dTimeSpd * normalize(Vec3F(camRot(0, 2), camRot(1, 2), camRot(2, 2))));
+	globalCam.pos -= (dTimeSpd * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-	globalCam.pos += (dTimeSpd * normalize(Vec3F(camRot(0, 2), camRot(1, 2), camRot(2, 2))));
+	globalCam.pos += (dTimeSpd * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
     }
     if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-	globalCam.pos += (dTimeSpd * normalize(Vec3F(camRot(0, 0), camRot(1, 0), camRot(2, 0))));
+	globalCam.pos += (dTimeSpd * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
     }
     if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-	globalCam.pos -= (dTimeSpd * normalize(Vec3F(camRot(0, 0), camRot(1, 0), camRot(2, 0))));
+	globalCam.pos -= (dTimeSpd * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
     }
 }
 
@@ -377,7 +376,9 @@ mousePosCallback(GLFWwindow* window, double xpos, double ypos)
     last_y = ypos;
 
     Vec2F distance = normalize(Vec2F((float)X_DIST, (float)Y_DIST));
-     updateRotFromMouse(globalCam, distance);
+    cameraOffsetAngles(globalCam,
+		       distance.x * globalCam.rot_speed_deg,
+		       distance.y * globalCam.rot_speed_deg);
 }
 
 void
