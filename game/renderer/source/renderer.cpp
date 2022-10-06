@@ -29,8 +29,8 @@ const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
 const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
 const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
-unsigned int last_x = X_CENTER;
-unsigned int last_y = Y_CENTER;
+double last_x = X_CENTER;
+double last_y = Y_CENTER;
 float WIN_AR = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
@@ -137,7 +137,7 @@ main()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Cull Faces
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -347,18 +347,37 @@ keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+    Mat3F camRot   = quatToMat3(globalCam.orientation);
+    float dTimeSpd = dTime * globalCam.move_speed;
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+	globalCam.pos -= (dTimeSpd * normalize(Vec3F(camRot(0, 2), camRot(1, 2), camRot(2, 2))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+	globalCam.pos += (dTimeSpd * normalize(Vec3F(camRot(0, 2), camRot(1, 2), camRot(2, 2))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+	globalCam.pos += (dTimeSpd * normalize(Vec3F(camRot(0, 0), camRot(1, 0), camRot(2, 0))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+	globalCam.pos -= (dTimeSpd * normalize(Vec3F(camRot(0, 0), camRot(1, 0), camRot(2, 0))));
+    }
 }
 
 void
 mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    const float X_DIST = xpos - last_x;
-    const float Y_DIST = ypos - last_y;
+    const double X_DIST = xpos - last_x;
+    const double Y_DIST = ypos - last_y;
     last_x = xpos;
     last_y = ypos;
 
-    Vec2F distance = normalize(Vec2F(X_DIST, Y_DIST));
-    updateRotFromMouse(globalCam, distance);
+    Vec2F distance = normalize(Vec2F((float)X_DIST, (float)Y_DIST));
+     updateRotFromMouse(globalCam, distance);
 }
 
 void
