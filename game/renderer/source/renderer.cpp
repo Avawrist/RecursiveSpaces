@@ -31,47 +31,45 @@ const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
 const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
 double last_x = X_CENTER;
 double last_y = Y_CENTER;
-float WIN_AR = (float)WIN_WIDTH / (float)WIN_HEIGHT;
+float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
-float prevTime   = 0.0f;
-float dTime      = 0.0f;
-float FRAME_RATE = 30.0f;
+int   frame_rate  = 60;
+float prev_time   = 0.0f;
+float d_time      = 0.0f;
+float d_time_fr   = 1.0f;
 
 // Camera
 Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f));
 
-///////////////
-// Functions //
-///////////////
+/////////////////////////
+// Function Prototypes //
+/////////////////////////
 
-void
-odGLFWError();
+void odGLFWError();
 
-void
-printGLFWError();
+void printGLFWError();
 
-void
-framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
-void
-keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void
-mousePosCallback(GLFWwindow* window, double xpos, double ypos);
+void monitorCallback(GLFWmonitor* monitor, int event);
 
-void
-mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
+void mousePosCallback(GLFWwindow* window, double xpos, double ypos);
 
-void
-mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
 
-void
-APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
                        GLsizei length, const char *message, const void *userParam);
 
-int
-main()
+//////////////////////////
+// Function Definitions //
+//////////////////////////
+
+int main()
 {
     //////////////////////
     // Window & Context //
@@ -110,9 +108,10 @@ main()
     glfwSetCursorPosCallback(window, mousePosCallback);
     glfwSetMouseButtonCallback(window, mouseBtnCallback);
     glfwSetScrollCallback(window, mouseScrollCallback);
+    glfwSetMonitorCallback(monitorCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     odGLFWError();
-    
+
     // Make created window/context the current context
     glfwMakeContextCurrent(window);
     odGLFWError();
@@ -198,15 +197,15 @@ main()
     };
 
     // VBOs
-    GLuint testVBO;
-    glGenBuffers(1, &testVBO);
+    GLuint test_VBO;
+    glGenBuffers(1, &test_VBO);
     
     // VAOs
-    GLuint testVAO;
-    glGenVertexArrays(1, &testVAO);
+    GLuint test_VAO;
+    glGenVertexArrays(1, &test_VAO);
 
-    glBindVertexArray(testVAO); // Bind VAO
-    glBindBuffer(GL_ARRAY_BUFFER, testVBO); // Bind VBO while VAO is bound
+    glBindVertexArray(test_VAO); // Bind VAO
+    glBindBuffer(GL_ARRAY_BUFFER, test_VBO); // Bind VBO while VAO is bound
     glBufferData(GL_ARRAY_BUFFER, sizeof(testVertices), testVertices, GL_STATIC_DRAW); // Copy array to buffer
     // Tell OpenGL how the vertex array is divided into attribute arrays: 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -228,7 +227,7 @@ main()
     Mat4F view = getView(globalCam);
     
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
+    Mat4F projection = getPerspectiveMat(degToRads(globalCam.fov), win_ar, 1.0f, 100.0f);
     
     ////////////////////
     // Create Shaders //
@@ -251,9 +250,13 @@ main()
     while(!glfwWindowShouldClose(window))
     {
 	// Update delta time
-	float currTime = glfwGetTime();
-	dTime = currTime - prevTime;
-	prevTime = currTime;
+	float curr_time = glfwGetTime();
+	d_time    = curr_time - prev_time;
+	prev_time = curr_time;
+        d_time_fr = d_time * frame_rate;
+
+	printf("Frame length: %f\n", d_time_fr);
+	printf("FPS: %f\n", 1.0f / d_time);
 
 	////////////////////////////////////
 	// Update Transformation Matrices //
@@ -267,7 +270,7 @@ main()
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-        projection = getPerspectiveMat(degToRads(45.0f), WIN_AR, 1.0f, 100.0f);
+        projection = getPerspectiveMat(degToRads(globalCam.fov), win_ar, 1.0f, 100.0f);
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
 
 	//////////////////
@@ -279,7 +282,7 @@ main()
 	// Render pass 1 //
 	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
-	glBindVertexArray(testVAO);
+	glBindVertexArray(test_VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	//////////////////
@@ -295,10 +298,10 @@ main()
     /////////////
 
     // Delete Vertex Array Objects
-    glDeleteVertexArrays(1, &testVAO);
+    glDeleteVertexArrays(1, &test_VAO);
     
     // Delete buffers
-    glDeleteBuffers(1, &testVBO);
+    glDeleteBuffers(1, &test_VBO);
     
     // Delete window
     glfwDestroyWindow(window);
@@ -309,8 +312,7 @@ main()
     return 0;
 }
 
-void
-odGLFWError()
+void odGLFWError()
 {
     const char* errorMsg;
     int errorCode = glfwGetError(&errorMsg);
@@ -321,8 +323,7 @@ odGLFWError()
     }
 }
 
-void
-printGLFWError()
+void printGLFWError()
 {
     const char* errorMsg;
     int errorCode = glfwGetError(&errorMsg);
@@ -332,43 +333,65 @@ printGLFWError()
     }
 }
 
-void
-framebufferSizeCallback(GLFWwindow* window, int width, int height)
+void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    WIN_AR = (float)width / (float)height; // Update the global
+    win_ar = (float)width / (float)height; // Update the global
 }
 
-void
-keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    // Close window
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
-    Mat4F O        = getOrientation(globalCam);
-    float dTimeSpd = dTime * globalCam.move_speed;
+    // Camera movement
+    Mat4F O             = getOrientation(globalCam);
+    float d_time_spd_fr = d_time_fr * globalCam.move_speed;
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+	globalCam.pos -= (d_time_spd_fr * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+	globalCam.pos += (d_time_spd_fr * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+	globalCam.pos += (d_time_spd_fr * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+    }
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+	globalCam.pos -= (d_time_spd_fr * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+    }
+
+    // Camera zoom
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-	globalCam.pos -= (dTimeSpd * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+	globalCam.fov -= 1.0f;
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-	globalCam.pos += (dTimeSpd * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+	globalCam.fov += 1.0f;
     }
-    if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    globalCam.fov = clamp(globalCam.fov, 45.0f, 115.0f);
+}
+
+void monitorCallback(GLFWmonitor* monitor, int event)
+{
+    if (event == GLFW_CONNECTED)
     {
-	globalCam.pos += (dTimeSpd * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+        OutputDebugStringA("Monitor connected\n");
     }
-    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    else if (event == GLFW_DISCONNECTED)
     {
-	globalCam.pos -= (dTimeSpd * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+	OutputDebugStringA("Monitor disconnected\n");
     }
 }
 
-void
-mousePosCallback(GLFWwindow* window, double xpos, double ypos)
+void mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
     const double X_DIST = xpos - last_x;
     const double Y_DIST = ypos - last_y;
@@ -377,24 +400,21 @@ mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 
     Vec2F distance = normalize(Vec2F((float)X_DIST, (float)Y_DIST));
     cameraOffsetAngles(globalCam,
-		       distance.x * globalCam.rot_speed_deg,
-		       distance.y * globalCam.rot_speed_deg);
+		       distance.x * globalCam.rot_speed_deg * d_time * frame_rate,
+		       distance.y * globalCam.rot_speed_deg * d_time * frame_rate);
 }
 
-void
-mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
+void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
 {
     // Test passed
 }
 
-void
-mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Not tested
 }
 
-void
-APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
                        GLsizei length, const char *message, const void *userParam)
 {
     // ignore non-significant error/warning codes

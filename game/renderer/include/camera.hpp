@@ -13,8 +13,9 @@ typedef struct Camera
     Vec3F pos;
     float pitch          = 0.0f;
     float yaw            = 0.0f;
-    float move_speed     = 2.0f;
+    float move_speed     = 0.2f;
     float rot_speed_deg  = 2.0f;
+    float fov            = 45.0f;
     Camera();
     Camera(const Vec3F& _pos);
 } Camera;
