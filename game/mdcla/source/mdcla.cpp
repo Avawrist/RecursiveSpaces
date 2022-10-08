@@ -837,28 +837,6 @@ void print(const Quaternion& q)
     printf("(%f, (%f, %f, %f))\n", q.w, q.x, q.y, q.z);
 }
 
-/////////////////////////////
-// Transformation Matrices //
-/////////////////////////////
-
-Mat4F getPerspectiveMat(float vfov, float ar, float n, float f)
-{
-    float range = n - f;
-    float tanHalfFOV = tan(vfov * 0.5f);
-
-    return Mat4F(1.0f/(ar * tanHalfFOV), 0.0f,            0.0f,           0.0f,
-	         0.0f,                   1.0f/tanHalfFOV, 0.0f,           0.0f,
-	         0.0f,                   0.0f,            (-n - f)/range, (2.0f * f * n)/range,
-	         0.0f,                   0.0f,            1.0f,           0.0f);
-}
-
-// TO-DO: Implement
-Mat4F getOrthographicMat()
-{
-    printf("Function not implemented");
-    return Mat4F(1.0f);
-}
-
 ///////////////////
 // Interpolation //
 ///////////////////

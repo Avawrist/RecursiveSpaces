@@ -40,7 +40,7 @@ float d_time      = 0.0f;
 float d_time_fr   = 1.0f;
 
 // Camera
-Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f));
+Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
 
 /////////////////////////
 // Function Prototypes //
@@ -224,10 +224,10 @@ int main()
 		0.0f, 0.0f, 0.0f, 1.0f);
     
     // View Matrix (World space -> view space)
-    Mat4F view = getView(globalCam);
+    Mat4F view = cameraGetView(globalCam);
     
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = getPerspectiveMat(degToRads(globalCam.fov), win_ar, 1.0f, 100.0f);
+    Mat4F projection = cameraGetPerspective(globalCam);
     
     ////////////////////
     // Create Shaders //
@@ -255,9 +255,6 @@ int main()
 	prev_time = curr_time;
         d_time_fr = d_time * frame_rate;
 
-	printf("Frame length: %f\n", d_time_fr);
-	printf("FPS: %f\n", 1.0f / d_time);
-
 	////////////////////////////////////
 	// Update Transformation Matrices //
 	////////////////////////////////////
@@ -265,12 +262,12 @@ int main()
 	glUseProgram(basicShaderProgram.program_id);
 
 	// Update View
-	view = getView(globalCam);
+	view = cameraGetView(globalCam);
 	basicShaderProgram.addMat4Uniform("view", view.getPointer());
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-        projection = getPerspectiveMat(degToRads(globalCam.fov), win_ar, 1.0f, 100.0f);
+        projection = cameraGetPerspective(globalCam);
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
 
 	//////////////////
@@ -348,7 +345,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
 
     // Camera movement
-    Mat4F O             = getOrientation(globalCam);
+    Mat4F O             = cameraGetOrientation(globalCam);
     float d_time_spd_fr = d_time_fr * globalCam.move_speed;
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {

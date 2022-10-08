@@ -190,13 +190,6 @@ Quaternion inverse(const Quaternion& q);
 Mat3F      quatToMat3(const Quaternion& q);
 void       print(const Quaternion& q);
 
-/////////////////////////////
-// Transformation Matrices //
-/////////////////////////////
-
-Mat4F getPerspectiveMat(float vfov, float ar, float n, float f);
-Mat4F getOrthographicMat();
-
 ///////////////////
 // Interpolation //
 ///////////////////

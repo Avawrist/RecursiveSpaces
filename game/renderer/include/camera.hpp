@@ -11,17 +11,23 @@
 typedef struct Camera
 {
     Vec3F pos;
-    float pitch          = 0.0f;
-    float yaw            = 0.0f;
-    float move_speed     = 0.2f;
-    float rot_speed_deg  = 2.0f;
-    float fov            = 45.0f;
+    float fov;
+    float n;
+    float f;
+    float ar;
+    float pitch         = 0.0f;
+    float yaw           = 0.0f;
+    float move_speed    = 0.2;
+    float rot_speed_deg = 2.0f;
     Camera();
-    Camera(const Vec3F& _pos);
+    Camera(const Vec3F& _pos, float _n, float _f, float _fov, float _ar);
 } Camera;
 void  cameraOffsetAngles(Camera& cam, float oYaw, float oPitch);
-Mat4F getOrientation(const Camera& cam);
-Mat4F getTranslation(const Camera& cam);
-Mat4F getView(const Camera& cam);
+Mat4F cameraGetOrientation(const Camera& cam);
+Mat4F cameraGetOrientationInverse(const Camera& cam);
+Mat4F cameraGetPerspective(const Camera& cam);
+Mat4F cameraGetTranslation(const Camera& cam);
+Mat4F cameraGetTranslationInverse(const Camera& cam);
+Mat4F cameraGetView(const Camera& cam);
 
 #endif
