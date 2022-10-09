@@ -13,6 +13,7 @@
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 // My libs
 #include <mdcla.hpp>
 #include <shader.hpp>
@@ -29,18 +30,18 @@ const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
 const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
 const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
-double last_x = X_CENTER;
-double last_y = Y_CENTER;
+float last_x = X_CENTER;
+float last_y = Y_CENTER;
 float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
 int   frame_rate  = 60;
 float prev_time   = 0.0f;
 float d_time      = 0.0f;
-float d_time_fr   = 1.0f;
 
 // Camera
 Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
+bool mouseFirst = true; 
 
 /////////////////////////
 // Function Prototypes //
@@ -218,10 +219,7 @@ int main()
     /////////////////////////////
 
     // Model Matrix (Local space -> world space)
-    Mat4F model(1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f);
+    Mat4F model(1.0f);
     
     // View Matrix (World space -> view space)
     Mat4F view = cameraGetView(globalCam);
@@ -253,7 +251,6 @@ int main()
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
-        d_time_fr = d_time * frame_rate;
 
 	////////////////////////////////////
 	// Update Transformation Matrices //
@@ -267,7 +264,7 @@ int main()
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-        projection = cameraGetPerspective(globalCam);
+	projection = cameraGetPerspective(globalCam);
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
 
 	//////////////////
@@ -333,7 +330,8 @@ void printGLFWError()
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    win_ar = (float)width / (float)height; // Update the global
+    win_ar       = (float)width / (float)height; // Update the global
+    globalCam.ar = win_ar;
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -344,27 +342,33 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
-    // Camera movement
-    Mat4F O             = cameraGetOrientation(globalCam);
-    float d_time_spd_fr = d_time_fr * globalCam.speed;
+    ////////////////////
+    // Control camera //
+    ////////////////////
+    
+    Mat4F V = cameraGetView(globalCam);
+    // Move forward
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-	globalCam.pos -= (d_time_spd_fr * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+	globalCam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * globalCam.speed;
     }
+    // Move back
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-	globalCam.pos += (d_time_spd_fr * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
+	globalCam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * globalCam.speed;
     }
+    // Move right
     if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-	globalCam.pos += (d_time_spd_fr * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+	globalCam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * globalCam.speed;
     }
+    // Move left
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-	globalCam.pos -= (d_time_spd_fr * normalize(Vec3F(O(0, 0), O(1, 0), O(2, 0))));
+	globalCam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * globalCam.speed;
     }
 
-    // Camera zoom
+    // Zoom
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
 	globalCam.fov -= 1.0f;
@@ -390,14 +394,21 @@ void monitorCallback(GLFWmonitor* monitor, int event)
 
 void mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    const float X_DIST = xpos - last_x;
-    const float Y_DIST = ypos - last_y;
+    float x_dist = xpos - last_x;
+    float y_dist = ypos - last_y;
     last_x = xpos;
     last_y = ypos;
-
-    float offset_yaw   = X_DIST * globalCam.sensitivity;
-    float offset_pitch = Y_DIST * globalCam.sensitivity;
-    cameraOffsetAngles(globalCam, offset_yaw, offset_pitch);
+    
+    if(mouseFirst)
+    {
+        x_dist = 0.0f;
+	y_dist = 0.0f;
+	mouseFirst = false;
+    }
+    
+    cameraOffsetAngles(globalCam,
+		       globalCam.sensitivity * y_dist,
+		       globalCam.sensitivity * x_dist);
 }
 
 void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
