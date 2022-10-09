@@ -82,7 +82,60 @@ Mat4F cameraGetTranslationInverse(const Camera& cam)
 
 Mat4F cameraGetView(const Camera& cam)
 {
-    print(cameraGetTranslationInverse(cam));
     return (cameraGetTranslationInverse(cam) * cameraGetOrientation(cam));
 }
 
+/*
+void cameraOffsetAngles(Camera& cam, float oYaw, float oPitch)
+{
+    cam.yaw   += oYaw;
+    cam.pitch += oPitch;
+
+    if(cam.yaw > 360.0f) {cam.yaw -= 360.0f;}
+    if(cam.yaw < 0.0f) {cam.yaw += 360.0f;}
+    cam.pitch = clamp(cam.pitch, -90.0f, 90.0f);
+}
+
+Mat4F cameraGetPerspective(const Camera& cam)
+{
+    float range        = cam.n - cam.f;
+    float tan_half_fov = tan(degToRads(cam.fov) * 0.5f);
+
+    return Mat4F(1.0f/(cam.ar * tan_half_fov), 0.0f, 0.0f, 0.0f,                   // Row 1
+	         0.0f, 1.0f/tan_half_fov, 0.0f, 0.0f,                              // Row 2
+	         0.0f, 0.0f, (-cam.n - cam.f)/range, (2.0f * cam.f * cam.n)/range, // Row 3
+	         0.0f, 0.0f, 1.0f, 0.0f);                                          // Row 4
+    
+}
+
+Mat4F cameraGetRotation(const Camera& cam)
+{
+    float yaw_rads   = degToRads(cam.yaw);
+    float pitch_rads = degToRads(cam.pitch);
+    float cos_yaw    = cos(yaw_rads);
+    float cos_pitch  = cos(pitch_rads);
+    float sin_yaw    = sin(yaw_rads);
+    float sin_pitch  = sin(pitch_rads);
+    
+    return Mat4F(cos_yaw,  sin_yaw * sin_pitch, sin_yaw * cos_pitch,  0.0f,
+	         0.0f,     cos_pitch,           -sin_pitch,           0.0f,
+	         -sin_yaw, cos_yaw * sin_pitch, cos_pitch * cos_yaw,  0.0f,
+	         0.0f,     0.0f,                0.0f,                 1.0f);
+}
+
+Mat4F cameraGetTranslation(const Camera& cam)
+{
+    return Mat4F(1.0f,      0.0f,      0.0f,      0.0f,
+		 0.0f,      1.0f,      0.0f,      0.0f,
+		 0.0f,      0.0f,      1.0f,      0.0f,
+		 cam.pos.x, cam.pos.y, cam.pos.z, 1.0f);
+}
+
+Mat4F cameraGetTranslationInverse(const Camera& cam)
+{
+    return Mat4F(1.0f,       0.0f,       0.0f,       0.0f,
+		 0.0f,       1.0f,       0.0f,       0.0f,
+		 0.0f,       0.0f,       1.0f,       0.0f,
+		 -cam.pos.x, -cam.pos.y, -cam.pos.z, 1.0f);
+}
+*/

@@ -346,7 +346,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
     // Camera movement
     Mat4F O             = cameraGetOrientation(globalCam);
-    float d_time_spd_fr = d_time_fr * globalCam.move_speed;
+    float d_time_spd_fr = d_time_fr * globalCam.speed;
     if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
 	globalCam.pos -= (d_time_spd_fr * normalize(Vec3F(O(0, 2), O(1, 2), O(2, 2))));
@@ -390,15 +390,14 @@ void monitorCallback(GLFWmonitor* monitor, int event)
 
 void mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    const double X_DIST = xpos - last_x;
-    const double Y_DIST = ypos - last_y;
+    const float X_DIST = xpos - last_x;
+    const float Y_DIST = ypos - last_y;
     last_x = xpos;
     last_y = ypos;
 
-    Vec2F distance = normalize(Vec2F((float)X_DIST, (float)Y_DIST));
-    cameraOffsetAngles(globalCam,
-		       distance.x * globalCam.rot_speed_deg * d_time * frame_rate,
-		       distance.y * globalCam.rot_speed_deg * d_time * frame_rate);
+    float offset_yaw   = X_DIST * globalCam.sensitivity;
+    float offset_pitch = Y_DIST * globalCam.sensitivity;
+    cameraOffsetAngles(globalCam, offset_yaw, offset_pitch);
 }
 
 void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
