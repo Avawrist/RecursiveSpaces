@@ -24,7 +24,6 @@ typedef struct Camera
 } Camera;
 void  cameraOffsetAngles(Camera& cam, float oYaw, float oPitch);
 Mat4F cameraGetOrientation(const Camera& cam);
-Mat4F cameraGetOrientationInverse(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);
 Mat4F cameraGetTranslation(const Camera& cam);
 Mat4F cameraGetTranslationInverse(const Camera& cam);

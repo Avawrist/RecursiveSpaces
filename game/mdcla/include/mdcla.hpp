@@ -113,6 +113,7 @@ public:
 	  float n20, float n21, float n22);
     Mat3F(float f);
     Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c);
+    Mat3F(const Mat3F& m);
     void         operator *=(float s);
     void         operator +=(const Mat3F& m);
     void         operator -=(const Mat3F& m);
@@ -145,6 +146,7 @@ public:
 	  float n30, float n31, float n32, float n33);
     Mat4F(float f);
     Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d);
+    Mat4F(const Mat4F& m);
     Mat4F(const Mat3F& m);
     void         operator *=(float s);
     void         operator +=(const Mat4F& m);

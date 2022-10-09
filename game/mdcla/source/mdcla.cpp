@@ -428,6 +428,13 @@ Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
     n[2][0] = a.z; n[2][1] = b.z; n[2][2] = c.z;
 }
 
+Mat3F::Mat3F(const Mat3F& m)
+{
+    n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2);
+    n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2);
+    n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2);
+}
+
 void Mat3F::operator *=(float s)
 {
     n[0][0] *= s; n[0][1] *= s; n[0][2] *= s;
@@ -511,7 +518,7 @@ Vec3F operator *(const Mat3F& m, const Vec3F& v)
 		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z);
 }
 
-Mat3F tranpose(const Mat3F& m)
+Mat3F transpose(const Mat3F& m)
 {
     return Mat3F(m(0, 0), m(1, 0), m(2, 0),
 		 m(0, 1), m(1, 1), m(2, 1),
@@ -566,6 +573,14 @@ Mat4F::Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d)
     n[1][0] = a.y; n[1][1] = b.y; n[1][2] = c.y; n[1][3] = d.y;
     n[2][0] = a.z; n[2][1] = b.z; n[2][2] = c.z; n[2][3] = d.z;
     n[3][0] = a.w; n[3][1] = b.w; n[3][2] = c.w; n[3][3] = d.w;    
+}
+
+Mat4F::Mat4F(const Mat4F& m)
+{
+    n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2); n[0][3] = m(0, 3);
+    n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2); n[1][3] = m(1, 3);
+    n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2); n[2][3] = m(2, 3);
+    n[3][0] = m(3, 0); n[3][1] = m(3, 1); n[3][2] = m(3, 2); n[3][3] = m(3, 3);
 }
 
 Mat4F::Mat4F(const Mat3F& m)
@@ -676,7 +691,7 @@ Vec4F operator *(const Mat4F& m, const Vec4F& v)
 		 m(3, 0) * v.x + m(3, 1) * v.y + m(3, 2) * v.z + m(3, 3) * v.w);
 }
 
-Mat4F tranpose(const Mat4F& m)
+Mat4F transpose(const Mat4F& m)
 {
     return Mat4F(m(0, 0), m(1, 0), m(2, 0), m(3, 0),
 		 m(0, 1), m(1, 1), m(2, 1), m(3, 1),

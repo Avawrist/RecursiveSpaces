@@ -35,6 +35,10 @@ void cameraOffsetAngles(Camera& cam, float oYaw, float oPitch)
 {
     cam.yaw   += oYaw;
     cam.pitch += oPitch;
+
+    if(cam.yaw > 360.0f) {cam.yaw -= 360.0f;}
+    if(cam.yaw < 0.0f) {cam.yaw += 360.0f;}
+    cam.pitch = clamp(cam.pitch, -90.0f, 90.0f);
 }
 
 Mat4F cameraGetOrientation(const Camera& cam)
@@ -44,21 +48,8 @@ Mat4F cameraGetOrientation(const Camera& cam)
     Quaternion x_rot(cos(half_yaw_rads), 0.0f, sin(half_yaw_rads), 0.0f);
     Quaternion y_rot(cos(half_pitch_rads), sin(half_pitch_rads), 0.0f, 0.0f);
     Quaternion o = normalize(x_rot * y_rot);
-    print(o);
-
-    return Mat4F(quatToMat3(o));
-}
-
-Mat4F cameraGetOrientationInverse(const Camera& cam)
-{
-    float half_yaw_rads   = degToRads(cam.yaw) * 0.5f;
-    float half_pitch_rads = degToRads(cam.pitch) * 0.5f;
-    Quaternion x_rot(cos(half_yaw_rads), 0.0f, -sin(half_yaw_rads), 0.0f);
-    Quaternion y_rot(cos(half_pitch_rads), -sin(half_pitch_rads), 0.0f, 0.0f);
-    Quaternion o = normalize(x_rot * y_rot);
-    print(o);
-
-    return Mat4F(quatToMat3(o));
+        
+    return Mat4F(quatToMat3(o)); // Orthogonal rotation matrix
 }
 
 Mat4F cameraGetPerspective(const Camera& cam)
@@ -76,21 +67,22 @@ Mat4F cameraGetPerspective(const Camera& cam)
 Mat4F cameraGetTranslation(const Camera& cam)
 {
     return Mat4F(1.0f,      0.0f,      0.0f,      0.0f,
-	         0.0f,      1.0f,      0.0f,      0.0f,
-	         0.0f,      0.0f,      1.0f,      0.0f,
-	         cam.pos.x, cam.pos.y, cam.pos.z, 1.0f);
+		 0.0f,      1.0f,      0.0f,      0.0f,
+		 0.0f,      0.0f,      1.0f,      0.0f,
+		 cam.pos.x, cam.pos.y, cam.pos.z, 1.0f);
 }
 
 Mat4F cameraGetTranslationInverse(const Camera& cam)
 {
     return Mat4F(1.0f,       0.0f,       0.0f,       0.0f,
-	         0.0f,       1.0f,       0.0f,       0.0f,
-	         0.0f,       0.0f,       1.0f,       0.0f,
-	         -cam.pos.x, -cam.pos.y, -cam.pos.z, 1.0f);
+		 0.0f,       1.0f,       0.0f,       0.0f,
+		 0.0f,       0.0f,       1.0f,       0.0f,
+		 -cam.pos.x, -cam.pos.y, -cam.pos.z, 1.0f);
 }
 
 Mat4F cameraGetView(const Camera& cam)
 {
+    print(cameraGetTranslationInverse(cam));
     return (cameraGetTranslationInverse(cam) * cameraGetOrientation(cam));
 }
 
