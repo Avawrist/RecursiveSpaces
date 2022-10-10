@@ -17,18 +17,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(GLFW3 REQUIRED)
 set(LIBS glfw3 opengl32)
 
-#add_library(STB_IMAGE "${CMAKE_SOURCE_DIR}/game/renderer/source/stb_image.cpp")
+#add_library(STB_IMAGE "${CMAKE_SOURCE_DIR}/src/stb_image.cpp")
 #set(LIBS ${LIBS} STB_IMAGE)
 
-#add_library(GLAD "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c")
+#add_library(GLAD "${CMAKE_SOURCE_DIR}/src/glad.c")
 #set(LIBS ${LIBS} GLAD)
 
 # Create & Link Executable to Libs
-set(SOURCES "${CMAKE_SOURCE_DIR}/game/renderer/source/renderer.cpp"
-            "${CMAKE_SOURCE_DIR}/game/renderer/source/glad.c"
-	    "${CMAKE_SOURCE_DIR}/game/renderer/source/shader.cpp"
-	    "${CMAKE_SOURCE_DIR}/game/renderer/source/camera.cpp"
-	    "${CMAKE_SOURCE_DIR}/game/mdcla/source/mdcla.cpp")	
+set(SOURCES "${CMAKE_SOURCE_DIR}/src/renderer.cpp"
+            "${CMAKE_SOURCE_DIR}/src/glad.c"
+	    "${CMAKE_SOURCE_DIR}/src/shader.cpp"
+	    "${CMAKE_SOURCE_DIR}/src/camera.cpp"
+	    "${CMAKE_SOURCE_DIR}/src/mdcla.cpp")	
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
@@ -41,7 +41,3 @@ include_directories(${CMAKE_SOURCE_DIR}/include/glm)
 include_directories(${CMAKE_SOURCE_DIR}/include/glm/glm)
 include_directories(${CMAKE_SOURCE_DIR}/include/glm/cmake)
 include_directories(${CMAKE_SOURCE_DIR}/include/KHR)
-include_directories(${CMAKE_SOURCE_DIR}/game/mdcla/source)
-include_directories(${CMAKE_SOURCE_DIR}/game/mdcla/include)
-include_directories(${CMAKE_SOURCE_DIR}/game/renderer/source)
-include_directories(${CMAKE_SOURCE_DIR}/game/renderer/include)
