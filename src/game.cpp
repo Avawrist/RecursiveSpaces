@@ -1,13 +1,14 @@
-// ======================================================================
-// Title: renderer.cpp
-// Description: The primary source file for an untitled renderer.
-// ======================================================================
+// ====================================================================================
+// Title: game.cpp
+// Description: The primary source file for an untitled game, containing the game loop.
+// ====================================================================================
 
 // Win libs
 #include <windows.h>
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
+
 // 3rd party libs
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,9 +18,16 @@
 // My libs
 #include <mdcla.hpp>
 #include <shader.hpp>
+#include <cursor.hpp>
 #include <camera.hpp>
 
 using namespace std;
+
+//////////////
+// Typedefs //
+//////////////
+
+typedef unsigned int uint;
 
 /////////////
 // Globals //
@@ -30,8 +38,6 @@ const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
 const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
 const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
-float last_x = X_CENTER;
-float last_y = Y_CENTER;
 float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
@@ -39,9 +45,11 @@ int   frame_rate  = 60;
 float prev_time   = 0.0f;
 float d_time      = 0.0f;
 
+// Cursor
+Cursor global_cursor(X_CENTER, Y_CENTER);
+
 // Camera
-Camera globalCam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
-bool mouseFirst = true; 
+Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
 
 /////////////////////////
 // Function Prototypes //
@@ -52,16 +60,6 @@ void odGLFWError();
 void printGLFWError();
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-void monitorCallback(GLFWmonitor* monitor, int event);
-
-void mousePosCallback(GLFWwindow* window, double xpos, double ypos);
-
-void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods);
-
-void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
                        GLsizei length, const char *message, const void *userParam);
@@ -105,11 +103,6 @@ int main()
     //////////////////////////////
     
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    glfwSetKeyCallback(window, keyCallback);
-    glfwSetCursorPosCallback(window, mousePosCallback);
-    glfwSetMouseButtonCallback(window, mouseBtnCallback);
-    glfwSetScrollCallback(window, mouseScrollCallback);
-    glfwSetMonitorCallback(monitorCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     odGLFWError();
 
@@ -198,11 +191,11 @@ int main()
     };
 
     // VBOs
-    GLuint test_VBO;
+    uint test_VBO;
     glGenBuffers(1, &test_VBO);
     
     // VAOs
-    GLuint test_VAO;
+    uint test_VAO;
     glGenVertexArrays(1, &test_VAO);
 
     glBindVertexArray(test_VAO); // Bind VAO
@@ -220,12 +213,10 @@ int main()
 
     // Model Matrix (Local space -> world space)
     Mat4F model(1.0f);
-    
     // View Matrix (World space -> view space)
-    Mat4F view = cameraGetView(globalCam);
-    
+    Mat4F view = cameraGetView(global_cam);
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = cameraGetPerspective(globalCam);
+    Mat4F projection = cameraGetPerspective(global_cam);
     
     ////////////////////
     // Create Shaders //
@@ -247,24 +238,35 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
-	// Update delta time
+	///////////////////////
+	// Update delta time //
+	///////////////////////
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
 
+	///////////////////
+	// Update cursor //
+	///////////////////
+	cursorUpdate(global_cursor, window);
+	
+	///////////////////
+	// Update camera //
+	///////////////////
+	cameraUpdate(global_cam, window, cursorGetDistance(global_cursor), d_time);
+	
 	////////////////////////////////////
 	// Update Transformation Matrices //
 	////////////////////////////////////
-	
 	glUseProgram(basicShaderProgram.program_id);
 
 	// Update View
-	view = cameraGetView(globalCam);
+	view = cameraGetView(global_cam);
 	basicShaderProgram.addMat4Uniform("view", view.getPointer());
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-	projection = cameraGetPerspective(globalCam);
+	projection = cameraGetPerspective(global_cam);
 	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
 
 	//////////////////
@@ -285,6 +287,11 @@ int main()
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 	odGLFWError();
+
+	/////////////////////
+	// Close condition //
+	/////////////////////
+	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {glfwSetWindowShouldClose(window, GLFW_TRUE);}
     }
 
     /////////////
@@ -331,94 +338,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
     win_ar       = (float)width / (float)height; // Update the global
-    globalCam.ar = win_ar;
-}
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    // Close window
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    {
-	glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
-    ////////////////////
-    // Control camera //
-    ////////////////////
-    
-    Mat4F V = cameraGetView(globalCam);
-    // Move forward
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-	globalCam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * globalCam.speed;
-    }
-    // Move back
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-	globalCam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * globalCam.speed;
-    }
-    // Move right
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-	globalCam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * globalCam.speed;
-    }
-    // Move left
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-	globalCam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * globalCam.speed;
-    }
-
-    // Zoom
-    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-	globalCam.fov -= 1.0f;
-    }
-    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-	globalCam.fov += 1.0f;
-    }
-    globalCam.fov = clamp(globalCam.fov, 45.0f, 115.0f);
-}
-
-void monitorCallback(GLFWmonitor* monitor, int event)
-{
-    if (event == GLFW_CONNECTED)
-    {
-        OutputDebugStringA("Monitor connected\n");
-    }
-    else if (event == GLFW_DISCONNECTED)
-    {
-	OutputDebugStringA("Monitor disconnected\n");
-    }
-}
-
-void mousePosCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    float x_dist = xpos - last_x;
-    float y_dist = ypos - last_y;
-    last_x = xpos;
-    last_y = ypos;
-    
-    if(mouseFirst)
-    {
-        x_dist = 0.0f;
-	y_dist = 0.0f;
-	mouseFirst = false;
-    }
-    
-    cameraOffsetAngles(globalCam,
-		       globalCam.sensitivity * y_dist,
-		       globalCam.sensitivity * x_dist);
-}
-
-void mouseBtnCallback(GLFWwindow* window, int button, int action, int mods)
-{
-    // Test passed
-}
-
-void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    // Not tested
+    global_cam.ar = win_ar;
 }
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 

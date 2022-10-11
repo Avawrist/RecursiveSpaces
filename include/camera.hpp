@@ -7,12 +7,13 @@
 #define CAMERA_H
 
 #include <mdcla.hpp>
+#include <GLFW/glfw3.h>
 
 typedef struct Camera
 {
     Vec3F pos;
-    float speed       = 0.25f;
-    float sensitivity = 0.75f;
+    float speed       = 1.0f;
+    float sensitivity = 1.0f;
     float pitch       = 0.0f;
     float yaw         = 0.0f;
     float n;
@@ -22,7 +23,8 @@ typedef struct Camera
     Camera();
     Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar);
 } Camera;
-void  cameraOffsetAngles(Camera& cam, float o_pitch, float o_yaw);
+void cameraUpdate(Camera& cam, GLFWwindow* window, const Vec2F& distance, float d_time);
+void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 Mat4F cameraGetView(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);
 

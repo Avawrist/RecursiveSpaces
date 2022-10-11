@@ -31,7 +31,60 @@ Camera::Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar)
 // Camera Non-Members //
 ////////////////////////
 
-void cameraOffsetAngles(Camera& cam, float o_pitch, float o_yaw)
+void cameraUpdate(Camera& cam, GLFWwindow* window, const Vec2F& distance, float d_time)
+{
+    /////////////////////
+    // Camera Strafing //
+    /////////////////////
+
+    // polling GLFW for input
+    // TODO: Create our own input data structure and poll that instead?
+    
+    Mat4F V          = cameraGetView(cam);
+    float d_time_spd = d_time * cam.speed; 
+    // Move forward
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
+    }
+    // Move back
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
+    }
+    // Move right
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
+    }
+    // Move left
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
+    }
+
+    /////////////////
+    // Camera Zoom //
+    /////////////////
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        cam.fov -= 1.0f;
+    }
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        cam.fov += 1.0f;
+    }
+    cam.fov = clamp(cam.fov, 45.0f, 115.0f);
+
+    ////////////////////
+    // Camera Looking //
+    ////////////////////
+    cameraOffsetAngles(cam,
+		       cam.sensitivity * distance.x,
+		       cam.sensitivity * distance.y);
+}
+
+void cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch)
 {
     cam.pitch -= o_pitch;
     cam.yaw   -= o_yaw;
