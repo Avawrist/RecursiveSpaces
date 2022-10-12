@@ -20,6 +20,7 @@
 #include <shader.hpp>
 #include <cursor.hpp>
 #include <camera.hpp>
+#include <entity.hpp>
 
 using namespace std;
 
@@ -50,6 +51,9 @@ Cursor global_cursor(X_CENTER, Y_CENTER);
 
 // Camera
 Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
+
+// Test gameObject
+gameObject go; 
 
 /////////////////////////
 // Function Prototypes //
