@@ -12,6 +12,11 @@
 // Struct Model //
 //////////////////
 
+enum modelType
+{
+    test = 0
+};
+
 /////////////////
 // Struct Mesh //
 /////////////////
