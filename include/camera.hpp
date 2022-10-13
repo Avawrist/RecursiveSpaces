@@ -13,6 +13,7 @@ typedef struct Camera
 {
     Vec3F pos;
     float speed       = 2.0f;
+    float z_speed     = 20.0f;
     float sensitivity = 1.0f;
     float pitch       = 0.0f;
     float yaw         = 0.0f;

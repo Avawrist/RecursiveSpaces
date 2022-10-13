@@ -230,8 +230,9 @@ int main()
     // Create Shaders //
     ////////////////////
 
-    Shader basicShaderProgram("..\\..\\assets\\shaders\\basic.vs",
-			      "..\\..\\assets\\shaders\\basic.fs");
+    //F:\assets\shaders
+    Shader basicShaderProgram("..\\assets\\shaders\\basic.vs",
+			      "..\\assets\\shaders\\basic.fs");
 
     // Load uniform values to GPU
     glUseProgram(basicShaderProgram.program_id);

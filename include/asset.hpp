@@ -14,7 +14,7 @@
 
 enum modelType
 {
-    test = 0
+    test1 = 0
 };
 
 /////////////////
