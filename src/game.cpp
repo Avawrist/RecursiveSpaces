@@ -16,11 +16,12 @@
 #include "stb_image.h"
 
 // My libs
-#include <mdcla.hpp>
-#include <shader.hpp>
-#include <cursor.hpp>
-#include <camera.hpp>
-#include <entity.hpp>
+#include "mdcla.hpp"
+#include "shader.hpp"
+#include "cursor.hpp"
+#include "camera.hpp"
+#include "entity.hpp"
+#include "asset.hpp"
 
 using namespace std;
 
@@ -54,6 +55,9 @@ Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
 
 // Test gameObject
 gameObject go; 
+
+// Test mesh
+Mesh mesh;
 
 /////////////////////////
 // Function Prototypes //
@@ -226,9 +230,8 @@ int main()
     // Create Shaders //
     ////////////////////
 
-    // TO-DO: Make generic path
-    Shader basicShaderProgram("F:\\assets\\shaders\\basic.vs",
-			      "F:\\assets\\shaders\\basic.fs");
+    Shader basicShaderProgram("..\\..\\assets\\shaders\\basic.vs",
+			      "..\\..\\assets\\shaders\\basic.fs");
 
     // Load uniform values to GPU
     glUseProgram(basicShaderProgram.program_id);
