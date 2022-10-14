@@ -22,6 +22,7 @@
 #include "camera.hpp"
 #include "entity.hpp"
 #include "asset.hpp"
+#include "load.hpp"
 
 using namespace std;
 
@@ -38,8 +39,8 @@ typedef unsigned int uint;
 // Window
 const unsigned int WIN_WIDTH  = 640;
 const unsigned int WIN_HEIGHT = 480;
-const unsigned int X_CENTER = WIN_WIDTH / 2.0f;
-const unsigned int Y_CENTER = WIN_HEIGHT / 2.0f;
+const unsigned int X_CENTER   = WIN_WIDTH / 2.0f;
+const unsigned int Y_CENTER   = WIN_HEIGHT / 2.0f;
 float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
@@ -147,57 +148,17 @@ int main()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(glDebugOutput, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+    //////////////////////////
+    // Initialize Cube Mesh //
+    //////////////////////////
+
+    loadObjToMesh("..\\assets\\meshes\\cube.obj", mesh);
     
     ////////////////////////////
     // Initialize Render Data //
     ////////////////////////////
     
-    // Vertex data
-    float testVertices[] = {
-	// Positions
-	-0.5f, -0.5f, -0.5f, 
-	0.5f,  0.5f, -0.5f,  
-	0.5f, -0.5f, -0.5f,           
-	0.5f,  0.5f, -0.5f,  
-	-0.5f, -0.5f, -0.5f,  
-	-0.5f,  0.5f, -0.5f,  
-	// Front face
-	-0.5f, -0.5f,  0.5f,  
-	0.5f, -0.5f,  0.5f,  
-	0.5f,  0.5f,  0.5f,  
-	0.5f,  0.5f,  0.5f,  
-	-0.5f,  0.5f,  0.5f,  
-	-0.5f, -0.5f,  0.5f,  
-	// Left face
-	-0.5f,  0.5f,  0.5f,  
-	-0.5f,  0.5f, -0.5f,  
-	-0.5f, -0.5f, -0.5f,  
-	-0.5f, -0.5f, -0.5f,  
-	-0.5f, -0.5f,  0.5f,  
-	-0.5f,  0.5f,  0.5f,  
-	// Right face
-	0.5f,  0.5f,  0.5f,  
-	0.5f, -0.5f, -0.5f,  
-	0.5f,  0.5f, -0.5f,           
-	0.5f, -0.5f, -0.5f,  
-	0.5f,  0.5f,  0.5f,  
-	0.5f, -0.5f,  0.5f,       
-	// Bottom face
-	-0.5f, -0.5f, -0.5f,  
-	0.5f, -0.5f, -0.5f,  
-	0.5f, -0.5f,  0.5f,  
-	0.5f, -0.5f,  0.5f,  
-	-0.5f, -0.5f,  0.5f,  
-	-0.5f, -0.5f, -0.5f,  
-	// Top face
-	-0.5f,  0.5f, -0.5f,  
-	0.5f,  0.5f,  0.5f,  
-	0.5f,  0.5f, -0.5f,       
-	0.5f,  0.5f,  0.5f,  
-	-0.5f,  0.5f, -0.5f,  
-	-0.5f,  0.5f,  0.5f
-    };
-
     // VBOs
     uint test_VBO;
     glGenBuffers(1, &test_VBO);
@@ -208,7 +169,8 @@ int main()
 
     glBindVertexArray(test_VAO); // Bind VAO
     glBindBuffer(GL_ARRAY_BUFFER, test_VBO); // Bind VBO while VAO is bound
-    glBufferData(GL_ARRAY_BUFFER, sizeof(testVertices), testVertices, GL_STATIC_DRAW); // Copy array to buffer
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW); // Copy array to buffer
+    
     // Tell OpenGL how the vertex array is divided into attribute arrays: 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0); // Enable the first attribute array (position)

@@ -69,7 +69,6 @@ void cameraUpdate(Camera& cam, GLFWwindow* window, const Vec2F& distance, float 
     if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         cam.fov -= cam.z_speed * d_time;
-	printf("%f", cam.fov);
     }
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
