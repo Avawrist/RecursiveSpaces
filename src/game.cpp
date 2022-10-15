@@ -54,12 +54,6 @@ Cursor global_cursor(X_CENTER, Y_CENTER);
 // Camera
 Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
 
-// Test gameObject
-gameObject go; 
-
-// Test mesh
-Mesh mesh;
-
 /////////////////////////
 // Function Prototypes //
 /////////////////////////
@@ -153,6 +147,7 @@ int main()
     // Initialize Cube Mesh //
     //////////////////////////
 
+    Mesh mesh;
     loadObjToMesh("..\\assets\\meshes\\cube.obj", mesh);
     
     ////////////////////////////
