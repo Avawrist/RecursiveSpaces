@@ -132,11 +132,11 @@ int main()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Cull Faces
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glFrontFace(GL_CCW);
+    //glCullFace(GL_BACK);
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -148,7 +148,7 @@ int main()
     //////////////////////////
 
     Mesh mesh;
-    loadObjToMesh("..\\assets\\meshes\\cube.obj", mesh);
+    loadObjToMesh("..\\assets\\meshes\\output.obj", mesh);
     
     ////////////////////////////
     // Initialize Render Data //
