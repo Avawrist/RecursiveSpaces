@@ -26,6 +26,9 @@ typedef struct Mesh
     std::vector<float> vertices;
     std::vector<float> uvs;
     std::vector<float> normals;
+    std::vector<int>   vert_indices;
+    std::vector<int>   text_indices;
+    std::vector<int>   norm_indices;
 } Mesh;
 
 /////////////////////

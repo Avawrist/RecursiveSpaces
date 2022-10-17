@@ -148,7 +148,11 @@ int main()
     //////////////////////////
 
     Mesh mesh;
-    loadObjToMesh("..\\assets\\meshes\\output.obj", mesh);
+    if(!loadObjToMesh("..\\assets\\meshes\\cylinder.obj", mesh))
+    {
+	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\cylinder.obj\n");
+	return -1;
+    }
     
     ////////////////////////////
     // Initialize Render Data //
