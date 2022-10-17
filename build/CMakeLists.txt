@@ -13,7 +13,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # Find & add third party libs:
 #find_package(OPENGL REQUIRED)
-#find_package(GLM REQUIRED)
 find_package(GLFW3 REQUIRED)
 set(LIBS glfw3 opengl32)
 
@@ -41,7 +40,4 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include/glad)
 include_directories(${CMAKE_SOURCE_DIR}/include/GLFW)
 include_directories(${CMAKE_SOURCE_DIR}/include/GLFW/glfw)
-include_directories(${CMAKE_SOURCE_DIR}/include/glm)
-include_directories(${CMAKE_SOURCE_DIR}/include/glm/glm)
-include_directories(${CMAKE_SOURCE_DIR}/include/glm/cmake)
 include_directories(${CMAKE_SOURCE_DIR}/include/KHR)
