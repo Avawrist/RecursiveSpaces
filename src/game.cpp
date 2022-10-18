@@ -146,7 +146,6 @@ int main()
     //////////////////////////
     // Initialize Cube Mesh //
     //////////////////////////
-
     Mesh mesh;
     if(!loadObjToMesh("..\\assets\\meshes\\cylinder.obj", mesh))
     {
@@ -161,21 +160,31 @@ int main()
     // VBOs
     uint test_VBO;
     glGenBuffers(1, &test_VBO);
+
+    // EBOs
+    uint test_EBO;
+    glGenBuffers(1, &test_EBO);
     
     // VAOs
     uint test_VAO;
     glGenVertexArrays(1, &test_VAO);
 
+    // Configure OpenGL objects:
     glBindVertexArray(test_VAO); // Bind VAO
+    
     glBindBuffer(GL_ARRAY_BUFFER, test_VBO); // Bind VBO while VAO is bound
     glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW); // Copy array to buffer
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, test_EBO); // Bind EBO while VAO is bound
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.vert_indices.size() * sizeof(int), mesh.vert_indices.data(), GL_STATIC_DRAW); // copy index array to buffer
     
     // Tell OpenGL how the vertex array is divided into attribute arrays: 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0); // Enable the first attribute array (position)
+    
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind buffer (it is tied to the vertex array object now)
     glBindVertexArray(0); // Unbind until we are ready to draw
-    
+
     /////////////////////////////
     // Transformation Matrices //
     /////////////////////////////
@@ -248,7 +257,7 @@ int main()
 	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
 	glBindVertexArray(test_VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawElements(GL_TRIANGLES, mesh.vert_indices.size(), GL_UNSIGNED_INT, 0);
 
 	//////////////////
 	// Swap buffers //
@@ -272,6 +281,7 @@ int main()
     
     // Delete buffers
     glDeleteBuffers(1, &test_VBO);
+    glDeleteBuffers(1, &test_EBO);
     
     // Delete window
     glfwDestroyWindow(window);
