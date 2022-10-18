@@ -144,10 +144,10 @@ int main()
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
     //////////////////////////
-    // Initialize Cube Mesh //
+    // Initialize Test Mesh //
     //////////////////////////
     Mesh mesh;
-    if(!loadObjToMesh("..\\assets\\meshes\\cylinder.obj", mesh))
+    if(!loadObjToMesh("..\\assets\\meshes\\monkey.obj", mesh))
     {
 	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\cylinder.obj\n");
 	return -1;
