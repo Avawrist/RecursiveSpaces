@@ -149,8 +149,16 @@ int main()
     Mesh mesh;
     if(!loadObjToMesh("..\\assets\\meshes\\monkey.obj", mesh))
     {
-	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\cylinder.obj\n");
+	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\monkey.obj\n");
 	return -1;
+    }
+
+    for(int i = 0; i < mesh.vert_indices.size() - 2; i += 3)
+    {
+	printf("%i %i %i\n",
+	       mesh.vert_indices[i],
+	       mesh.vert_indices[i+1],
+	       mesh.vert_indices[i+2]);
     }
     
     ////////////////////////////

@@ -60,15 +60,17 @@ int loadObjToMesh(const char* path, Mesh& mesh)
 		   &v_ind_x, &t_ind_x, &n_ind_x,
 		   &v_ind_y, &t_ind_y, &n_ind_y,
 		   &v_ind_z, &t_ind_z, &n_ind_z);
-	    mesh.vert_indices.push_back(v_ind_x);
-	    mesh.vert_indices.push_back(v_ind_y);
-	    mesh.vert_indices.push_back(v_ind_z);
-	    mesh.text_indices.push_back(t_ind_x);
-	    mesh.text_indices.push_back(t_ind_y);
-	    mesh.text_indices.push_back(t_ind_z);
-	    mesh.norm_indices.push_back(n_ind_x);
-	    mesh.norm_indices.push_back(n_ind_y);
-	    mesh.norm_indices.push_back(n_ind_z);
+	    // Add index value minus 1 to convert from Blender convention (1 to n)
+	    // to OpenGl convention (0 to n-1):
+	    mesh.vert_indices.push_back(v_ind_x - 1);
+	    mesh.vert_indices.push_back(v_ind_y - 1);
+	    mesh.vert_indices.push_back(v_ind_z - 1);
+	    mesh.text_indices.push_back(t_ind_x - 1);
+	    mesh.text_indices.push_back(t_ind_y - 1);
+	    mesh.text_indices.push_back(t_ind_z - 1);
+	    mesh.norm_indices.push_back(n_ind_x - 1);
+	    mesh.norm_indices.push_back(n_ind_y - 1);
+	    mesh.norm_indices.push_back(n_ind_z - 1);
 	}
     }
     while(!feof(file_p));
