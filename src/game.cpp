@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // 3rd party libs
 #include <glad/glad.h>
@@ -146,19 +147,12 @@ int main()
     //////////////////////////
     // Initialize Test Mesh //
     //////////////////////////
-    Mesh mesh;
-    if(!loadObjToMesh("..\\assets\\meshes\\monkey.obj", mesh))
+
+    Mesh *mesh_p = new Mesh;
+    if(!loadObjToMesh("..\\assets\\meshes\\monkey.obj", mesh_p))
     {
 	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\monkey.obj\n");
 	return -1;
-    }
-
-    for(int i = 0; i < mesh.vert_indices.size() - 2; i += 3)
-    {
-	printf("%i %i %i\n",
-	       mesh.vert_indices[i],
-	       mesh.vert_indices[i+1],
-	       mesh.vert_indices[i+2]);
     }
     
     ////////////////////////////
@@ -181,10 +175,10 @@ int main()
     glBindVertexArray(test_VAO); // Bind VAO
     
     glBindBuffer(GL_ARRAY_BUFFER, test_VBO); // Bind VBO while VAO is bound
-    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW); // Copy array to buffer
+    glBufferData(GL_ARRAY_BUFFER, mesh_p->vertices.size() * sizeof(float), mesh_p->vertices.data(), GL_STATIC_DRAW); // Copy array to buffer
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, test_EBO); // Bind EBO while VAO is bound
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.vert_indices.size() * sizeof(int), mesh.vert_indices.data(), GL_STATIC_DRAW); // copy index array to buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_p->vert_indices.size() * sizeof(int), mesh_p->vert_indices.data(), GL_STATIC_DRAW); // copy index array to buffer
     
     // Tell OpenGL how the vertex array is divided into attribute arrays: 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -265,7 +259,7 @@ int main()
 	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
 	glBindVertexArray(test_VAO);
-	glDrawElements(GL_TRIANGLES, mesh.vert_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, mesh_p->vert_indices.size(), GL_UNSIGNED_INT, 0);
 
 	//////////////////
 	// Swap buffers //
@@ -284,6 +278,9 @@ int main()
     // Cleanup //
     /////////////
 
+    // Delete mesh
+    delete mesh_p;
+    
     // Delete Vertex Array Objects
     glDeleteVertexArrays(1, &test_VAO);
     
@@ -325,7 +322,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
     win_ar       = (float)width / (float)height; // Update the global
-    global_cam.ar = win_ar;
+    global_cam.ar = win_ar; // TODO: Decouple the camera from the framebuffer callback
 }
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 

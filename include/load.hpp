@@ -9,6 +9,6 @@
 #include <stdio.h>
 #include "asset.hpp"
 
-int loadObjToMesh(const char* path, Mesh& mesh);
+int loadObjToMesh(const char* path, Mesh* mesh_p);
 
 #endif

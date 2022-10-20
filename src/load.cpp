@@ -5,10 +5,9 @@
 
 #include "load.hpp"
 
-int loadObjToMesh(const char* path, Mesh& mesh)
+int loadObjToMesh(const char* path, Mesh* mesh_p)
 {
     // Assumes a pointer to .obj file path is passed.
-
     float v_x;
     float v_y;
     float v_z;
@@ -35,22 +34,22 @@ int loadObjToMesh(const char* path, Mesh& mesh)
 	if(buf[0] == 'v' && buf[1] == ' ') // Line of geometry
 	{
 	    fscanf(file_p, "%f %f %f", &v_x, &v_y, &v_z);
-	    mesh.vertices.push_back(v_x);
-	    mesh.vertices.push_back(v_y);
-	    mesh.vertices.push_back(v_z);
+	    mesh_p->vertices.push_back(v_x);
+	    mesh_p->vertices.push_back(v_y);
+	    mesh_p->vertices.push_back(v_z);
 	}
 	else if(buf[0] == 'v' && buf[1] == 't') // Line of texture coords
 	{
 	    fscanf(file_p, " %f %f", &v_x, &v_y);
-	    mesh.uvs.push_back(v_x);
-	    mesh.uvs.push_back(v_y);
+	    mesh_p->uvs.push_back(v_x);
+	    mesh_p->uvs.push_back(v_y);
 	}
 	else if(buf[0] == 'v' && buf[1] == 'n') // Line of vector normals
 	{
 	    fscanf(file_p, " %f %f %f", &v_x, &v_y, &v_z);
-	    mesh.normals.push_back(v_x);
-	    mesh.normals.push_back(v_y);
-	    mesh.normals.push_back(v_z);
+	    mesh_p->normals.push_back(v_x);
+	    mesh_p->normals.push_back(v_y);
+	    mesh_p->normals.push_back(v_z);
 	}
 	else if(buf[0] == 'f') // Line of face indices
 	{
@@ -62,15 +61,15 @@ int loadObjToMesh(const char* path, Mesh& mesh)
 		   &v_ind_z, &t_ind_z, &n_ind_z);
 	    // Add index value minus 1 to convert from Blender convention (1 to n)
 	    // to OpenGl convention (0 to n-1):
-	    mesh.vert_indices.push_back(v_ind_x - 1);
-	    mesh.vert_indices.push_back(v_ind_y - 1);
-	    mesh.vert_indices.push_back(v_ind_z - 1);
-	    mesh.text_indices.push_back(t_ind_x - 1);
-	    mesh.text_indices.push_back(t_ind_y - 1);
-	    mesh.text_indices.push_back(t_ind_z - 1);
-	    mesh.norm_indices.push_back(n_ind_x - 1);
-	    mesh.norm_indices.push_back(n_ind_y - 1);
-	    mesh.norm_indices.push_back(n_ind_z - 1);
+	    mesh_p->vert_indices.push_back(v_ind_x - 1);
+	    mesh_p->vert_indices.push_back(v_ind_y - 1);
+	    mesh_p->vert_indices.push_back(v_ind_z - 1);
+	    mesh_p->text_indices.push_back(t_ind_x - 1);
+	    mesh_p->text_indices.push_back(t_ind_y - 1);
+	    mesh_p->text_indices.push_back(t_ind_z - 1);
+	    mesh_p->norm_indices.push_back(n_ind_x - 1);
+	    mesh_p->norm_indices.push_back(n_ind_y - 1);
+	    mesh_p->norm_indices.push_back(n_ind_z - 1);
 	}
     }
     while(!feof(file_p));
