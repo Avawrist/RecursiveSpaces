@@ -160,38 +160,6 @@ int main()
 
     
     
-    ////////////////////////////
-    // Initialize Render Data //
-    ////////////////////////////
-    
-    // VBOs
-    uint test_VBO;
-    glGenBuffers(1, &test_VBO);
-
-    // EBOs
-    uint test_EBO;
-    glGenBuffers(1, &test_EBO);
-    
-    // VAOs
-    uint test_VAO;
-    glGenVertexArrays(1, &test_VAO);
-
-    // Configure OpenGL objects:
-    glBindVertexArray(test_VAO); // Bind VAO
-    
-    glBindBuffer(GL_ARRAY_BUFFER, test_VBO); // Bind VBO while VAO is bound
-    glBufferData(GL_ARRAY_BUFFER, mesh_p->vertices.size() * sizeof(float), mesh_p->vertices.data(), GL_STATIC_DRAW); // Copy array to buffer
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, test_EBO); // Bind EBO while VAO is bound
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_p->vert_indices.size() * sizeof(int), mesh_p->vert_indices.data(), GL_STATIC_DRAW); // copy index array to buffer
-    
-    // Tell OpenGL how the vertex array is divided into attribute arrays: 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0); // Enable the first attribute array (position)
-    
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind buffer (it is tied to the vertex array object now)
-    glBindVertexArray(0); // Unbind until we are ready to draw
-
     /////////////////////////////
     // Transformation Matrices //
     /////////////////////////////
@@ -263,7 +231,8 @@ int main()
 	// Render pass 1 //
 	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
-	glBindVertexArray(test_VAO);
+	glBindVertexArray(mesh_p->vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
 	glDrawElements(GL_TRIANGLES, mesh_p->vert_indices.size(), GL_UNSIGNED_INT, 0);
 
 	//////////////////
@@ -285,14 +254,7 @@ int main()
 
     // Delete mesh
     delete mesh_p;
-    
-    // Delete Vertex Array Objects
-    glDeleteVertexArrays(1, &test_VAO);
-    
-    // Delete buffers
-    glDeleteBuffers(1, &test_VBO);
-    glDeleteBuffers(1, &test_EBO);
-    
+
     // Delete window
     glfwDestroyWindow(window);
 	

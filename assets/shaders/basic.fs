@@ -1,5 +1,8 @@
 #version 330 core
 
+in vec2 uv;
+in vec3 norm;
+
 out vec4 fragColor;
 
 void main()

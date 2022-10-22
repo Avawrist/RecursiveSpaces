@@ -11,17 +11,25 @@
 
 Mesh::Mesh()
 {
-    printf("placeholder\n");
+    // Generate OpenGL objects:
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(4, buffers);
 }
 
 Mesh::~Mesh()
 {
-    printf("placeholder\n");
+    // Delete OpenGL objects:
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(4, buffers);
 }
 
 int meshLoadObj(Mesh* mesh_p, const char* path)
 {
-        // Assumes a pointer to .obj file path is passed.
+    // Note: Assumes a pointer to .obj file path is passed.
+
+    ///////////////////
+    // Get File Data //
+    ///////////////////    
     float v_x;
     float v_y;
     float v_z;
@@ -87,9 +95,55 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
 	}
     }
     while(!feof(file_p));
-    
     fclose(file_p);
 
+    //////////////////////////////
+    // Configure OpenGL Objects //
+    //////////////////////////////
+
+    // Always bind VAO first
+    glBindVertexArray(mesh_p->vao);
+
+    // Vertex VBO
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[VERT_INDEX]);
+    glBufferData(GL_ARRAY_BUFFER,
+		 mesh_p->vertices.size() * sizeof(float),
+		 mesh_p->vertices.data(),
+		 GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // UV VBO
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[UV_INDEX]);
+    glBufferData(GL_ARRAY_BUFFER,
+		 mesh_p->uvs.size() * sizeof(float),
+		 mesh_p->uvs.data(),
+		 GL_STATIC_DRAW);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // Normal VBO
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[NORM_INDEX]);
+    glBufferData(GL_ARRAY_BUFFER,
+		 mesh_p->normals.size() * sizeof(float),
+		 mesh_p->normals.data(),
+		 GL_STATIC_DRAW);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // EBO // TODO: Consolidate all index buffers into single buffer here,
+    //              i.e., replace vert_indices with indices array
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+		 mesh_p->vert_indices.size() * sizeof(int),
+		 mesh_p->vert_indices.data(),
+		 GL_STATIC_DRAW);
+
+    // Unbind buffers and VAO:
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    
     return 1;
 }
 
