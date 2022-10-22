@@ -6,6 +6,14 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#include <windows.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 typedef struct Shader {
     GLuint program_id;
     GLuint vert_id;

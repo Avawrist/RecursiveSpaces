@@ -23,7 +23,6 @@
 #include "camera.hpp"
 #include "entity.hpp"
 #include "asset.hpp"
-#include "load.hpp"
 
 using namespace std;
 
@@ -133,7 +132,7 @@ int main()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     // Cull Faces
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -149,11 +148,17 @@ int main()
     //////////////////////////
 
     Mesh *mesh_p = new Mesh;
-    if(!loadObjToMesh("..\\assets\\meshes\\monkey.obj", mesh_p))
+    if(!meshLoadObj(mesh_p, "..\\assets\\meshes\\sphere.obj"))
     {
-	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\monkey.obj\n");
+	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\sphere.obj\n");
 	return -1;
     }
+
+    ////////////////////////
+    // Initialize Texture //
+    ////////////////////////
+
+    
     
     ////////////////////////////
     // Initialize Render Data //

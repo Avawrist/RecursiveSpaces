@@ -4,14 +4,6 @@
 // Last Modified: 9/17/2022 MDC
 // ======================================================================
 
-#include <windows.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <shader.hpp>
 
 // # Struct Shader
