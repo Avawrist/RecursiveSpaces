@@ -9,12 +9,18 @@
 // Struct Mesh //
 /////////////////
 
-Mesh::Mesh()
+Mesh::Mesh(const char* obj_path)
 {
-    // Generate OpenGL objects:
+    // Generate OpenGL objects
     glGenVertexArrays(1, &vao);
     glGenBuffers(4, buffers);
-}
+   
+    // Load mesh data
+    if(!meshLoadObj(this, obj_path))
+    {
+	OutputDebugStringA("ERROR: Failed to load mesh.\n");
+    }
+ }
 
 Mesh::~Mesh()
 {
@@ -97,9 +103,14 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     while(!feof(file_p));
     fclose(file_p);
 
-    //////////////////////////////
-    // Configure OpenGL Objects //
-    //////////////////////////////
+    return 1;
+}
+
+void meshDataToGPU(Mesh* mesh_p)
+{
+    ///////////////////////////////////
+    // Configure OpenGL Mesh Objects //
+    ///////////////////////////////////
 
     // Always bind VAO first
     glBindVertexArray(mesh_p->vao);
@@ -143,10 +154,67 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    
-    return 1;
 }
 
-/////////////////////
-// Struct Material //
-/////////////////////
+////////////////////
+// Struct Texture //
+////////////////////
+
+Texture::Texture(const char* bmp_path)
+{
+    // Create OpenGL Texture object
+    glGenTextures(1, textures); // TODO: Add generation for normal & spec maps
+
+    // Load texture data
+    if(!textureLoadBmp(this, bmp_path))
+    {
+	OutputDebugStringA("ERROR: Failed to load texture.\n");
+    }
+}
+
+Texture::~Texture()
+{
+    glDeleteTextures(1, textures); // TODO: add deletion for specular & normal maps
+}
+
+int textureLoadBmp(Texture* texture_p, const char* path)
+{
+    ////////////////////////////
+    // Get bmp data from file //
+    ////////////////////////////
+    unsigned char header[54];
+    unsigned int  data_pos; // Position in the file where the data begins
+    unsigned int  size;     // width * height * 3
+
+    
+    FILE* file_p = fopen(path, "rb");
+    if(!file_p) {return 0;}
+
+    if(fread(header, 1, 54, file_p) != 54) {return 0;}
+    if(header[0] != 'B' || header[1] != 'M') {return 0;}
+
+    data_pos = ;
+    size     = ;
+    width    = ;
+    height   = ;
+}
+
+void textureDataToGPU(Texture* texture_p)
+{
+    /////////////////////////////////////////////
+    // Configure Diffuse Map Texture in OpenGL //
+    /////////////////////////////////////////////
+    glBindTexture(GL_TEXTURE_2D, texture_p->texture[D_MAP_INDEX]);
+    glTexImage2D(GL_TEXTURE_2D,
+		 0,
+		 GL_RGB,
+		 texture_p->width,
+		 texture_p->height,
+		 0,
+		 GL_BGR, // .bmp stores RGB dat as BGR
+		 GL_UNSIGNED_BYTE,
+		 texture_p->diffuse_map.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+}
+

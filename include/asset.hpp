@@ -14,14 +14,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+/////////////////
+// Struct Mesh //
+/////////////////
+
 #define VERT_INDEX 0
 #define UV_INDEX   1
 #define NORM_INDEX 2
 #define ELE_INDEX  3
-
-/////////////////
-// Struct Mesh //
-/////////////////
 
 typedef struct Mesh
 {
@@ -33,13 +33,32 @@ typedef struct Mesh
     std::vector<int>   norm_indices;
     GLuint vao;
     GLuint buffers[4];
-    Mesh();
+    Mesh(const char* obj_path);
     ~Mesh();
 } Mesh;
-int meshLoadObj(Mesh* mesh_p, const char* path);
+int  meshLoadObj(Mesh* mesh_p, const char* path);
+void meshDataToGPU(Mesh* mesh_p);
 
-/////////////////////
-// Struct Material //
-/////////////////////
+////////////////////
+// Struct Texture //
+////////////////////
+
+#define D_MAP_INDEX 0
+#define N_MAP_INDEX 1
+#define S_MAP_INDEX 2
+
+typedef struct Texture
+{
+    unsigned int width;
+    unsigned int height;
+    std::vector<float> diffuse_map;
+    std::vector<float> normal_map;
+    std::vector<float> specular_map;
+    GLuint textures[3]; 
+    Texture(const char* bmp_path);
+    ~Texture();
+} Texture;
+int  textureLoadBmp(Texture* texture_p, const char* path);
+void textureDataToGPU(Texture* texture_p);
 
 #endif
