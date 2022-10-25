@@ -9,6 +9,7 @@
 // Win libs
 #include <vector>
 #include <stdio.h>
+#include <windows.h>
 
 // 3rd party libs
 #include <glad/glad.h>
@@ -43,18 +44,12 @@ void meshDataToGPU(Mesh* mesh_p);
 // Struct Texture //
 ////////////////////
 
-#define D_MAP_INDEX 0
-#define N_MAP_INDEX 1
-#define S_MAP_INDEX 2
-
 typedef struct Texture
 {
     unsigned int width;
     unsigned int height;
-    std::vector<float> diffuse_map;
-    std::vector<float> normal_map;
-    std::vector<float> specular_map;
-    GLuint textures[3]; 
+    GLuint texture; 
+    std::vector<float> map;
     Texture(const char* bmp_path);
     ~Texture();
 } Texture;

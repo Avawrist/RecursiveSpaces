@@ -147,18 +147,15 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh;
-    if(!meshLoadObj(mesh_p, "..\\assets\\meshes\\sphere.obj"))
-    {
-	OutputDebugStringA("ERROR: loadObjToMesh failed to load ..\\assets\\meshes\\sphere.obj\n");
-	return -1;
-    }
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\sphere.obj");
+    meshDataToGPU(mesh_p);
 
     ////////////////////////
     // Initialize Texture //
     ////////////////////////
 
-    
+    Texture *texture_p = new Texture("..\\assets\\textures\\hearts.bmp");
+    textureDataToGPU(texture_p);
     
     /////////////////////////////
     // Transformation Matrices //

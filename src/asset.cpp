@@ -20,7 +20,7 @@ Mesh::Mesh(const char* obj_path)
     {
 	OutputDebugStringA("ERROR: Failed to load mesh.\n");
     }
- }
+}
 
 Mesh::~Mesh()
 {
@@ -163,8 +163,8 @@ void meshDataToGPU(Mesh* mesh_p)
 Texture::Texture(const char* bmp_path)
 {
     // Create OpenGL Texture object
-    glGenTextures(1, textures); // TODO: Add generation for normal & spec maps
-
+    glGenTextures(1, &texture);
+    
     // Load texture data
     if(!textureLoadBmp(this, bmp_path))
     {
@@ -174,7 +174,7 @@ Texture::Texture(const char* bmp_path)
 
 Texture::~Texture()
 {
-    glDeleteTextures(1, textures); // TODO: add deletion for specular & normal maps
+    glDeleteTextures(1, &texture); // TODO: add deletion for specular & normal maps
 }
 
 int textureLoadBmp(Texture* texture_p, const char* path)
@@ -186,17 +186,30 @@ int textureLoadBmp(Texture* texture_p, const char* path)
     unsigned int  data_pos; // Position in the file where the data begins
     unsigned int  size;     // width * height * 3
 
-    
     FILE* file_p = fopen(path, "rb");
     if(!file_p) {return 0;}
 
     if(fread(header, 1, 54, file_p) != 54) {return 0;}
     if(header[0] != 'B' || header[1] != 'M') {return 0;}
 
-    data_pos = ;
-    size     = ;
-    width    = ;
-    height   = ;
+    data_pos          = *(unsigned int*)&(header[10]);
+    texture_p->width  = *(unsigned int*)&(header[18]);
+    texture_p->height = *(unsigned int*)&(header[22]);
+    size              = texture_p->width * texture_p->height * 3; // size in floats
+
+    printf("data_pos: %u\n", data_pos);
+    printf("width: %u\n", texture_p->width);
+    printf("height: %u\n", texture_p->height);
+    
+    // Safety check if data_pos was not provided:
+    if(data_pos == 0) {data_pos = 54;}
+
+    // Read the image data from the bmp file:
+    texture_p->map.reserve(size);
+    fread(texture_p->map.data(), 1, size, file_p);
+    fclose(file_p);
+
+    return 1;
 }
 
 void textureDataToGPU(Texture* texture_p)
@@ -204,16 +217,16 @@ void textureDataToGPU(Texture* texture_p)
     /////////////////////////////////////////////
     // Configure Diffuse Map Texture in OpenGL //
     /////////////////////////////////////////////
-    glBindTexture(GL_TEXTURE_2D, texture_p->texture[D_MAP_INDEX]);
+    glBindTexture(GL_TEXTURE_2D, texture_p->texture);
     glTexImage2D(GL_TEXTURE_2D,
-		 0,
+		 0, // OpenGL to generate mipmaps at runtime
 		 GL_RGB,
 		 texture_p->width,
 		 texture_p->height,
 		 0,
 		 GL_BGR, // .bmp stores RGB dat as BGR
 		 GL_UNSIGNED_BYTE,
-		 texture_p->diffuse_map.data());
+		 texture_p->map.data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 }
