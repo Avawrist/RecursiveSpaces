@@ -39,15 +39,9 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     float v_x;
     float v_y;
     float v_z;
-    int   v_ind_1;
-    int   v_ind_2;
-    int   v_ind_3;
-    int   t_ind_1;
-    int   t_ind_2;
-    int   t_ind_3;
-    int   n_ind_1;
-    int   n_ind_2;
-    int   n_ind_3;
+    int   v_ind;
+    int   t_ind;
+    int   n_ind;
     
     std::vector<float> vertices;
     std::vector<float> uvs;
@@ -88,68 +82,35 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
 	    normals.push_back(v_z);
 	}
 
-	//////////////////////////////////////
-	// Fill mesh data & indices vectors //
-	//////////////////////////////////////
+	///////////////////////////
+	// Fill mesh data vector //
+	///////////////////////////
 	else if(buf[0] == 'f') // Line of face indices
 	{
-	    // v/t/n
-	    fscanf(file_p,
-		   "%i/%i/%i %i/%i/%i %i/%i/%i",
-		   &v_ind_1, &t_ind_1, &n_ind_1,  // Set 1
-		   &v_ind_2, &t_ind_2, &n_ind_2,  // Set 2
-		   &v_ind_3, &t_ind_3, &n_ind_3); // Set 3
+	    for(int i = 0; i < 3; i++)
+	    {
+		// v/t/n
+		fscanf(file_p, "%i/%i/%i", &v_ind, &t_ind, &n_ind);
 
-	    // Remove 1 from each index value to match OpenGL conventions:
-	    v_ind_1 -= 1;
-	    v_ind_2 -= 1;
-	    v_ind_3 -= 1;
-	    t_ind_1 -= 1;
-	    t_ind_2 -= 1;
-	    t_ind_3 -= 1;
-	    n_ind_1 -= 1;
-	    n_ind_2 -= 1;
-	    n_ind_3 -= 1;
-
-	    /////////////////////////////////////////////////////////////////
-	    // Massage vertices, uvs and normals together into data vector //
-	    /////////////////////////////////////////////////////////////////
-
-	    // Set 1: Vertices
-	    mesh_p->data.push_back(vertices[v_ind_1 * 3]);
-	    mesh_p->data.push_back(vertices[(v_ind_1 * 3) + 1]);
-	    mesh_p->data.push_back(vertices[(v_ind_1 * 3) + 2]);
-	    // Set 1: UVs
-	    mesh_p->data.push_back(uvs[t_ind_1 * 2]);
-	    mesh_p->data.push_back(uvs[(t_ind_1 * 2) + 1]);
-	    // Set 1: Normals
-	    mesh_p->data.push_back(normals[n_ind_1 * 3]);
-	    mesh_p->data.push_back(normals[(n_ind_1 * 3) + 1]);
-	    mesh_p->data.push_back(normals[(n_ind_1 * 3) + 2]);
-
-	    // Set 2: Vertices
-	    mesh_p->data.push_back(vertices[v_ind_2 * 3]);
-	    mesh_p->data.push_back(vertices[(v_ind_2 * 3) + 1]);
-	    mesh_p->data.push_back(vertices[(v_ind_2 * 3) + 2]);
-	    // Set 2: UVs
-	    mesh_p->data.push_back(uvs[t_ind_2 * 2]);
-	    mesh_p->data.push_back(uvs[(t_ind_2 * 2) + 1]);
-	    // Set 2: Normals
-	    mesh_p->data.push_back(normals[n_ind_2 * 3]);
-	    mesh_p->data.push_back(normals[(n_ind_2 * 3) + 1]);
-	    mesh_p->data.push_back(normals[(n_ind_2 * 3) + 2]);
-
-	    // Set 3: Vertices
-	    mesh_p->data.push_back(vertices[v_ind_3 * 3]);
-	    mesh_p->data.push_back(vertices[(v_ind_3 * 3) + 1]);
-	    mesh_p->data.push_back(vertices[(v_ind_3 * 3) + 2]);
-	    // Set 3: UVs
-	    mesh_p->data.push_back(uvs[t_ind_3 * 2]);
-	    mesh_p->data.push_back(uvs[(t_ind_3 * 2) + 1]);
-	    // Set 3: Normals
-	    mesh_p->data.push_back(normals[n_ind_3 * 3]);
-	    mesh_p->data.push_back(normals[(n_ind_3 * 3) + 1]);
-	    mesh_p->data.push_back(normals[(n_ind_3 * 3) + 2]);
+		// Remove 1 from each index value to match OpenGL conventions:
+		v_ind -= 1;
+		t_ind -= 1;
+		n_ind -= 1;
+	        
+		// Massage vertices, uvs and normals together into single data vector:
+		
+		// Vertices
+		mesh_p->data.push_back(vertices[v_ind * 3]);
+		mesh_p->data.push_back(vertices[(v_ind * 3) + 1]);
+		mesh_p->data.push_back(vertices[(v_ind * 3) + 2]);
+		// UVs
+		mesh_p->data.push_back(uvs[t_ind * 2]);
+		mesh_p->data.push_back(uvs[(t_ind * 2) + 1]);
+		// Normals
+		mesh_p->data.push_back(normals[n_ind * 3]);
+		mesh_p->data.push_back(normals[(n_ind * 3) + 1]);
+		mesh_p->data.push_back(normals[(n_ind * 3) + 2]);
+	    }
 	}
     }
     while(!feof(file_p));

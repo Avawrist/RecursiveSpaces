@@ -1,16 +1,12 @@
 Blender .obj export settings:
 Include:
 	x Selection Only
-	x OBJ Groups
 Transform:
 	Scale: 1.00
-	Path Mode: Auto
 	Forward: -Z Forward
 	Up: Y Up
 Geometry:
 	x Apply Modifiers
 	x Write Normals
-	x Include UVs
-	x Write Materials
+	x Write UVs
 	x Triangulate Faces
-	x Keep Vertex Order

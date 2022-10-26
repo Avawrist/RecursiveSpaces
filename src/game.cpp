@@ -147,7 +147,7 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\sphere.obj");
     meshDataToGPU(mesh_p);
 
     ////////////////////////
