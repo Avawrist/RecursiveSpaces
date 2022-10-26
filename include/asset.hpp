@@ -46,14 +46,16 @@ void meshDataToGPU(Mesh* mesh_p);
 
 typedef struct Texture
 {
-    unsigned int width;
-    unsigned int height;
-    GLuint texture; 
-    std::vector<float> map;
+    int width;
+    int height;
+    GLuint texture_id; 
+    std::vector<unsigned char> map;
     Texture(const char* bmp_path);
     ~Texture();
 } Texture;
 int  textureLoadBmp(Texture* texture_p, const char* path);
 void textureDataToGPU(Texture* texture_p);
+
+GLenum glCheckError_(const char *file, int line);
 
 #endif

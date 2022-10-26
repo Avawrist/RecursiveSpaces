@@ -102,7 +102,7 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     }
     while(!feof(file_p));
     fclose(file_p);
-
+    
     return 1;
 }
 
@@ -132,7 +132,7 @@ void meshDataToGPU(Mesh* mesh_p)
 		 GL_STATIC_DRAW);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
+    
     // Normal VBO
     glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[NORM_INDEX]);
     glBufferData(GL_ARRAY_BUFFER,
@@ -141,7 +141,7 @@ void meshDataToGPU(Mesh* mesh_p)
 		 GL_STATIC_DRAW);
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+    
     // EBO // TODO: Consolidate all index buffers into single buffer here,
     //              i.e., replace vert_indices with indices array
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
@@ -163,7 +163,7 @@ void meshDataToGPU(Mesh* mesh_p)
 Texture::Texture(const char* bmp_path)
 {
     // Create OpenGL Texture object
-    glGenTextures(1, &texture);
+    glGenTextures(1, &texture_id);
     
     // Load texture data
     if(!textureLoadBmp(this, bmp_path))
@@ -174,7 +174,7 @@ Texture::Texture(const char* bmp_path)
 
 Texture::~Texture()
 {
-    glDeleteTextures(1, &texture); // TODO: add deletion for specular & normal maps
+    glDeleteTextures(1, &texture_id); // TODO: add deletion for specular & normal maps
 }
 
 int textureLoadBmp(Texture* texture_p, const char* path)
@@ -184,28 +184,25 @@ int textureLoadBmp(Texture* texture_p, const char* path)
     ////////////////////////////
     unsigned char header[54];
     unsigned int  data_pos; // Position in the file where the data begins
-    unsigned int  size;     // width * height * 3
+    unsigned int  size;
 
     FILE* file_p = fopen(path, "rb");
     if(!file_p) {return 0;}
 
+    // Get Header 
     if(fread(header, 1, 54, file_p) != 54) {return 0;}
     if(header[0] != 'B' || header[1] != 'M') {return 0;}
 
     data_pos          = *(unsigned int*)&(header[10]);
-    texture_p->width  = *(unsigned int*)&(header[18]);
-    texture_p->height = *(unsigned int*)&(header[22]);
-    size              = texture_p->width * texture_p->height * 3; // size in floats
-
-    printf("data_pos: %u\n", data_pos);
-    printf("width: %u\n", texture_p->width);
-    printf("height: %u\n", texture_p->height);
+    texture_p->width  = *(int*)&(header[18]);
+    texture_p->height = *(int*)&(header[22]);
+    size              = texture_p->width * texture_p->height * 3;
     
     // Safety check if data_pos was not provided:
     if(data_pos == 0) {data_pos = 54;}
 
     // Read the image data from the bmp file:
-    texture_p->map.reserve(size);
+    texture_p->map.resize(size);
     fread(texture_p->map.data(), 1, size, file_p);
     fclose(file_p);
 
@@ -217,7 +214,7 @@ void textureDataToGPU(Texture* texture_p)
     /////////////////////////////////////////////
     // Configure Diffuse Map Texture in OpenGL //
     /////////////////////////////////////////////
-    glBindTexture(GL_TEXTURE_2D, texture_p->texture);
+    glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
     glTexImage2D(GL_TEXTURE_2D,
 		 0, // OpenGL to generate mipmaps at runtime
 		 GL_RGB,
@@ -227,7 +224,9 @@ void textureDataToGPU(Texture* texture_p)
 		 GL_BGR, // .bmp stores RGB dat as BGR
 		 GL_UNSIGNED_BYTE,
 		 texture_p->map.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
-

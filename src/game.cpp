@@ -228,6 +228,7 @@ int main()
 	// Render pass 1 //
 	///////////////////
 	glUseProgram(basicShaderProgram.program_id);
+	glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
 	glBindVertexArray(mesh_p->vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
 	glDrawElements(GL_TRIANGLES, mesh_p->vert_indices.size(), GL_UNSIGNED_INT, 0);
@@ -251,6 +252,7 @@ int main()
 
     // Delete mesh
     delete mesh_p;
+    delete texture_p;
 
     // Delete window
     glfwDestroyWindow(window);

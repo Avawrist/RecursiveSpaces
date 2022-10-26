@@ -3,9 +3,11 @@
 in vec2 uv;
 in vec3 norm;
 
-out vec4 fragColor;
+out vec4 color;
+
+uniform sampler2D diffuse_map;
 
 void main()
 {
-	fragColor = vec4(0.7f, 0.2f, 0.5f, 1.0f);
+	color = texture(diffuse_map, uv);
 }
