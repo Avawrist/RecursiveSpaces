@@ -147,7 +147,7 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\sphere.obj");
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
     meshDataToGPU(mesh_p);
 
     ////////////////////////
@@ -230,8 +230,7 @@ int main()
 	glUseProgram(basicShaderProgram.program_id);
 	glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
 	glBindVertexArray(mesh_p->vao);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
-	glDrawElements(GL_TRIANGLES, mesh_p->vert_indices.size(), GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, mesh_p->data.size());
 
 	//////////////////
 	// Swap buffers //

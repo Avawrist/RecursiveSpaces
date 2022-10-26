@@ -7,6 +7,7 @@
 #define ASSET_H
 
 // Win libs
+#include <map>
 #include <vector>
 #include <stdio.h>
 #include <windows.h>
@@ -15,25 +16,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// My libs
+#include "mdcla.hpp"
+
 /////////////////
 // Struct Mesh //
 /////////////////
 
-#define VERT_INDEX 0
-#define UV_INDEX   1
-#define NORM_INDEX 2
-#define ELE_INDEX  3
+#define MESH_INDEX 0
+#define ELE_INDEX  1
 
 typedef struct Mesh
 {
-    std::vector<float> vertices;
-    std::vector<float> uvs;
-    std::vector<float> normals;
-    std::vector<int>   vert_indices;
-    std::vector<int>   text_indices; // TODO: Single index array for all attributes
-    std::vector<int>   norm_indices;
+    std::vector<float> data;
     GLuint vao;
-    GLuint buffers[4];
+    GLuint vbo;
     Mesh(const char* obj_path);
     ~Mesh();
 } Mesh;
@@ -46,10 +43,10 @@ void meshDataToGPU(Mesh* mesh_p);
 
 typedef struct Texture
 {
-    int width;
-    int height;
-    GLuint texture_id; 
     std::vector<unsigned char> map;
+    int    width;
+    int    height;
+    GLuint texture_id; 
     Texture(const char* bmp_path);
     ~Texture();
 } Texture;

@@ -13,7 +13,7 @@ Mesh::Mesh(const char* obj_path)
 {
     // Generate OpenGL objects
     glGenVertexArrays(1, &vao);
-    glGenBuffers(4, buffers);
+    glGenBuffers(1, &vbo);
    
     // Load mesh data
     if(!meshLoadObj(this, obj_path))
@@ -26,7 +26,7 @@ Mesh::~Mesh()
 {
     // Delete OpenGL objects:
     glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(4, buffers);
+    glDeleteBuffers(1, &vbo);
 }
 
 int meshLoadObj(Mesh* mesh_p, const char* path)
@@ -39,16 +39,20 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     float v_x;
     float v_y;
     float v_z;
-    int   v_ind_x;
-    int   v_ind_y;
-    int   v_ind_z;
-    int   t_ind_x;
-    int   t_ind_y;
-    int   t_ind_z;
-    int   n_ind_x;
-    int   n_ind_y;
-    int   n_ind_z;
+    int   v_ind_1;
+    int   v_ind_2;
+    int   v_ind_3;
+    int   t_ind_1;
+    int   t_ind_2;
+    int   t_ind_3;
+    int   n_ind_1;
+    int   n_ind_2;
+    int   n_ind_3;
     
+    std::vector<float> vertices;
+    std::vector<float> uvs;
+    std::vector<float> normals;
+   
     FILE* file_p;
     file_p = fopen(path, "r");
     if(!file_p) {return 0;}
@@ -57,47 +61,95 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     char buf[SIZE];
     do
     {
+	// Get line identifier
 	fgets(buf, SIZE, file_p);
-	
+
+	/////////////////////////////////////////////////
+	// Read all data into 3 separate vectors first //
+	/////////////////////////////////////////////////
 	if(buf[0] == 'v' && buf[1] == ' ') // Line of geometry
 	{
 	    fscanf(file_p, "%f %f %f", &v_x, &v_y, &v_z);
-	    mesh_p->vertices.push_back(v_x);
-	    mesh_p->vertices.push_back(v_y);
-	    mesh_p->vertices.push_back(v_z);
+	    vertices.push_back(v_x);
+	    vertices.push_back(v_y);
+	    vertices.push_back(v_z);
 	}
 	else if(buf[0] == 'v' && buf[1] == 't') // Line of texture coords
 	{
 	    fscanf(file_p, " %f %f", &v_x, &v_y);
-	    mesh_p->uvs.push_back(v_x);
-	    mesh_p->uvs.push_back(v_y);
+	    uvs.push_back(v_x);
+	    uvs.push_back(v_y);
 	}
 	else if(buf[0] == 'v' && buf[1] == 'n') // Line of vector normals
 	{
 	    fscanf(file_p, " %f %f %f", &v_x, &v_y, &v_z);
-	    mesh_p->normals.push_back(v_x);
-	    mesh_p->normals.push_back(v_y);
-	    mesh_p->normals.push_back(v_z);
+	    normals.push_back(v_x);
+	    normals.push_back(v_y);
+	    normals.push_back(v_z);
 	}
+
+	//////////////////////////////////////
+	// Fill mesh data & indices vectors //
+	//////////////////////////////////////
 	else if(buf[0] == 'f') // Line of face indices
 	{
 	    // v/t/n
 	    fscanf(file_p,
 		   "%i/%i/%i %i/%i/%i %i/%i/%i",
-		   &v_ind_x, &t_ind_x, &n_ind_x,
-		   &v_ind_y, &t_ind_y, &n_ind_y,
-		   &v_ind_z, &t_ind_z, &n_ind_z);
-	    // Add index value minus 1 to convert from Blender convention (1 to n)
-	    // to OpenGl convention (0 to n-1):
-	    mesh_p->vert_indices.push_back(v_ind_x - 1);
-	    mesh_p->vert_indices.push_back(v_ind_y - 1);
-	    mesh_p->vert_indices.push_back(v_ind_z - 1);
-	    mesh_p->text_indices.push_back(t_ind_x - 1);
-	    mesh_p->text_indices.push_back(t_ind_y - 1);
-	    mesh_p->text_indices.push_back(t_ind_z - 1);
-	    mesh_p->norm_indices.push_back(n_ind_x - 1);
-	    mesh_p->norm_indices.push_back(n_ind_y - 1);
-	    mesh_p->norm_indices.push_back(n_ind_z - 1);
+		   &v_ind_1, &t_ind_1, &n_ind_1,  // Set 1
+		   &v_ind_2, &t_ind_2, &n_ind_2,  // Set 2
+		   &v_ind_3, &t_ind_3, &n_ind_3); // Set 3
+
+	    // Remove 1 from each index value to match OpenGL conventions:
+	    v_ind_1 -= 1;
+	    v_ind_2 -= 1;
+	    v_ind_3 -= 1;
+	    t_ind_1 -= 1;
+	    t_ind_2 -= 1;
+	    t_ind_3 -= 1;
+	    n_ind_1 -= 1;
+	    n_ind_2 -= 1;
+	    n_ind_3 -= 1;
+
+	    /////////////////////////////////////////////////////////////////
+	    // Massage vertices, uvs and normals together into data vector //
+	    /////////////////////////////////////////////////////////////////
+
+	    // Set 1: Vertices
+	    mesh_p->data.push_back(vertices[v_ind_1 * 3]);
+	    mesh_p->data.push_back(vertices[(v_ind_1 * 3) + 1]);
+	    mesh_p->data.push_back(vertices[(v_ind_1 * 3) + 2]);
+	    // Set 1: UVs
+	    mesh_p->data.push_back(uvs[t_ind_1 * 2]);
+	    mesh_p->data.push_back(uvs[(t_ind_1 * 2) + 1]);
+	    // Set 1: Normals
+	    mesh_p->data.push_back(normals[n_ind_1 * 3]);
+	    mesh_p->data.push_back(normals[(n_ind_1 * 3) + 1]);
+	    mesh_p->data.push_back(normals[(n_ind_1 * 3) + 2]);
+
+	    // Set 2: Vertices
+	    mesh_p->data.push_back(vertices[v_ind_2 * 3]);
+	    mesh_p->data.push_back(vertices[(v_ind_2 * 3) + 1]);
+	    mesh_p->data.push_back(vertices[(v_ind_2 * 3) + 2]);
+	    // Set 2: UVs
+	    mesh_p->data.push_back(uvs[t_ind_2 * 2]);
+	    mesh_p->data.push_back(uvs[(t_ind_2 * 2) + 1]);
+	    // Set 2: Normals
+	    mesh_p->data.push_back(normals[n_ind_2 * 3]);
+	    mesh_p->data.push_back(normals[(n_ind_2 * 3) + 1]);
+	    mesh_p->data.push_back(normals[(n_ind_2 * 3) + 2]);
+
+	    // Set 3: Vertices
+	    mesh_p->data.push_back(vertices[v_ind_3 * 3]);
+	    mesh_p->data.push_back(vertices[(v_ind_3 * 3) + 1]);
+	    mesh_p->data.push_back(vertices[(v_ind_3 * 3) + 2]);
+	    // Set 3: UVs
+	    mesh_p->data.push_back(uvs[t_ind_3 * 2]);
+	    mesh_p->data.push_back(uvs[(t_ind_3 * 2) + 1]);
+	    // Set 3: Normals
+	    mesh_p->data.push_back(normals[n_ind_3 * 3]);
+	    mesh_p->data.push_back(normals[(n_ind_3 * 3) + 1]);
+	    mesh_p->data.push_back(normals[(n_ind_3 * 3) + 2]);
 	}
     }
     while(!feof(file_p));
@@ -115,44 +167,27 @@ void meshDataToGPU(Mesh* mesh_p)
     // Always bind VAO first
     glBindVertexArray(mesh_p->vao);
 
-    // Vertex VBO
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[VERT_INDEX]);
+    // Mesh VBO
+    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->vbo);
     glBufferData(GL_ARRAY_BUFFER,
-		 mesh_p->vertices.size() * sizeof(float),
-		 mesh_p->vertices.data(),
+		 mesh_p->data.size() * sizeof(float),
+		 mesh_p->data.data(),
 		 GL_STATIC_DRAW);
+
+    // Vertex Attribute
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
-    // UV VBO
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[UV_INDEX]);
-    glBufferData(GL_ARRAY_BUFFER,
-		 mesh_p->uvs.size() * sizeof(float),
-		 mesh_p->uvs.data(),
-		 GL_STATIC_DRAW);
+    // UV Attribute
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    // Normal VBO
-    glBindBuffer(GL_ARRAY_BUFFER, mesh_p->buffers[NORM_INDEX]);
-    glBufferData(GL_ARRAY_BUFFER,
-		 mesh_p->normals.size() * sizeof(float),
-		 mesh_p->normals.data(),
-		 GL_STATIC_DRAW);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    // EBO // TODO: Consolidate all index buffers into single buffer here,
-    //              i.e., replace vert_indices with indices array
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_p->buffers[ELE_INDEX]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		 mesh_p->vert_indices.size() * sizeof(int),
-		 mesh_p->vert_indices.data(),
-		 GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 
-    // Unbind buffers and VAO:
+    // Normal Attribute
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    
+    // Unbind buffer and VAO:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 

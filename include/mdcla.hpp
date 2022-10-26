@@ -27,6 +27,7 @@ typedef struct Vec2F
     float&       operator [](int i);
     const float& operator [](int i) const;
 } Vec2F;
+bool  operator ==(const Vec2F& a, const Vec2F& b);
 Vec2F operator +(const Vec2F& a, const Vec2F& b);
 Vec2F operator -(const Vec2F& a, const Vec2F& b);
 Vec2F operator *(const Vec2F& v, float s);
@@ -56,6 +57,7 @@ typedef struct Vec3F
     float&       operator [](int i);
     const float& operator [](int i) const;
 } Vec3F;
+bool  operator ==(const Vec3F& a, const Vec3F& b);
 Vec3F operator +(const Vec3F& a, const Vec3F& b);
 Vec3F operator -(const Vec3F& a, const Vec3F& b);
 Vec3F operator *(const Vec3F& v, float s);
@@ -88,6 +90,7 @@ typedef struct Vec4F
     const float& operator [](int i) const;
     void print();
 } Vec4F;
+bool  operator ==(const Vec4F& a, const Vec4F& b);
 Vec4F operator +(const Vec4F& a, const Vec4F& b);
 Vec4F operator -(const Vec4F& a, const Vec4F& b);
 Vec4F operator *(const Vec4F& v, float s);

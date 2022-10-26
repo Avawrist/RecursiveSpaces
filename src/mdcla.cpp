@@ -67,6 +67,11 @@ const float& Vec2F::operator [](int i) const
 
 // Vec2F Non-members
 
+bool operator ==(const Vec2F& a, const Vec2F& b)
+{
+    return(a.x == b.x && a.y == b.y);
+}
+
 Vec2F operator +(const Vec2F& a, const Vec2F& b)
 {
     return Vec2F(a.x + b.x,
@@ -186,6 +191,11 @@ const float& Vec3F::operator [](int i) const
 }
 
 // Vec3F Non-Members
+
+bool operator ==(const Vec3F& a, const Vec3F& b)
+{
+    return(a.x == b.x && a.y == b.y && a.z == b.z);
+}
 
 Vec3F operator +(const Vec3F& a, const Vec3F& b)
 {
@@ -326,6 +336,11 @@ const float& Vec4F::operator [](int i) const
 }
 
 // Vec4F Non-Members
+
+bool operator ==(const Vec4F& a, const Vec4F& b)
+{
+    return(a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w);
+}
 
 Vec4F operator +(const Vec4F& a, const Vec4F& b)
 {
