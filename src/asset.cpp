@@ -46,13 +46,15 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     std::vector<float> vertices;
     std::vector<float> uvs;
     std::vector<float> normals;
-   
+
+    const int SIZE = 3;
+    char buf[SIZE];
+    char c; 
+    
     FILE* file_p;
     file_p = fopen(path, "r");
     if(!file_p) {return 0;}
     
-    const int SIZE = 3;
-    char buf[SIZE];
     do
     {
 	// Get line identifier
