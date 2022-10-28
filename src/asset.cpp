@@ -223,8 +223,157 @@ void textureDataToGPU(Texture* texture_p)
 		 GL_UNSIGNED_BYTE,
 		 texture_p->map.data());
     glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+/////////////////////////
+// Struct FrameTexture //
+/////////////////////////
+
+FrameTexture::FrameTexture(int _width, int _height)
+{
+    //////////////////////////////
+    // Initialize FBO & Texture //
+    //////////////////////////////
+
+    // FBO:
+    glGenFramebuffers(1, &fbo);
+    
+    // Texture:
+    glGenTextures(1, &color_text_id);
+    glGenTextures(1, &depth_stencil_text_id);
+    width  = _width;
+    height = _height;
+    
+    ////////////////////
+    // Initalize Quad //
+    ////////////////////
+
+    // Quad VAO:
+    glGenVertexArrays(1, &quad_vao);
+
+    // Quad VBO:
+    glGenBuffers(1, &quad_vbo);
+}
+
+FrameTexture::~FrameTexture()
+{
+    // Delete FBO
+    glDeleteFramebuffers(1, &fbo);
+    
+    // Delete texture
+    glDeleteTextures(1, &color_text_id);
+    glDeleteTextures(1, &depth_stencil_text_id);
+    
+    // Delete quad VAO
+    glDeleteVertexArrays(1, &quad_vao);
+    
+    // Delete quad VBO
+    glDeleteBuffers(1, &quad_vbo);
+}
+
+void frameTextureDataToGPU(FrameTexture* ftexture_p)
+{
+    //////////////////////////////////////
+    // Config Framebuffer with Textures //
+    //////////////////////////////////////
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo);
+
+    ///////////////////
+    // Color Texture //
+    ///////////////////
+    
+    // Allocate memory for color texture on GPU
+    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id);
+    glTexImage2D(GL_TEXTURE_2D,
+		 0,
+		 GL_RGB,
+		 ftexture_p->width,
+		 ftexture_p->height,
+		 0,
+		 GL_RGB,
+		 GL_UNSIGNED_BYTE,
+		 NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Attach texture to FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+			   GL_COLOR_ATTACHMENT0,
+			   GL_TEXTURE_2D,
+			   ftexture_p->color_text_id,
+			   0);
+
+    ///////////////////////////
+    // Depth/Stencil Texture //
+    ///////////////////////////
+    
+    // Allocate memory for depth texture on GPU
+    glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_stencil_text_id);
+    glTexImage2D(GL_TEXTURE_2D,
+		 0,
+		 GL_DEPTH24_STENCIL8,
+		 ftexture_p->width,
+		 ftexture_p->height,
+		 0,
+		 GL_DEPTH_STENCIL,
+		 GL_UNSIGNED_INT_24_8,
+		 NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Attach texture to FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+			   GL_DEPTH_STENCIL_ATTACHMENT,
+			   GL_TEXTURE_2D,
+			   ftexture_p->depth_stencil_text_id,
+			   0);
+    			   
+    // Unbind
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    /////////////////////////
+    // Configure VBO & VAO //
+    /////////////////////////
+    
+    // Bind VAO first
+    glBindVertexArray(ftexture_p->quad_vao);
+
+    // Move quad data to QPU
+    glBindBuffer(GL_ARRAY_BUFFER, ftexture_p->quad_vbo);
+    glBufferData(GL_ARRAY_BUFFER,
+		 sizeof(ftexture_p->quad_data),
+		 ftexture_p->quad_data,
+		 GL_STATIC_DRAW);
+
+    // Vertex Attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    
+    // UV Attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    
+    // Unbind buffer and VAO:
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void frameTextureDraw(FrameTexture* ftexture_p, Shader* shader_p)
+{
+    // Set proper state to render
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
+    glClear(GL_COLOR_BUFFER_BIT); // clear screen
+    glDisable(GL_DEPTH_TEST); // Disable so quad is visible
+    glUseProgram(shader_p->program_id); // Set post-process shader
+    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id); // Bind color texture to post-process shader
+    glBindVertexArray(ftexture_p->quad_vao); // Bind quad vao
+
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices in the quad data
 }

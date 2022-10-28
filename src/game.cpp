@@ -37,8 +37,8 @@ typedef unsigned int uint;
 /////////////
 
 // Window
-const unsigned int WIN_WIDTH  = 640;
-const unsigned int WIN_HEIGHT = 480;
+const unsigned int WIN_WIDTH  = 1280;
+const unsigned int WIN_HEIGHT = 840;
 const unsigned int X_CENTER   = WIN_WIDTH / 2.0f;
 const unsigned int Y_CENTER   = WIN_HEIGHT / 2.0f;
 float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
@@ -90,10 +90,10 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 4); // multisame buffer with 4 samples
+    glfwWindowHint(GLFW_SAMPLES, 0); // disable multisampling
 	
     // Create window & context
-    GLFWwindow* window = glfwCreateWindow(640, 480, "First Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "First Game", NULL, NULL);
     if(!window)
     {
 	OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
@@ -129,10 +129,8 @@ int main()
     ////////////////////////////
     
     glEnable(GL_BLEND);
-    glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glClearColor(1.0f, 0.71f, 0.89f, 1.0f);
     // Cull Faces
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -147,14 +145,14 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\sphere.obj");
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
     meshDataToGPU(mesh_p);
 
     ////////////////////////
     // Initialize Texture //
     ////////////////////////
 
-    Texture *texture_p = new Texture("..\\assets\\textures\\hearts.bmp");
+    Texture *texture_p = new Texture("..\\assets\\textures\\orange.bmp");
     textureDataToGPU(texture_p);
     
     /////////////////////////////
@@ -172,15 +170,27 @@ int main()
     // Create Shaders //
     ////////////////////
 
-    //F:\assets\shaders
-    Shader basicShaderProgram("..\\assets\\shaders\\basic.vs",
-			      "..\\assets\\shaders\\basic.fs");
+    // Simple object shader
+    Shader *basic_shader_p = new Shader("..\\assets\\shaders\\basic.vs",
+					"..\\assets\\shaders\\basic.fs");
 
+    // Post-processing shader
+    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vs",
+				     "..\\assets\\shaders\\pp.fs");
+    
     // Load uniform values to GPU
-    glUseProgram(basicShaderProgram.program_id);
-    basicShaderProgram.addMat4Uniform("model", model.getPointer());
-    basicShaderProgram.addMat4Uniform("view", view.getPointer());
-    basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
+    glUseProgram(basic_shader_p->program_id);
+    shaderAddMat4Uniform(basic_shader_p, "model", model.getPointer());
+    shaderAddMat4Uniform(basic_shader_p, "view", view.getPointer());
+    shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
+
+    
+    /////////////////////////
+    // Create Framebuffers //
+    /////////////////////////
+
+    FrameTexture *ftexture_p = new FrameTexture(WIN_WIDTH, WIN_HEIGHT);
+    frameTextureDataToGPU(ftexture_p);
     
     /////////////////
     // Render Loop //
@@ -208,30 +218,38 @@ int main()
 	////////////////////////////////////
 	// Update Transformation Matrices //
 	////////////////////////////////////
-	glUseProgram(basicShaderProgram.program_id);
+	glUseProgram(basic_shader_p->program_id);
 
 	// Update View
 	view = cameraGetView(global_cam);
-	basicShaderProgram.addMat4Uniform("view", view.getPointer());
+	shaderAddMat4Uniform(basic_shader_p, "view", view.getPointer());
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
 	projection = cameraGetPerspective(global_cam);
-	basicShaderProgram.addMat4Uniform("projection", projection.getPointer());
-
-	//////////////////
-	// Clear screen //
-	//////////////////
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
 
 	///////////////////
 	// Render pass 1 //
 	///////////////////
-	glUseProgram(basicShaderProgram.program_id);
+
+	// Use this render pass to write pre-processed image to the color texture.
+	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glUseProgram(basic_shader_p->program_id); // Use the basic object shader
+	// Move into gameobject draw code eventually:
 	glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh_p->data.size());
 
+	/////////////////////////////////////
+	// Render pass 2 (Post-processing) //
+	/////////////////////////////////////
+
+	// use this render pass to draw post-processed color texture to screen.
+        frameTextureDraw(ftexture_p, pp_shader_p);
+	
 	//////////////////
 	// Swap buffers //
 	//////////////////
@@ -252,7 +270,10 @@ int main()
     // Delete mesh
     delete mesh_p;
     delete texture_p;
-
+    delete basic_shader_p;
+    delete pp_shader_p;
+    delete ftexture_p;
+    
     // Delete window
     glfwDestroyWindow(window);
 	
