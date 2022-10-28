@@ -6,8 +6,12 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
-#include <mdcla.hpp>
+// 3rd Party libs
 #include <GLFW/glfw3.h>
+
+// My libs
+#include "typedefs.hpp"
+#include "mdcla.hpp"
 
 typedef struct Cursor
 {

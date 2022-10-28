@@ -3,7 +3,7 @@
 // Description: The implementation file for my personal linear algebra library.
 // ======================================================================
 
-#include <mdcla.hpp>
+#include "mdcla.hpp"
 
 //////////////////
 // Struct Vec2F //
@@ -60,7 +60,7 @@ float& Vec2F::operator [](int i)
     return *(&x + i);
 }
 
-const float& Vec2F::operator [](int i) const
+c_float& Vec2F::operator [](int i) const
 {
     return *(&x + i);
 }
@@ -185,7 +185,7 @@ float& Vec3F::operator [](int i)
     return *(&x + i);
 }
 
-const float& Vec3F::operator [](int i) const
+c_float& Vec3F::operator [](int i) const
 {
     return *(&x + i);
 }
@@ -330,7 +330,7 @@ float& Vec4F::operator [](int i)
     return *(&x + i);
 }
 
-const float& Vec4F::operator [](int i) const
+c_float& Vec4F::operator [](int i) const
 {
     return *(&x + i);
 }
@@ -486,12 +486,12 @@ float& Mat3F::operator ()(int i, int j)
     return n[i][j];
 }
 
-const float& Mat3F::operator ()(int i, int j) const
+c_float& Mat3F::operator ()(int i, int j) const
 {
     return n[i][j];
 }
 
-const float* Mat3F::getPointer()
+c_float* Mat3F::getPointer()
 {
     return &(n[0][0]);
 }
@@ -645,12 +645,12 @@ float& Mat4F::operator ()(int i, int j)
     return n[i][j];
 }
 
-const float& Mat4F::operator ()(int i, int j) const
+c_float& Mat4F::operator ()(int i, int j) const
 {
     return n[i][j];
 }
 
-const float* Mat4F::getPointer()
+c_float* Mat4F::getPointer()
 {
     return &(n[0][0]);
 }

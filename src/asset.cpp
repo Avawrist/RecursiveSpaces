@@ -3,13 +3,13 @@
 // Description: The header file for model, mesh & material objects
 // ======================================================================
 
-#include <asset.hpp>
+#include "asset.hpp"
 
 /////////////////
 // Struct Mesh //
 /////////////////
 
-Mesh::Mesh(const char* obj_path)
+Mesh::Mesh(c_char* obj_path)
 {
     // Generate OpenGL objects
     glGenVertexArrays(1, &vao);
@@ -29,7 +29,7 @@ Mesh::~Mesh()
     glDeleteBuffers(1, &vbo);
 }
 
-int meshLoadObj(Mesh* mesh_p, const char* path)
+int meshLoadObj(Mesh* mesh_p, c_char* path)
 {
     // Note: Assumes a pointer to .obj file path is passed.
 
@@ -47,12 +47,11 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
     std::vector<float> uvs;
     std::vector<float> normals;
 
-    const int SIZE = 3;
-    char buf[SIZE];
-    char c; 
+    c_int SIZE = 3;
+    char  buf[SIZE];
     
     FILE* file_p;
-    file_p = fopen(path, "r");
+    fopen_s(&file_p, path, "r");
     if(!file_p) {return 0;}
     
     do
@@ -65,20 +64,20 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
 	/////////////////////////////////////////////////
 	if(buf[0] == 'v' && buf[1] == ' ') // Line of geometry
 	{
-	    fscanf(file_p, "%f %f %f", &v_x, &v_y, &v_z);
+	    fscanf_s(file_p, "%f %f %f", &v_x, &v_y, &v_z);
 	    vertices.push_back(v_x);
 	    vertices.push_back(v_y);
 	    vertices.push_back(v_z);
 	}
 	else if(buf[0] == 'v' && buf[1] == 't') // Line of texture coords
 	{
-	    fscanf(file_p, " %f %f", &v_x, &v_y);
+	    fscanf_s(file_p, " %f %f", &v_x, &v_y);
 	    uvs.push_back(v_x);
 	    uvs.push_back(v_y);
 	}
 	else if(buf[0] == 'v' && buf[1] == 'n') // Line of vector normals
 	{
-	    fscanf(file_p, " %f %f %f", &v_x, &v_y, &v_z);
+	    fscanf_s(file_p, " %f %f %f", &v_x, &v_y, &v_z);
 	    normals.push_back(v_x);
 	    normals.push_back(v_y);
 	    normals.push_back(v_z);
@@ -92,7 +91,7 @@ int meshLoadObj(Mesh* mesh_p, const char* path)
 	    for(int i = 0; i < 3; i++)
 	    {
 		// v/t/n
-		fscanf(file_p, "%i/%i/%i", &v_ind, &t_ind, &n_ind);
+		fscanf_s(file_p, "%i/%i/%i", &v_ind, &t_ind, &n_ind);
 
 		// Remove 1 from each index value to match OpenGL conventions:
 		v_ind -= 1;
@@ -158,7 +157,7 @@ void meshDataToGPU(Mesh* mesh_p)
 // Struct Texture //
 ////////////////////
 
-Texture::Texture(const char* bmp_path)
+Texture::Texture(c_char* bmp_path)
 {
     // Create OpenGL Texture object
     glGenTextures(1, &texture_id);
@@ -175,23 +174,24 @@ Texture::~Texture()
     glDeleteTextures(1, &texture_id); // TODO: add deletion for specular & normal maps
 }
 
-int textureLoadBmp(Texture* texture_p, const char* path)
+int textureLoadBmp(Texture* texture_p, c_char* path)
 {
     ////////////////////////////
     // Get bmp data from file //
     ////////////////////////////
-    unsigned char header[54];
-    unsigned int  data_pos; // Position in the file where the data begins
-    unsigned int  size;
+    uchar header[54];
+    uint  data_pos; // Position in the file where the data begins
+    uint  size;
 
-    FILE* file_p = fopen(path, "rb");
+    FILE* file_p;
+    fopen_s(&file_p, path, "rb");
     if(!file_p) {return 0;}
 
     // Get Header 
     if(fread(header, 1, 54, file_p) != 54) {return 0;}
     if(header[0] != 'B' || header[1] != 'M') {return 0;}
 
-    data_pos          = *(unsigned int*)&(header[10]);
+    data_pos          = *(uint*)&(header[10]);
     texture_p->width  = *(int*)&(header[18]);
     texture_p->height = *(int*)&(header[22]);
     size              = texture_p->width * texture_p->height * 3;

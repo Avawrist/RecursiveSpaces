@@ -16,6 +16,7 @@
 #include <GLFW/glfw3.h>
 
 // My libs
+#include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "shader.hpp"
 
@@ -31,10 +32,10 @@ typedef struct Mesh
     std::vector<float> data;
     GLuint vao;
     GLuint vbo;
-    Mesh(const char* obj_path);
+    Mesh(c_char* obj_path);
     ~Mesh();
 } Mesh;
-int  meshLoadObj(Mesh* mesh_p, const char* path);
+int  meshLoadObj(Mesh* mesh_p, c_char* path);
 void meshDataToGPU(Mesh* mesh_p);
 
 ////////////////////
@@ -43,14 +44,14 @@ void meshDataToGPU(Mesh* mesh_p);
 
 typedef struct Texture
 {
-    std::vector<unsigned char> map;
+    std::vector<uchar> map;
     int    width;
     int    height;
     GLuint texture_id; 
-    Texture(const char* bmp_path);
+    Texture(c_char* bmp_path);
     ~Texture();
 } Texture;
-int  textureLoadBmp(Texture* texture_p, const char* path);
+int  textureLoadBmp(Texture* texture_p, c_char* path);
 void textureDataToGPU(Texture* texture_p);
 
 /////////////////////////

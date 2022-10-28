@@ -4,14 +4,14 @@
 // Last Modified: 9/17/2022 MDC
 // ======================================================================
 
-#include <shader.hpp>
+#include "shader.hpp"
 
 // # Struct Shader
 // A basic struct that holds the vertex, fragment and shader program ids.
 // On creation, the struct will create the required vertex and fragment shaders,
 // set the shader source code, compile and link the shader program.
 
-Shader::Shader(const char* _vertPath, const char* _fragPath)
+Shader::Shader(c_char* _vertPath, c_char* _fragPath)
 {
     // Create Shader Program
     program_id = glCreateProgram();
@@ -24,7 +24,7 @@ Shader::Shader(const char* _vertPath, const char* _fragPath)
     vert_id = glCreateShader(GL_VERTEX_SHADER);
     
     // Convert file into NULL terminated const char* from path
-    const char*       pShaderCodeV;
+    c_char*       pShaderCodeV;
     std::string       sShaderCodeV;
     std::ifstream     shaderFileV;
     std::stringstream shaderStreamV;
@@ -63,7 +63,7 @@ Shader::Shader(const char* _vertPath, const char* _fragPath)
     frag_id = glCreateShader(GL_FRAGMENT_SHADER);
     
     // Convert file into NULL terminated const char* from path
-    const char*       pShaderCodeF;
+    c_char*           pShaderCodeF;
     std::string       sShaderCodeF;
     std::ifstream     shaderFileF;
     std::stringstream shaderStreamF;
@@ -124,7 +124,7 @@ Shader::~Shader()
     glDeleteProgram(program_id);
 }
 
-void shaderAddMat4Uniform(const Shader* shader_p, const char* name, const float* m)
+void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m)
 {
     int loc = glGetUniformLocation(shader_p->program_id, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, m);

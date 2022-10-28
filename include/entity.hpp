@@ -6,7 +6,9 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <mdcla.hpp>
+// My libs
+#include "typedefs.hpp"
+#include "mdcla.hpp"
 
 enum objectType 
 {

@@ -6,8 +6,12 @@
 #ifndef MDCLA_H
 #define MDCLA_H
 
+// Win libs
 #include <cmath>
 #include <stdio.h> // TO-DO: Remove from release ver w/ print functions
+
+// My libs
+#include "typedefs.hpp"
 
 //////////////////
 // Struct Vec2F //
@@ -25,7 +29,7 @@ typedef struct Vec2F
     void         operator +=(const Vec2F& v);
     void         operator -=(const Vec2F& v);
     float&       operator [](int i);
-    const float& operator [](int i) const;
+    c_float&     operator [](int i) const;
 } Vec2F;
 bool  operator ==(const Vec2F& a, const Vec2F& b);
 Vec2F operator +(const Vec2F& a, const Vec2F& b);
@@ -55,7 +59,7 @@ typedef struct Vec3F
     void         operator +=(const Vec3F& v);
     void         operator -=(const Vec3F& v);
     float&       operator [](int i);
-    const float& operator [](int i) const;
+    c_float&     operator [](int i) const;
 } Vec3F;
 bool  operator ==(const Vec3F& a, const Vec3F& b);
 Vec3F operator +(const Vec3F& a, const Vec3F& b);
@@ -87,7 +91,7 @@ typedef struct Vec4F
     void         operator +=(const Vec4F& v);
     void         operator -=(const Vec4F& v);
     float&       operator [](int i);
-    const float& operator [](int i) const;
+    c_float&     operator [](int i) const;
     void print();
 } Vec4F;
 bool  operator ==(const Vec4F& a, const Vec4F& b);
@@ -123,8 +127,8 @@ public:
     Vec3F        operator [](int j);
     const Vec3F  operator [](int j) const;
     float&       operator ()(int i, int j);
-    const float& operator ()(int i, int j) const;
-    const float* getPointer();
+    c_float&     operator ()(int i, int j) const;
+    c_float* getPointer();
 } Mat3F;
 Mat3F operator +(const Mat3F& a, const Mat3F& b);
 Mat3F operator -(const Mat3F& a, const Mat3F& b);
@@ -157,8 +161,8 @@ public:
     Vec4F        operator [](int j);
     const Vec4F  operator [](int j) const;
     float&       operator ()(int i, int j);
-    const float& operator ()(int i, int j) const;
-    const float* getPointer();
+    c_float& operator ()(int i, int j) const;
+    c_float* getPointer();
 } Mat4F;
 Mat4F operator +(const Mat4F& a, const Mat4F& b);
 Mat4F operator -(const Mat4F& a, const Mat4F& b);

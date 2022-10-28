@@ -6,21 +6,26 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+// Win libs
 #include <windows.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 
+// 3rd Party libs
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+// My libs
+#include "typedefs.hpp"
 
 typedef struct Shader {
     GLuint program_id;
     GLuint vert_id;
     GLuint frag_id;
-    Shader(const char* _vertPath, const char* _fragPath);
+    Shader(c_char* _vertPath, c_char* _fragPath);
     ~Shader();
 } Shader;
-void shaderAddMat4Uniform(const Shader* shader_p, const char* name, const float* m);
+void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m);
 
 #endif 
