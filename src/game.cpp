@@ -17,6 +17,7 @@
 #include "stb_image.h"
 
 // My libs
+#include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "shader.hpp"
 #include "cursor.hpp"
@@ -26,21 +27,17 @@
 
 using namespace std;
 
-//////////////
-// Typedefs //
-//////////////
-
-typedef unsigned int uint;
-
 /////////////
 // Globals //
 /////////////
 
 // Window
-const unsigned int WIN_WIDTH  = 1280;
-const unsigned int WIN_HEIGHT = 840;
-const unsigned int X_CENTER   = WIN_WIDTH / 2.0f;
-const unsigned int Y_CENTER   = WIN_HEIGHT / 2.0f;
+c_uint WIN_WIDTH   = 1024;
+c_uint WIN_HEIGHT  = 1024;
+c_uint VIEW_WIDTH  = WIN_WIDTH * 0.5f;;
+c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.5f;
+c_uint X_CENTER    = WIN_WIDTH / 2.0f;
+c_uint Y_CENTER    = WIN_HEIGHT / 2.0f;
 float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
@@ -105,7 +102,6 @@ int main()
     // Set GLFW event callbacks //
     //////////////////////////////
     
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     odGLFWError();
 
@@ -154,6 +150,15 @@ int main()
 
     Texture *texture_p = new Texture("..\\assets\\textures\\orange.bmp");
     textureDataToGPU(texture_p);
+
+    /////////////////////////////
+    // Initialize Framebuffers //
+    /////////////////////////////
+    
+    // Texture size should match the viewport.
+    //We will then blow it up to fit the screen for a low res look.
+    FrameTexture *ftexture_p = new FrameTexture(VIEW_WIDTH, VIEW_HEIGHT);
+    frameTextureDataToGPU(ftexture_p);
     
     /////////////////////////////
     // Transformation Matrices //
@@ -184,14 +189,6 @@ int main()
     shaderAddMat4Uniform(basic_shader_p, "view", view.getPointer());
     shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
 
-    
-    /////////////////////////
-    // Create Framebuffers //
-    /////////////////////////
-
-    FrameTexture *ftexture_p = new FrameTexture(WIN_WIDTH, WIN_HEIGHT);
-    frameTextureDataToGPU(ftexture_p);
-    
     /////////////////
     // Render Loop //
     /////////////////
@@ -229,11 +226,13 @@ int main()
 	projection = cameraGetPerspective(global_cam);
 	shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
 
-	///////////////////
-	// Render pass 1 //
-	///////////////////
+	/////////////////////////
+	// ** Render pass 1 ** //
+	/////////////////////////
 
 	// Use this render pass to write pre-processed image to the color texture.
+	glViewport(0, 0, VIEW_WIDTH, VIEW_HEIGHT); // Render to a smaller area first
+	                                           // so we can blow it up and lower the res
 	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -243,11 +242,13 @@ int main()
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh_p->data.size());
 
-	/////////////////////////////////////
-	// Render pass 2 (Post-processing) //
-	/////////////////////////////////////
+	///////////////////////////////////////////
+	// ** Render pass 2 (Post-processing) ** //
+	///////////////////////////////////////////
 
 	// use this render pass to draw post-processed color texture to screen.
+	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT); // Render to the full screen now,
+	                                         // blowing up the screen texture
         frameTextureDraw(ftexture_p, pp_shader_p);
 	
 	//////////////////
@@ -285,7 +286,7 @@ int main()
 
 void odGLFWError()
 {
-    const char* errorMsg;
+    c_char* errorMsg;
     int errorCode = glfwGetError(&errorMsg);
     if(errorMsg)
     {
@@ -296,7 +297,7 @@ void odGLFWError()
 
 void printGLFWError()
 {
-    const char* errorMsg;
+    c_char* errorMsg;
     int errorCode = glfwGetError(&errorMsg);
     if(errorMsg)
     {
@@ -304,15 +305,8 @@ void printGLFWError()
     }
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-    win_ar       = (float)width / (float)height; // Update the global
-    global_cam.ar = win_ar; // TODO: Decouple the camera from the framebuffer callback
-}
-
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
-                       GLsizei length, const char *message, const void *userParam)
+                       GLsizei length, c_char *message, c_void *userParam)
 {
     // ignore non-significant error/warning codes
     if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return; 
