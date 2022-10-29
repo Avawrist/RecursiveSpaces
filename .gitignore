@@ -1,1 +1,7 @@
 build/
+*.cpp~
+*.hpp~
+*.fs~
+*.vs~
+*.obj~
+*.bmp~
