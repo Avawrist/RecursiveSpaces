@@ -28,7 +28,7 @@ typedef struct Shader {
     ~Shader();
 } Shader;
 void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m);
-void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, float x, float y, float z);
+void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v);
 void shaderAddFloatUniform(const Shader* shader_p, c_char* name, float f);
 
 #endif 

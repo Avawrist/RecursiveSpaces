@@ -16,7 +16,7 @@ struct DirLight
 };
 
 // Uniforms
-uniform DirLight dirLight;
+uniform DirLight  dirLight;
 uniform sampler2D diffuse_map;
 
 // Function Prototypes
@@ -43,25 +43,13 @@ void main()
 	final_color = vec4(object_color, 1.0);
 }
 
-/*
-// TEST
-void main()
-{
-	// Prep Data
-	vec3 n_dir  = normalize(dirLight.dir);
-	vec3 n_norm = normalize(norm);
-
-	// Output
-	final_color = vec4(n_norm, 1.0);
-}
-*/
 vec3 getDirLight(DirLight dirLight, vec3 dir, vec3 norm)
 {
 	// Ambient Component
 	vec3 ambient_comp = dirLight.ambient_strength * dirLight.color;
 
 	// Diffuse Component
-	vec3 diffuse_comp = max(dot(dirLight.dir, norm), 0.0) * dirLight.color;
+	vec3 diffuse_comp = max(dot(-dirLight.dir, norm), 0.0) * dirLight.color;
 
 	// Specular Component
 	// TODO

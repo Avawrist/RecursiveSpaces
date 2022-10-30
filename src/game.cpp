@@ -158,7 +158,7 @@ int main()
 
     DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
 					Vec3F(0.0f, -1.0f, -1.0f),
-	                                0.1f);
+	                                0.0f);
 
     /////////////////////////////
     // Initialize Framebuffers //
@@ -228,16 +228,8 @@ int main()
 	glUseProgram(bp_shader_p->program_id);
 	
 	// DirLights //
-	shaderAddVec3Uniform(bp_shader_p,
-			     "dirLight.color",
-			     dirLight_p->color.x,
-			     dirLight_p->color.y,
-			     dirLight_p->color.z);
-	shaderAddVec3Uniform(bp_shader_p,
-			     "dirLight.dir",
-			     dirLight_p->dir.x,
-			     dirLight_p->dir.y,
-			     dirLight_p->dir.z);
+	shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dirLight_p->color);
+	shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dirLight_p->dir);
 	shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dirLight_p->ambient_strength);
 	
 	// Transformation Matrices // 
