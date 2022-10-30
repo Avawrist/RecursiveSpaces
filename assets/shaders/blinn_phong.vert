@@ -14,5 +14,5 @@ void main()
 {
 	gl_Position = projection * view * model * vec4(in_pos, 1.0);
 	uv = in_uv;
-	norm = in_norm;
+	norm = mat3(transpose(inverse(model))) * in_norm; // Corrects normals IF model was scaled non-uniformly. 
 }

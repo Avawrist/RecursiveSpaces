@@ -152,6 +152,14 @@ int main()
     Texture *texture_p = new Texture("..\\assets\\textures\\orange.bmp");
     textureDataToGPU(texture_p);
 
+    ///////////////////////
+    // Initialize Lights //
+    ///////////////////////
+
+    DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
+					Vec3F(0.0f, -1.0f, -1.0f),
+	                                0.1f);
+
     /////////////////////////////
     // Initialize Framebuffers //
     /////////////////////////////
@@ -177,18 +185,18 @@ int main()
     ////////////////////
 
     // Simple object shader
-    Shader *basic_shader_p = new Shader("..\\assets\\shaders\\basic.vs",
-					"..\\assets\\shaders\\basic.fs");
+    Shader *bp_shader_p = new Shader("..\\assets\\shaders\\blinn_phong.vert",
+					"..\\assets\\shaders\\blinn_phong.frag");
 
     // Post-processing shader
-    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vs",
-				     "..\\assets\\shaders\\pp.fs");
+    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vert",
+				     "..\\assets\\shaders\\pp.frag");
     
-    // Load uniform values to GPU
-    glUseProgram(basic_shader_p->program_id);
-    shaderAddMat4Uniform(basic_shader_p, "model", model.getPointer());
-    shaderAddMat4Uniform(basic_shader_p, "view", view.getPointer());
-    shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
+    // Load initial uniform values to GPU
+    glUseProgram(bp_shader_p->program_id);
+    shaderAddMat4Uniform(bp_shader_p, "model",      model.getPointer());
+    shaderAddMat4Uniform(bp_shader_p, "view",       view.getPointer());
+    shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
     /////////////////
     // Render Loop //
@@ -213,19 +221,35 @@ int main()
 	///////////////////
 	cameraUpdate(global_cam, window, cursorGetDistance(global_cursor), d_time);
 	
-	////////////////////////////////////
-	// Update Transformation Matrices //
-	////////////////////////////////////
-	glUseProgram(basic_shader_p->program_id);
+	////////////////////////////
+	// Update Shader Uniforms //
+	////////////////////////////
 
+	glUseProgram(bp_shader_p->program_id);
+	
+	// DirLights //
+	shaderAddVec3Uniform(bp_shader_p,
+			     "dirLight.color",
+			     dirLight_p->color.x,
+			     dirLight_p->color.y,
+			     dirLight_p->color.z);
+	shaderAddVec3Uniform(bp_shader_p,
+			     "dirLight.dir",
+			     dirLight_p->dir.x,
+			     dirLight_p->dir.y,
+			     dirLight_p->dir.z);
+	shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dirLight_p->ambient_strength);
+	
+	// Transformation Matrices // 
+     
 	// Update View
 	view = cameraGetView(global_cam);
-	shaderAddMat4Uniform(basic_shader_p, "view", view.getPointer());
+	shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
 	projection = cameraGetPerspective(global_cam);
-	shaderAddMat4Uniform(basic_shader_p, "projection", projection.getPointer());
+	shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
 	/////////////////////////
 	// ** Render pass 1 ** //
@@ -237,7 +261,7 @@ int main()
 	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glUseProgram(basic_shader_p->program_id); // Use the basic object shader
+	glUseProgram(bp_shader_p->program_id); // Use the basic object shader
 	// Move into gameobject draw code eventually:
 	glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
 	glBindVertexArray(mesh_p->vao);
@@ -272,9 +296,10 @@ int main()
     // Delete mesh
     delete mesh_p;
     delete texture_p;
-    delete basic_shader_p;
+    delete bp_shader_p;
     delete pp_shader_p;
     delete ftexture_p;
+    delete dirLight_p;
     
     // Delete window
     glfwDestroyWindow(window);

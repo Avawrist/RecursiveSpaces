@@ -6,6 +6,9 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "typedefs.hpp"
+#include "mdcla.hpp"
+
 //////////////////////////////
 // Directional Light Struct //
 //////////////////////////////
@@ -16,13 +19,13 @@ typedef struct DirLight
     Vec3F dir;
     float ambient_strength;
     DirLight();
-    DirLight(Vec3F _color, Vec3F _dir);
+    DirLight(Vec3F _color, Vec3F _dir, float _ambient_strength);
 } DirLight;
 
 ////////////////////////
 // Point Light Struct //
 ////////////////////////
-
+/*
 typedef struct PointLight
 {
 
@@ -36,5 +39,5 @@ typedef struct SpotLight
 {
     
 } Spotlight;
-
+*/
 #endif

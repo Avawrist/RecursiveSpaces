@@ -92,7 +92,6 @@ typedef struct Vec4F
     void         operator -=(const Vec4F& v);
     float&       operator [](int i);
     c_float&     operator [](int i) const;
-    void print();
 } Vec4F;
 bool  operator ==(const Vec4F& a, const Vec4F& b);
 Vec4F operator +(const Vec4F& a, const Vec4F& b);
