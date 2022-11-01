@@ -5,6 +5,7 @@ layout (location = 2) in vec3 in_norm;
 
 out vec2 uv;
 out vec3 norm;
+out vec3 frag_pos;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -12,7 +13,8 @@ uniform mat4 projection;
 
 void main()
 {
+	uv          = in_uv;
+	norm        = mat3(transpose(inverse(model))) * in_norm;
+	frag_pos    = vec3(model * vec4(in_pos, 1.0));
 	gl_Position = projection * view * model * vec4(in_pos, 1.0);
-	uv = in_uv;
-	norm = mat3(transpose(inverse(model))) * in_norm; // Corrects normals IF model was scaled non-uniformly. 
 }

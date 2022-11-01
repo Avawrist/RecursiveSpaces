@@ -35,7 +35,7 @@ using namespace std;
 // Window
 c_uint WIN_WIDTH   = 1024;
 c_uint WIN_HEIGHT  = 1024;
-c_uint VIEW_WIDTH  = WIN_WIDTH * 0.5f;;
+c_uint VIEW_WIDTH  = WIN_WIDTH * 0.5f;
 c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.5f;
 c_uint X_CENTER    = WIN_WIDTH * 0.5f;
 c_uint Y_CENTER    = WIN_HEIGHT * 0.5f;
@@ -231,6 +231,9 @@ int main()
 	shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dirLight_p->color);
 	shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dirLight_p->dir);
 	shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dirLight_p->ambient_strength);
+
+	// Cam Position //
+	shaderAddVec3Uniform(bp_shader_p, "cam_pos", global_cam.pos);
 	
 	// Transformation Matrices // 
      
