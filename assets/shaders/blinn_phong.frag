@@ -19,6 +19,7 @@ struct DirLight
 // Uniforms
 uniform DirLight  dirLight;
 uniform sampler2D diffuse_map;
+uniform sampler2D normal_map;
 uniform vec3      cam_pos;
 
 // Function Prototypes
@@ -34,7 +35,7 @@ void main()
 	vec3 n_norm      = normalize(norm);
 
 	// Object Color
-	vec3 object_color = vec3(texture(diffuse_map, uv));
+	vec3 object_color = vec3(texture(normal_map, uv));
 
 	// Add DirLight
 	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, n_norm);
@@ -61,8 +62,8 @@ vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm)
 	vec3 diffuse_comp = max(dot(light_dir, norm), 0.0) * dirLight.color;
 
 	// Specular Component
-	// TODO: Get shininess from material (currently 32)
-	vec3 specular_comp = pow(reduceGradient(max(dot(norm, n_half), 0.0)), 32) * dirLight.color;
+	// TODO: Get shininess from material (currently 128)
+	vec3 specular_comp = pow(reduceGradient(max(dot(norm, n_half), 0.0)), 128) * dirLight.color;
 
 	return (ambient_comp + diffuse_comp + specular_comp);
 }

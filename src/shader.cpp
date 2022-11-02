@@ -136,6 +136,12 @@ void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v)
     glUniform3fv(loc, 1, &v[0]);
 }
 
+void shaderAddIntUniform(const Shader* shader_p, c_char* name, int i)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform1i(loc, i);    
+}
+
 void shaderAddFloatUniform(const Shader* shader_p, c_char* name, float f)
 {
     int loc = glGetUniformLocation(shader_p->program_id, name);

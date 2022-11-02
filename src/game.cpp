@@ -145,12 +145,15 @@ int main()
     Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
     meshDataToGPU(mesh_p);
 
-    ////////////////////////
-    // Initialize Texture //
-    ////////////////////////
+    /////////////////////////
+    // Initialize Textures //
+    /////////////////////////
 
-    Texture *texture_p = new Texture("..\\assets\\textures\\orange.bmp");
-    textureDataToGPU(texture_p);
+    Texture *d_texture_p = new Texture("..\\assets\\textures\\brickwall.bmp");
+    textureDataToGPU(d_texture_p);
+
+    Texture *n_texture_p = new Texture("..\\assets\\textures\\brickwall_normal.bmp");
+    textureDataToGPU(n_texture_p);
 
     ///////////////////////
     // Initialize Lights //
@@ -188,16 +191,22 @@ int main()
     Shader *bp_shader_p = new Shader("..\\assets\\shaders\\blinn_phong.vert",
 					"..\\assets\\shaders\\blinn_phong.frag");
 
-    // Post-processing shader
-    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vert",
-				     "..\\assets\\shaders\\pp.frag");
-    
     // Load initial uniform values to GPU
     glUseProgram(bp_shader_p->program_id);
     shaderAddMat4Uniform(bp_shader_p, "model",      model.getPointer());
     shaderAddMat4Uniform(bp_shader_p, "view",       view.getPointer());
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
-
+    shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
+    shaderAddIntUniform(bp_shader_p, "normal_map", 1);
+    
+    // Post-processing shader
+    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vert",
+				     "..\\assets\\shaders\\pp.frag");
+    // Load initial uniform values to GPU
+    glUseProgram(pp_shader_p->program_id);
+    shaderAddIntUniform(pp_shader_p, "color_texture", 0);
+    
+    
     /////////////////
     // Render Loop //
     /////////////////
@@ -258,7 +267,11 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glUseProgram(bp_shader_p->program_id); // Use the basic object shader
 	// Move into gameobject draw code eventually:
-	glBindTexture(GL_TEXTURE_2D, texture_p->texture_id);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, d_texture_p->texture_id);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, n_texture_p->texture_id);
+	
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, mesh_p->data.size());
 
@@ -290,7 +303,7 @@ int main()
 
     // Delete mesh
     delete mesh_p;
-    delete texture_p;
+    delete d_texture_p;
     delete bp_shader_p;
     delete pp_shader_p;
     delete ftexture_p;
