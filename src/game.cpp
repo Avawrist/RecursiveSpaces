@@ -160,7 +160,7 @@ int main()
     ///////////////////////
 
     DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
-					Vec3F(0.0f, -1.0f, -1.0f),
+					Vec3F(1.0f, 0.0f, 0.0f),
 	                                0.0f);
 
     /////////////////////////////

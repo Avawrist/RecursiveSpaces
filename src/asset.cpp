@@ -20,6 +20,9 @@ Mesh::Mesh(c_char* obj_path)
     {
 	OutputDebugStringA("ERROR: Failed to load mesh.\n");
     }
+
+    // Add tangents to Mesh data vector
+    meshCalcTangents(this);
 }
 
 Mesh::~Mesh()
@@ -46,7 +49,7 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
     std::vector<float> vertices;
     std::vector<float> uvs;
     std::vector<float> normals;
-
+    
     c_int SIZE = 3;
     char  buf[SIZE];
     
@@ -120,6 +123,54 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
     return 1;
 }
 
+void meshCalcTangents(Mesh* mesh_p)
+{
+    //   0       1       2      3     4      5       6      7
+    //(vert.x, vert.y, vert.z, uv.x, uv.y, norm.x, norm.y, norm.z, 
+
+    //  8       9       10     11    12     13     14      15    
+    //vert.x, vert.y, vert.z, uv.x, uv.y, norm.x, norm.y, norm.z, 
+
+    //  16      17      18     19    20     21      22      23
+    //vert.x, vert.y, vert.z, uv.x, uv.y, norm.x, norm.y, norm.z)
+
+    int   triangle_count = mesh_p->data.size() / 24; // 24 elements per triangle
+    int   stride = 33; // 33 elements after insertion
+    float tangent_vals[3];
+    int   index;
+	
+    for(int i = 0; i < triangle_count; i++)
+    {
+	index = i * stride;
+        
+	// Prep Data
+	Vec3F pos_1 = Vec3F(mesh_p->data[index],    mesh_p->data[index+1],  mesh_p->data[index+2]);
+	Vec3F pos_2 = Vec3F(mesh_p->data[index+8],  mesh_p->data[index+9],  mesh_p->data[index+10]);
+	Vec3F pos_3 = Vec3F(mesh_p->data[index+16], mesh_p->data[index+17], mesh_p->data[index+18]);
+
+	Vec2F uv_1 = Vec2F(mesh_p->data[index+3],  mesh_p->data[index+4]);
+	Vec2F uv_2 = Vec2F(mesh_p->data[index+11], mesh_p->data[index+12]);
+	Vec2F uv_3 = Vec2F(mesh_p->data[index+19], mesh_p->data[index+20]);
+	
+	Vec3F edge_1     = pos_2 - pos_1;
+	Vec3F edge_2     = pos_3 - pos_1;
+	Vec2F delta_uv_1 = uv_2 - uv_1;
+	Vec2F delta_uv_2 = uv_3 - uv_1;
+
+	float f = 1.0f / (delta_uv_1.x * delta_uv_2.y - delta_uv_2.x * delta_uv_1.y);
+
+	// Calculate Tangent
+	tangent_vals[0] = f * (delta_uv_2.y * edge_1.x - delta_uv_1.y * edge_2.x);
+	tangent_vals[1] = f * (delta_uv_2.y * edge_1.y - delta_uv_1.y * edge_2.y);
+	tangent_vals[2] = f * (delta_uv_2.y * edge_1.z - delta_uv_1.y * edge_2.z);
+
+	// Insert Tangent in Data
+	mesh_p->data.insert(mesh_p->data.begin() + index + 8, tangent_vals, tangent_vals + 3);
+	mesh_p->data.insert(mesh_p->data.begin() + index + 19, tangent_vals, tangent_vals + 3);
+	mesh_p->data.insert(mesh_p->data.begin() + index + 30, tangent_vals, tangent_vals + 3);
+    }
+}
+
 void meshDataToGPU(Mesh* mesh_p)
 {
     ///////////////////////////////////
@@ -138,15 +189,19 @@ void meshDataToGPU(Mesh* mesh_p)
 
     // Vertex Attribute
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), 0);
 
     // UV Attribute
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 
     // Normal Attribute
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(5 * sizeof(float)));
+
+    // Tangent Attribute
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
     
     // Unbind buffer and VAO:
     glBindBuffer(GL_ARRAY_BUFFER, 0);

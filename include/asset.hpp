@@ -36,6 +36,7 @@ typedef struct Mesh
     ~Mesh();
 } Mesh;
 int  meshLoadObj(Mesh* mesh_p, c_char* path);
+void meshCalcTangents(Mesh* mesh_p);
 void meshDataToGPU(Mesh* mesh_p);
 
 ////////////////////

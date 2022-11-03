@@ -2,8 +2,8 @@
 
 // In Variables
 in vec2 uv;
-in vec3 norm;
 in vec3 frag_pos;
+in mat3 TBN;
 
 // Out Variables
 out vec4 final_color;
@@ -29,22 +29,35 @@ float reduceGradient(float n_value_f);
 // Function Definitions
 void main()
 {
-	// Prep Data
-	vec3 n_light_dir = normalize(-dirLight.dir);
-	vec3 n_view_dir  = normalize(cam_pos - frag_pos);
-	vec3 n_norm      = normalize(norm);
+	///////////////
+	// Prep Data //
+	///////////////
+
+	// Directions
+	vec3 n_light_dir = normalize(-dirLight.dir);      // world space
+	vec3 n_view_dir  = normalize(cam_pos - frag_pos); // world space
+
+	// Fragment Normal (In range -1 to 1)
+	vec3 frag_norm = (vec3(texture(normal_map, uv)) * 2.0) - 1.0;
+	frag_norm      = normalize(TBN * frag_norm); // Convert from tangent space to world space
 
 	// Object Color
-	vec3 object_color = vec3(texture(normal_map, uv));
+	vec3 object_color = vec3(texture(diffuse_map, uv));
+
+	////////////////
+	// Add Lights //
+	////////////////
 
 	// Add DirLight
-	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, n_norm);
+	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, frag_norm);
 
 	// Add PointLight
 
 	// Add SpotLight
 
-	// Output
+	////////////
+	// Output //
+	////////////
 	final_color = vec4(object_color, 1.0);
 }
 
