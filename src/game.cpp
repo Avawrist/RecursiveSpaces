@@ -39,7 +39,7 @@ c_uint VIEW_WIDTH  = WIN_WIDTH * 0.5f;
 c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.5f;
 c_uint X_CENTER    = WIN_WIDTH * 0.5f;
 c_uint Y_CENTER    = WIN_HEIGHT * 0.5f;
-float win_ar = (float)WIN_WIDTH / (float)WIN_HEIGHT;
+float win_ar       = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
 int   frame_rate  = 60;
@@ -304,6 +304,7 @@ int main()
     // Delete mesh
     delete mesh_p;
     delete d_texture_p;
+    delete n_texture_p;
     delete bp_shader_p;
     delete pp_shader_p;
     delete ftexture_p;

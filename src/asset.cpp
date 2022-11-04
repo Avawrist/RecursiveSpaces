@@ -258,7 +258,7 @@ int textureLoadBmp(Texture* texture_p, c_char* path)
     texture_p->map.resize(size);
     fread(texture_p->map.data(), 1, size, file_p);
     fclose(file_p);
-
+    
     return 1;
 }
 

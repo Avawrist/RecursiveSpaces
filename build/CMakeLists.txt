@@ -31,7 +31,8 @@ set(SOURCES "${CMAKE_SOURCE_DIR}/src/game.cpp"
 	    "${CMAKE_SOURCE_DIR}/src/mdcla.cpp"
 	    "${CMAKE_SOURCE_DIR}/src/entity.cpp"
 	    "${CMAKE_SOURCE_DIR}/src/asset.cpp"
-	    "${CMAKE_SOURCE_DIR}/src/light.cpp")	
+	    "${CMAKE_SOURCE_DIR}/src/light.cpp"
+	    "${CMAKE_SOURCE_DIR}/src/sound.cpp")	
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
