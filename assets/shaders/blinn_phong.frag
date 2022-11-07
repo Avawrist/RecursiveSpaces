@@ -77,7 +77,7 @@ vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm)
 	// Specular Component
 	// TODO: Get shininess from material (currently 128)
 	vec3 specular_comp = pow(reduceGradient(max(dot(norm, n_half), 0.0)), 128) * dirLight.color;
-
+	
 	return (ambient_comp + diffuse_comp + specular_comp);
 }
 

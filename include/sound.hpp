@@ -6,8 +6,6 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include <commdlg.h>
-
 // STREAMING WAV FILES
 // Primary buffer must be from the buffer class
 
@@ -23,11 +21,7 @@
 // SoundDevice Struct //
 ////////////////////////
 
-typedef struct SoundDevice {
-    HRESULT ds_device;
-    SoundDevice();
-    ~SoundDevice();
-} SoundDevice;
+
 
 #endif
 

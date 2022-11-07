@@ -56,12 +56,11 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
     FILE* file_p;
     fopen_s(&file_p, path, "r");
     if(!file_p) {return 0;}
-    
     do
     {
 	// Get line identifier
 	fgets(buf, SIZE, file_p);
-
+	
 	/////////////////////////////////////////////////
 	// Read all data into 3 separate vectors first //
 	/////////////////////////////////////////////////
@@ -98,7 +97,7 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
 
 		// Remove 1 from each index value to match OpenGL conventions:
 		v_ind -= 1;
-		t_ind -= 1;
+	t_ind -= 1;
 		n_ind -= 1;
 	        
 		// Massage vertices, uvs and normals together into single data vector:
