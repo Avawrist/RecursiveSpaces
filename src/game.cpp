@@ -39,7 +39,7 @@ c_uint VIEW_WIDTH  = WIN_WIDTH * 0.5f;
 c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.5f;
 c_uint X_CENTER    = WIN_WIDTH * 0.5f;
 c_uint Y_CENTER    = WIN_HEIGHT * 0.5f;
-float win_ar       = (float)WIN_WIDTH / (float)WIN_HEIGHT;
+float  win_ar      = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
 int   frame_rate  = 60;
@@ -50,7 +50,7 @@ float d_time      = 0.0f;
 Cursor global_cursor(X_CENTER, Y_CENTER);
 
 // Camera
-Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 1.0f, 100.0f, 45.0f, win_ar);
+Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 0.8f, 100.0f, 45.0f, win_ar);
 
 /////////////////////////
 // Function Prototypes //
@@ -258,13 +258,13 @@ int main()
 	/////////////////////////
 	// ** Render pass 1 ** //
 	/////////////////////////
-
+	printf("%i, %i\n", VIEW_WIDTH, VIEW_HEIGHT);
 	// Use this render pass to write pre-processed image to the color texture.
 	glViewport(0, 0, VIEW_WIDTH, VIEW_HEIGHT); // Render to a smaller area first
 	                                           // so we can blow it up and lower the res
 	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(bp_shader_p->program_id); // Use the basic object shader
 	// Move into gameobject draw code eventually:
 	glActiveTexture(GL_TEXTURE0);

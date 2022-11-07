@@ -431,4 +431,5 @@ void frameTextureDraw(FrameTexture* ftexture_p, Shader* shader_p)
     glBindVertexArray(ftexture_p->quad_vao); // Bind quad vao
 
     glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices in the quad data
+    glEnable(GL_DEPTH_TEST);
 }

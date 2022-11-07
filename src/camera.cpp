@@ -129,6 +129,6 @@ Mat4F cameraGetPerspective(const Camera& cam)
     return Mat4F(1.0f/(cam.ar * tan_half_fov), 0.0f, 0.0f, 0.0f,                   // Row 1
 	         0.0f, 1.0f/tan_half_fov, 0.0f, 0.0f,                              // Row 2
 	         0.0f, 0.0f, (-cam.n - cam.f)/range, (2.0f * cam.f * cam.n)/range, // Row 3
-	         0.0f, 0.0f, 1.0f, 0.0f);                                          // Row 4
+	         0.0f, 0.0f, -1.0f, 0.0f);                                         // Row 4
     
 }
