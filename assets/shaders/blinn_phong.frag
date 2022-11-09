@@ -3,6 +3,7 @@
 // In Variables
 in vec2 uv;
 in vec3 frag_pos;
+in vec3 vert_norm;
 in mat3 TBN;
 
 // Out Variables
@@ -49,7 +50,7 @@ void main()
 	////////////////
 
 	// Add DirLight
-	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, frag_norm);
+	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, vert_norm);
 
 	// Add PointLight
 

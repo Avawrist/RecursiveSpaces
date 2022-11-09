@@ -6,6 +6,7 @@ layout (location = 3) in vec3 in_tang;
 
 out vec2 uv;
 out vec3 frag_pos;
+out vec3 vert_norm;
 out mat3 TBN;
 
 uniform mat4 model;
@@ -27,5 +28,6 @@ void main()
 	// Positions and Coords
 	uv          = in_uv;
 	frag_pos    = vec3(model * vec4(in_pos, 1.0));
+	vert_norm   = in_norm;
 	gl_Position = projection * view * model * vec4(in_pos, 1.0);
 }

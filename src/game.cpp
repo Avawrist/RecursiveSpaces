@@ -142,7 +142,7 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\monkey.obj");
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
     meshDataToGPU(mesh_p);
 
     /////////////////////////
@@ -160,7 +160,7 @@ int main()
     ///////////////////////
 
     DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
-					Vec3F(1.0f, 0.0f, 0.0f),
+					Vec3F(0.0f, -1.0f, 1.0f),
 	                                0.0f);
 
     /////////////////////////////
@@ -258,7 +258,7 @@ int main()
 	/////////////////////////
 	// ** Render pass 1 ** //
 	/////////////////////////
-	printf("%i, %i\n", VIEW_WIDTH, VIEW_HEIGHT);
+
 	// Use this render pass to write pre-processed image to the color texture.
 	glViewport(0, 0, VIEW_WIDTH, VIEW_HEIGHT); // Render to a smaller area first
 	                                           // so we can blow it up and lower the res
