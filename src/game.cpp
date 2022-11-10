@@ -142,14 +142,14 @@ int main()
     // Initialize Test Mesh //
     //////////////////////////
 
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\cube.obj");
+    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\chest.obj");
     meshDataToGPU(mesh_p);
 
     /////////////////////////
     // Initialize Textures //
     /////////////////////////
 
-    Texture *d_texture_p = new Texture("..\\assets\\textures\\brickwall.bmp");
+    Texture *d_texture_p = new Texture("..\\assets\\textures\\chest.bmp");
     textureDataToGPU(d_texture_p);
 
     Texture *n_texture_p = new Texture("..\\assets\\textures\\brickwall_normal.bmp");
@@ -160,8 +160,8 @@ int main()
     ///////////////////////
 
     DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
-					Vec3F(0.0f, -1.0f, 1.0f),
-	                                0.0f);
+					Vec3F(0.0f, -1.0f, -1.0f),
+	                                0.25f);
 
     /////////////////////////////
     // Initialize Framebuffers //
