@@ -5,12 +5,33 @@
 
 #include "sound.hpp"
 
-int loadXAudio2()
+///////////////////////////
+// Struct SoundInterface //
+///////////////////////////
+
+SoundInterface::SoundInterface()
+{
+    if(soundInterfaceLoadXAudio2())
+    {
+	// init COM
+	
+	// init xaudio interface
+
+	// init sound master
+    }
+    else
+    {
+	OutputDebugStringA("Failed to load XAudio2\n");
+    }    
+}
+
+int soundInterfaceLoadXAudio2()
 {
     HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
+    if(x_audio_2_libs) {return 1;}
 
-    IXAudio2* pXAudio2 = nullptr;
-    XAudio2Create(&pXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+    x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
+    if(x_audio_2_libs) {return 1;}
     
     return 0;
 }

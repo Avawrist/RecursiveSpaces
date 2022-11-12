@@ -51,7 +51,7 @@ float d_time      = 0.0f;
 Cursor global_cursor(X_CENTER, Y_CENTER);
 
 // Camera
-Camera global_cam(Vec3F(0.0f, 0.0f, 3.0f), 0.8f, 100.0f, 45.0f, win_ar);
+Camera global_cam(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, win_ar);
 
 /////////////////////////
 // Function Prototypes //
@@ -142,7 +142,8 @@ int main()
     //////////////////////////
     // Load XAudio2 Library //
     //////////////////////////
-    
+
+    loadXAudio2();
     
     //////////////////////////
     // Initialize Test Mesh //

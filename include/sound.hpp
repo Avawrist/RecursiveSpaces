@@ -13,6 +13,14 @@
 #include <windows.h>
 #include <xaudio2.h>>
 
-int loadXAudio2();
+///////////////////////////
+// Struct SoundInterface //
+///////////////////////////
+
+typedef struct SoundInterface()
+{
+    SoundInterface();
+} SoundInterface;
+int soundInterfaceLoadXAudio2();
 
 #endif
