@@ -17,9 +17,12 @@
 // Struct SoundInterface //
 ///////////////////////////
 
-typedef struct SoundInterface()
+typedef struct SoundInterface
 {
+    IXAudio2*               interface_p;
+    IXAudio2MasteringVoice* master_voice_p;
     SoundInterface();
+    ~SoundInterface();
 } SoundInterface;
 int soundInterfaceLoadXAudio2();
 

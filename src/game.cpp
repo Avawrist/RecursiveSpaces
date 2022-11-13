@@ -143,7 +143,7 @@ int main()
     // Load XAudio2 Library //
     //////////////////////////
 
-    loadXAudio2();
+    SoundInterface soundInterface;
     
     //////////////////////////
     // Initialize Test Mesh //

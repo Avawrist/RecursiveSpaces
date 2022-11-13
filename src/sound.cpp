@@ -11,18 +11,30 @@
 
 SoundInterface::SoundInterface()
 {
+    interface_p    = nullptr;
+    master_voice_p = nullptr;
+    
     if(soundInterfaceLoadXAudio2())
     {
-	// init COM
+	// Init COM
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED); // wtf is this?
 	
-	// init xaudio interface
-
-	// init sound master
+	// Init xaudio interface
+	XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	
+	// Init sound master
+	interface_p->CreateMasteringVoice(&master_voice_p);
     }
     else
     {
 	OutputDebugStringA("Failed to load XAudio2\n");
     }    
+}
+
+SoundInterface::~SoundInterface()
+{
+    delete interface_p;
+    delete master_voice_p;
 }
 
 int soundInterfaceLoadXAudio2()
