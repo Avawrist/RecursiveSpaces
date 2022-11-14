@@ -16,8 +16,8 @@ SoundInterface::SoundInterface()
     
     if(soundInterfaceLoadXAudio2())
     {
-	// Init COM
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED); // wtf is this?
+	// Init COM library
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
 	
 	// Init xaudio interface
 	XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
@@ -33,16 +33,31 @@ SoundInterface::SoundInterface()
 
 SoundInterface::~SoundInterface()
 {
-    delete interface_p;
-    delete master_voice_p;
+    // Uninitialize COM library
+    CoUninitialize();
 }
 
 int soundInterfaceLoadXAudio2()
 {
+    // Windows 10 
     HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
     if(x_audio_2_libs) {return 1;}
 
     x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
+    if(x_audio_2_libs) {return 1;}
+
+    // Windows 8
+    x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
+    if(x_audio_2_libs) {return 1;}
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
+    if(x_audio_2_libs) {return 1;}
+
+    // DirectX SDK
+    x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
+    if(x_audio_2_libs) {return 1;}
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
     if(x_audio_2_libs) {return 1;}
     
     return 0;
