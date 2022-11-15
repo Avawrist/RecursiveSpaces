@@ -21,13 +21,21 @@ SoundInterface::SoundInterface()
 	
 	// Init xaudio interface
 	XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	if(!interface_p)
+	{
+	    OutputDebugStringA("Failed to initialize XAudio2 interface.\n");
+	}
 	
 	// Init sound master
 	interface_p->CreateMasteringVoice(&master_voice_p);
+	if(!master_voice_p)
+	{
+	    OutputDebugStringA("Failed to initialize XAudio2 Master Voice\n");
+	}
     }
     else
     {
-	OutputDebugStringA("Failed to load XAudio2\n");
+	OutputDebugStringA("Failed to load XAudio2 dynamic library.\n");
     }    
 }
 
@@ -61,4 +69,30 @@ int soundInterfaceLoadXAudio2()
     if(x_audio_2_libs) {return 1;}
     
     return 0;
+}
+
+//////////////////
+// Struct Sound //
+//////////////////
+
+Sound::Sound(c_char* wav_path)
+{
+    // Populate WAVEFORMATEX struct
+
+    // Populate XAUDIO2_BUFFER struct
+}
+
+Sound::~Sound()
+{
+    
+}
+
+int soundLoadWav(Sound& sound_p, c_char* wav_path)
+{
+    
+}
+
+void soundPlay(Sound& sound_p)
+{
+    
 }

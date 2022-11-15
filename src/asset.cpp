@@ -213,6 +213,10 @@ void meshDataToGPU(Mesh* mesh_p)
 
 Texture::Texture(c_char* bmp_path)
 {
+    // Init member variables
+    width  = 0;
+    height = 0;
+    
     // Create OpenGL Texture object
     glGenTextures(1, &texture_id);
     

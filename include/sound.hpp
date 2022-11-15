@@ -10,8 +10,12 @@
 #ifndef SOUND_H
 #define SOUND_H
 
+// Win libs
 #include <windows.h>
-#include <xaudio2.h>>
+#include <xaudio2.h>
+
+// My libs
+#include "typedefs.hpp"
 
 ///////////////////////////
 // Struct SoundInterface //
@@ -25,5 +29,19 @@ typedef struct SoundInterface
     ~SoundInterface();
 } SoundInterface;
 int soundInterfaceLoadXAudio2();
+
+//////////////////
+// Struct Sound //
+//////////////////
+
+typedef struct Sound
+{
+    WAVEFORMATEX   waveformat_p;
+    XAUDIO2_BUFFER buffer_p;
+    Sound(c_char* wav_path);
+    ~Sound();
+} Sound;
+int soundLoadWav(Sound& sound_p, c_char* wav_path);
+void soundPlay(Sound& sound_p);
 
 #endif
