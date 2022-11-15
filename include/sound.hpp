@@ -12,6 +12,7 @@
 
 // Win libs
 #include <windows.h>
+#include <stdio.h>
 #include <xaudio2.h>
 
 // My libs
@@ -41,7 +42,7 @@ typedef struct Sound
     Sound(c_char* wav_path);
     ~Sound();
 } Sound;
-int soundLoadWav(Sound& sound_p, c_char* wav_path);
-void soundPlay(Sound& sound_p);
+int soundLoadWav(Sound& sound, c_char* wav_path);
+void soundPlay(Sound& sound);
 
 #endif

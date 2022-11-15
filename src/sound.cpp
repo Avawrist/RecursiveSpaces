@@ -77,9 +77,10 @@ int soundInterfaceLoadXAudio2()
 
 Sound::Sound(c_char* wav_path)
 {
-    // Populate WAVEFORMATEX struct
-
-    // Populate XAUDIO2_BUFFER struct
+    if(!soundLoadWav(*this, wav_path))
+    {
+	OutputDebugStringA("Failed to load .wav file.\n");
+    }
 }
 
 Sound::~Sound()
@@ -87,12 +88,20 @@ Sound::~Sound()
     
 }
 
-int soundLoadWav(Sound& sound_p, c_char* wav_path)
+int soundLoadWav(Sound& sound, c_char* wav_path)
 {
+    // Populate WAVEFORMATEX struct
+    // Populate XAUDIO2_BUFFER struct
+
+    FILE* file_p;
+    fopen_s(&file_p, wav_path, "rb");
+
     
+    
+    return 1;
 }
 
-void soundPlay(Sound& sound_p)
+void soundPlay(Sound& sound)
 {
     
 }
