@@ -37,8 +37,8 @@ int soundInterfaceLoadXAudio2();
 
 typedef struct Sound
 {
-    WAVEFORMATEX   waveformat_p;
-    XAUDIO2_BUFFER buffer_p;
+    WAVEFORMATEX*   waveformat_p;
+    XAUDIO2_BUFFER* buffer_p;
     Sound(c_char* wav_path);
     ~Sound();
 } Sound;
