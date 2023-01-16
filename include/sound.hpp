@@ -37,12 +37,13 @@ int soundInterfaceLoadXAudio2();
 
 typedef struct Sound
 {
-    WAVEFORMATEX*   waveformat_p;
-    XAUDIO2_BUFFER* buffer_p;
+    WAVEFORMATEX  waveformat;
+    XAUDIO2_BUFFER buffer;
     Sound(c_char* wav_path);
     ~Sound();
 } Sound;
 int soundLoadWav(Sound& sound, c_char* wav_path);
+void findRIFFChunk(FILE* file_p, uint fourcc, uint& chunkSize, uint& chunkDataPosition);
 void soundPlay(Sound& sound);
 
 #endif

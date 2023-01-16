@@ -101,6 +101,11 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     return 1;
 }
 
+void findRIFFChunk(FILE* file_p, uint fourcc, uint& chunkSize, uint& chunkDataPosition)
+{
+    
+}
+
 void soundPlay(Sound& sound)
 {
     
