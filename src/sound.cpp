@@ -95,15 +95,26 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
 
     FILE* file_p;
     fopen_s(&file_p, wav_path, "rb");
+    if(!file_p) {return 0;}
 
-    
+    uint fourcc = 0;
+    uint chunkSize;
+    uint chunkDataPosition;
+    findRIFFChunk(file_p, fourcc, chunkSize, chunkDataPosition);
+
+    fclose(file_p);
     
     return 1;
 }
 
 void findRIFFChunk(FILE* file_p, uint fourcc, uint& chunkSize, uint& chunkDataPosition)
 {
-    
+    // File should be opened in binary mode.
+
+    // Set pointer to start of the file:
+    fseek(file_p, 0, SEEK_SET);
+
+    // 
 }
 
 void soundPlay(Sound& sound)
