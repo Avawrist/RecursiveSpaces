@@ -79,7 +79,7 @@ Sound::Sound(c_char* wav_path)
 {
     if(!soundLoadWav(*this, wav_path))
     {
-	OutputDebugStringA("Failed to load .wav file.\n");
+	OutputDebugStringA("\nERROR: Failed to load .wav file.\n");
     }
 }
 
@@ -93,28 +93,20 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     // Populate WAVEFORMATEX struct
     // Populate XAUDIO2_BUFFER struct
 
-    FILE* file_p;
+    FILE* file_p = NULL;
     fopen_s(&file_p, wav_path, "rb");
     if(!file_p) {return 0;}
 
-    uint fourcc = 0;
-    uint chunkSize;
-    uint chunkDataPosition;
-    findRIFFChunk(file_p, fourcc, chunkSize, chunkDataPosition);
-
+    // Check file header for RIFF
+    char f_type[4];
+    fread(f_type, sizeof(char), 4, file_p);
+    if(strcmp(f_type, "RIFF") != 0) {return 0;}
+    
+    // fread chunks into RIFF structs
+    
     fclose(file_p);
     
     return 1;
-}
-
-void findRIFFChunk(FILE* file_p, uint fourcc, uint& chunkSize, uint& chunkDataPosition)
-{
-    // File should be opened in binary mode.
-
-    // Set pointer to start of the file:
-    fseek(file_p, 0, SEEK_SET);
-
-    // 
 }
 
 void soundPlay(Sound& sound)

@@ -13,6 +13,7 @@
 // Win libs
 #include <windows.h>
 #include <stdio.h>
+#include <cstring>
 #include <xaudio2.h>
 
 // My libs
@@ -43,7 +44,12 @@ typedef struct Sound
     ~Sound();
 } Sound;
 int soundLoadWav(Sound& sound, c_char* wav_path);
-void findRIFFChunk(FILE* file_p, uint fourcc, uint& chunkSize, uint& chunkDataPosition);
 void soundPlay(Sound& sound);
+
+//////////////////
+// RIFF Structs //
+//////////////////
+
+
 
 #endif
