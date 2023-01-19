@@ -45,6 +45,7 @@ typedef struct Sound
 } Sound;
 int soundLoadWav(Sound& sound, c_char* wav_path);
 void soundPlay(Sound& sound);
+void convertEndian(char* buf, uint size);
 
 //////////////////
 // RIFF Structs //

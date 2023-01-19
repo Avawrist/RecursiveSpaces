@@ -98,7 +98,8 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     if(!file_p) {return 0;}
 
     // Check file header for RIFF
-    char f_type[4];
+    char f_type[5];
+    f_type[4] = '\0';
     fread(f_type, sizeof(char), 4, file_p);
     if(strcmp(f_type, "RIFF") != 0) {return 0;}
     
@@ -112,4 +113,23 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
 void soundPlay(Sound& sound)
 {
     
+}
+
+void convertEndian(char* buf, uint size)
+{
+    char* temp_buf = new char[size]; // dynamic char array
+
+    // copy buffer to temp buffer
+    for(int i = 0; i < size; i++)
+    {
+	temp_buf[i] = buf[i];
+    }
+    
+    // copy temp buffer back to buffer, in reverse order
+    for(int i = 0; i < size - 1; i++)
+    {
+	buf[i] = temp_buf[size - 2 - i];
+    }
+    
+    delete [] temp_buf;
 }
