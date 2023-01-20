@@ -93,17 +93,36 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     // Populate WAVEFORMATEX struct
     // Populate XAUDIO2_BUFFER struct
 
+    // Init riff structs
+    ChunkDescriptor chunkDescriptor;
+    
+    // Open file
     FILE* file_p = NULL;
     fopen_s(&file_p, wav_path, "rb");
     if(!file_p) {return 0;}
-
-    // Check file header for RIFF
-    char f_type[5];
-    f_type[4] = '\0';
-    fread(f_type, sizeof(char), 4, file_p);
-    if(strcmp(f_type, "RIFF") != 0) {return 0;}
     
-    // fread chunks into RIFF structs
+    // Read chunks into RIFF structs
+
+    // ChunkID
+    fread(chunkDescriptor.chunk_ID, sizeof(char), 4, file_p);
+    if(strcmp(chunkDescriptor.chunk_ID, "RIFF") != 0) {return 0;}
+
+    // ChunkSize
+    fread(&chunkDescriptor.chunk_size, sizeof(uint), 1, file_p);
+    
+    char msg[256];
+    sprintf_s(msg, "%u", chunkDescriptor.chunk_size);
+    OutputDebugStringA("\n");
+    OutputDebugStringA(msg);
+    OutputDebugStringA("\n\n");
+    
+    // Format
+    fread(chunkDescriptor.format, sizeof(char), 4, file_p);
+
+    
+    OutputDebugStringA("\n");
+    OutputDebugStringA(chunkDescriptor.format);
+    OutputDebugStringA("\n\n");
     
     fclose(file_p);
     
@@ -115,7 +134,7 @@ void soundPlay(Sound& sound)
     
 }
 
-void convertEndian(char* buf, uint size)
+void convertEndianChar(char* buf, uint size)
 {
     char* temp_buf = new char[size]; // dynamic char array
 
@@ -133,3 +152,21 @@ void convertEndian(char* buf, uint size)
     
     delete [] temp_buf;
 }
+
+////////////////////////////////
+// Struct RiffChunkDescriptor //
+////////////////////////////////
+
+ChunkDescriptor::ChunkDescriptor()
+{
+    chunk_ID[4] = '\0';
+    format[4]   = '\0';
+}
+
+////////////////////////
+// Struct FMTSubChunk //
+////////////////////////
+
+/////////////////////////
+// Struct DataSubChunk //
+/////////////////////////

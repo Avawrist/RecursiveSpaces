@@ -45,12 +45,29 @@ typedef struct Sound
 } Sound;
 int soundLoadWav(Sound& sound, c_char* wav_path);
 void soundPlay(Sound& sound);
-void convertEndian(char* buf, uint size);
+uint convertEndianUInt(uint value);
+void convertEndianChar(char* buf, uint size);
 
 //////////////////
 // RIFF Structs //
 //////////////////
 
+typedef struct ChunkDescriptor
+{
+    char chunk_ID[5];
+    uint chunk_size;
+    char format[5];
+    ChunkDescriptor();
+} ChunkDescriptor;
+/*
+typedef struct FMTSubChunk
+{
 
+} FMTSubChunk;
 
+typedef struct DataSubChunk
+{
+
+} DataSubChunk;
+*/
 #endif
