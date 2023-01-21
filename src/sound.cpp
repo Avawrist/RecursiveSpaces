@@ -95,6 +95,8 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
 
     // Init riff structs
     ChunkDescriptor chunkDescriptor;
+    FMTSubchunk     fmtSubchunk;
+    DataSubchunk    dataSubchunk;
     
     // Open file
     FILE* file_p = NULL;
@@ -103,25 +105,51 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     
     // Read chunks into RIFF structs
 
+    /////////////////////////////////
+    // Fill ChunkDescriptor struct //
+    /////////////////////////////////
+    
     // ChunkID
     fread(chunkDescriptor.chunk_ID, sizeof(char), 4, file_p);
     if(strcmp(chunkDescriptor.chunk_ID, "RIFF") != 0) {return 0;}
-
     // ChunkSize
     fread(&chunkDescriptor.chunk_size, sizeof(uint), 1, file_p);
-    
-    char msg[256];
-    sprintf_s(msg, "%u", chunkDescriptor.chunk_size);
-    OutputDebugStringA("\n");
-    OutputDebugStringA(msg);
-    OutputDebugStringA("\n\n");
-    
     // Format
     fread(chunkDescriptor.format, sizeof(char), 4, file_p);
 
+    /////////////////////////////
+    // Fill FMTSubchunk struct //
+    /////////////////////////////
+
+    // Subchunk1ID
+    fread(fmtSubchunk.subchunk_1_ID, sizeof(char), 4, file_p);
+    // Subchunk1Size
+    fread(&fmtSubchunk.subchunk_1_size, sizeof(uint), 1, file_p);
+    // AudioFormat
+    fread(&fmtSubchunk.audio_format, sizeof(shint), 1, file_p);
+    // NumChannels
+    fread(&fmtSubchunk.num_channels, sizeof(shint), 1, file_p);
+    // SampleRate
+    fread(&fmtSubchunk.sample_rate, sizeof(uint), 1, file_p);
+    // ByteRate
+    fread(&fmtSubchunk.byte_rate, sizeof(uint), 1, file_p);
+    // BlockAlign
+    fread(&fmtSubchunk.block_align, sizeof(shint), 1, file_p);
+    // BitsPerSample
+    fread(&fmtSubchunk.bits_per_sample, sizeof(shint), 1, file_p);
     
+    //////////////////////////////
+    // Fill DataSubchunk struct //
+    //////////////////////////////
+
+    // Subchunk2ID
+    fread(&dataSubchunk.subchunk_2_ID, sizeof(char), 4, file_p);
+    // Subchunk2Size
+    fread(&dataSubchunk.subchunk_2_size, sizeof(uint), 1, file_p);
+
+    // Temp debug output
     OutputDebugStringA("\n");
-    OutputDebugStringA(chunkDescriptor.format);
+    OutputDebugStringA(fmtSubchunk.subchunk_1_ID);
     OutputDebugStringA("\n\n");
     
     fclose(file_p);
@@ -132,25 +160,6 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
 void soundPlay(Sound& sound)
 {
     
-}
-
-void convertEndianChar(char* buf, uint size)
-{
-    char* temp_buf = new char[size]; // dynamic char array
-
-    // copy buffer to temp buffer
-    for(int i = 0; i < size; i++)
-    {
-	temp_buf[i] = buf[i];
-    }
-    
-    // copy temp buffer back to buffer, in reverse order
-    for(int i = 0; i < size - 1; i++)
-    {
-	buf[i] = temp_buf[size - 2 - i];
-    }
-    
-    delete [] temp_buf;
 }
 
 ////////////////////////////////
@@ -167,6 +176,16 @@ ChunkDescriptor::ChunkDescriptor()
 // Struct FMTSubChunk //
 ////////////////////////
 
+FMTSubchunk::FMTSubchunk()
+{
+    subchunk_1_ID[4]   = '\0';
+}
+
 /////////////////////////
 // Struct DataSubChunk //
 /////////////////////////
+
+DataSubchunk::DataSubchunk()
+{
+    subchunk_2_ID[4] = '\0';
+}

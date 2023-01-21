@@ -144,7 +144,7 @@ int main()
     //////////////////////////
 
     SoundInterface soundInterface;
-    Sound testSound("..\\assets\\sfx\\magic.wav");
+    Sound testSound("..\\assets\\sfx\\elephant.wav");
     
     //////////////////////////
     // Initialize Test Mesh //
