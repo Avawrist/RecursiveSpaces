@@ -143,14 +143,23 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     //////////////////////////////
 
     // Subchunk2ID
-    fread(&dataSubchunk.subchunk_2_ID, sizeof(char), 4, file_p);
+    fread(dataSubchunk.subchunk_2_ID, sizeof(char), 4, file_p);
     // Subchunk2Size
     fread(&dataSubchunk.subchunk_2_size, sizeof(uint), 1, file_p);
-
+    // Data
+    char* buffer = new char(7);
+    //fread((void *)buffer, sizeof(char), 4, file_p);
+    buffer[0] = 'T';
+    buffer[1] = 'T';
+    
     // Temp debug output
-    OutputDebugStringA("\n");
-    OutputDebugStringA(fmtSubchunk.subchunk_1_ID);
-    OutputDebugStringA("\n\n");
+    //char msg[256];
+    //sprintf_s(msg, "%u", dataSubchunk.subchunk_2_size);
+    //OutputDebugStringA("\n");
+    //OutputDebugStringA(msg);
+    //OutputDebugStringA("\n\n");
+
+    delete [] buffer;
     
     fclose(file_p);
     
