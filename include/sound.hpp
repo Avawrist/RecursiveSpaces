@@ -37,12 +37,12 @@ int soundInterfaceLoadXAudio2();
 
 typedef struct Sound
 {
-    WAVEFORMATEX  waveformat;
-    XAUDIO2_BUFFER buffer;
+    WAVEFORMATEX   waveFormat = {0};
+    XAUDIO2_BUFFER buffer = {0};
     Sound(c_char* wav_path);
     ~Sound();
 } Sound;
-int soundLoadWav(Sound& sound, c_char* wav_path);
+int  soundLoadWav(Sound& sound, c_char* wav_path);
 void soundPlay(Sound& sound);
 
 //////////////////
@@ -74,7 +74,6 @@ typedef struct DataSubchunk
 {
     char  subchunk_2_ID[5];
     uint  subchunk_2_size;
-    void* data;
     DataSubchunk();
 } DataSubchunk;
 

@@ -117,9 +117,9 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     // Format
     fread(chunkDescriptor.format, sizeof(char), 4, file_p);
 
-    /////////////////////////////
-    // Fill FMTSubchunk struct //
-    /////////////////////////////
+    /////////////////////////////////////////////
+    // Fill FMTSubchunk & WAVEFORMATEX structs //
+    /////////////////////////////////////////////
 
     // Subchunk1ID
     fread(fmtSubchunk.subchunk_1_ID, sizeof(char), 4, file_p);
@@ -128,29 +128,29 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     // AudioFormat
     fread(&fmtSubchunk.audio_format, sizeof(shint), 1, file_p);
     // NumChannels
-    fread(&fmtSubchunk.num_channels, sizeof(shint), 1, file_p);
+    fread(&sound.waveFormat.nChannels, sizeof(shint), 1, file_p);
     // SampleRate
-    fread(&fmtSubchunk.sample_rate, sizeof(uint), 1, file_p);
+    fread(&sound.waveFormat.nSamplesPerSec, sizeof(uint), 1, file_p);
     // ByteRate
-    fread(&fmtSubchunk.byte_rate, sizeof(uint), 1, file_p);
+    fread(&sound.waveFormat.nAvgBytesPerSec, sizeof(uint), 1, file_p);
     // BlockAlign
-    fread(&fmtSubchunk.block_align, sizeof(shint), 1, file_p);
+    fread(&sound.waveFormat.nBlockAlign, sizeof(shint), 1, file_p);
     // BitsPerSample
     fread(&fmtSubchunk.bits_per_sample, sizeof(shint), 1, file_p);
-    
-    //////////////////////////////
-    // Fill DataSubchunk struct //
-    //////////////////////////////
+
+    ////////////////////////////////////////////////
+    // Fill DataSubchunk & XAUDIO2_BUFFER structs //
+    ////////////////////////////////////////////////
 
     // Subchunk2ID
     fread(dataSubchunk.subchunk_2_ID, sizeof(char), 4, file_p);
     // Subchunk2Size
-    fread(&dataSubchunk.subchunk_2_size, sizeof(uint), 1, file_p);
+    fread(&sound.buffer.AudioBytes, sizeof(uint), 1, file_p);
     // Data
-    char* buffer = new char(7);
-    //fread((void *)buffer, sizeof(char), 4, file_p);
-    buffer[0] = 'T';
-    buffer[1] = 'T';
+    BYTE *buffer = new BYTE[sound.buffer.AudioBytes]; 
+    fread((void *)buffer, sizeof(char), sound.buffer.AudioBytes, file_p);
+    sound.buffer.pAudioData = buffer;
+    delete [] buffer;
     
     // Temp debug output
     //char msg[256];
@@ -158,8 +158,6 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     //OutputDebugStringA("\n");
     //OutputDebugStringA(msg);
     //OutputDebugStringA("\n\n");
-
-    delete [] buffer;
     
     fclose(file_p);
     
