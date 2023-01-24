@@ -145,6 +145,13 @@ int main()
 
     SoundInterface soundInterface;
     Sound testSound("..\\assets\\sfx\\elephant.wav");
+
+    HRESULT hr;
+    if(FAILED(hr = soundInterface.interface_p->CreateSourceVoice(&testSound.source_voice_p,
+								 &testSound.waveFormat)))
+    {
+	OutputDebugStringA("\npoop\n");
+    }
     
     //////////////////////////
     // Initialize Test Mesh //

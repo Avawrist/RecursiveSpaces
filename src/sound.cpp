@@ -77,6 +77,7 @@ int soundInterfaceLoadXAudio2()
 
 Sound::Sound(c_char* wav_path)
 {
+    // Load audio data to buffer
     if(!soundLoadWav(*this, wav_path))
     {
 	OutputDebugStringA("\nERROR: Failed to load .wav file.\n");
@@ -90,109 +91,55 @@ Sound::~Sound()
 
 int soundLoadWav(Sound& sound, c_char* wav_path)
 {
-    // Populate WAVEFORMATEX struct
-    // Populate XAUDIO2_BUFFER struct
-
-    // Init riff structs
-    ChunkDescriptor chunkDescriptor;
-    FMTSubchunk     fmtSubchunk;
-    DataSubchunk    dataSubchunk;
-    
     // Open file
     FILE* file_p = NULL;
     fopen_s(&file_p, wav_path, "rb");
     if(!file_p) {return 0;}
     
-    // Read chunks into RIFF structs
+    // Verify first ChunkID is "RIFF" format
+    char chunk_ID[5];
+    chunk_ID[4] = '\0';
+    fread(chunk_ID, sizeof(char), 4, file_p);
+    if(strcmp(chunk_ID, "RIFF") != 0) {return 0;}
 
-    /////////////////////////////////
-    // Fill ChunkDescriptor struct //
-    /////////////////////////////////
-    
-    // ChunkID
-    fread(chunkDescriptor.chunk_ID, sizeof(char), 4, file_p);
-    if(strcmp(chunkDescriptor.chunk_ID, "RIFF") != 0) {return 0;}
-    // ChunkSize
-    fread(&chunkDescriptor.chunk_size, sizeof(uint), 1, file_p);
-    // Format
-    fread(chunkDescriptor.format, sizeof(char), 4, file_p);
+    //////////////////////////////////
+    // Populate WAVEFORMATEX struct //
+    //////////////////////////////////
 
-    /////////////////////////////////////////////
-    // Fill FMTSubchunk & WAVEFORMATEX structs //
-    /////////////////////////////////////////////
+    // Skip ChunkSize (4), Format (4), SubchunkID (4),
+    // Subchunk1Size (4), AudioFormat (2)
+    fseek(file_p, 18, SEEK_CUR);
 
-    // Subchunk1ID
-    fread(fmtSubchunk.subchunk_1_ID, sizeof(char), 4, file_p);
-    // Subchunk1Size
-    fread(&fmtSubchunk.subchunk_1_size, sizeof(uint), 1, file_p);
-    // AudioFormat
-    fread(&fmtSubchunk.audio_format, sizeof(shint), 1, file_p);
-    // NumChannels
+    // Read NumChannels
     fread(&sound.waveFormat.nChannels, sizeof(shint), 1, file_p);
-    // SampleRate
+    // Read SampleRate
     fread(&sound.waveFormat.nSamplesPerSec, sizeof(uint), 1, file_p);
-    // ByteRate
+    // Read ByteRate
     fread(&sound.waveFormat.nAvgBytesPerSec, sizeof(uint), 1, file_p);
-    // BlockAlign
+    // Read BlockAlign
     fread(&sound.waveFormat.nBlockAlign, sizeof(shint), 1, file_p);
-    // BitsPerSample
-    fread(&fmtSubchunk.bits_per_sample, sizeof(shint), 1, file_p);
 
-    ////////////////////////////////////////////////
-    // Fill DataSubchunk & XAUDIO2_BUFFER structs //
-    ////////////////////////////////////////////////
+    ////////////////////////////////////
+    // Populate XAUDIO2_BUFFER struct //
+    ////////////////////////////////////
+    
+    // Skip BitsPerSample (2), Subchunk2ID (4)
+    fseek(file_p, 6, SEEK_CUR);
 
-    // Subchunk2ID
-    fread(dataSubchunk.subchunk_2_ID, sizeof(char), 4, file_p);
-    // Subchunk2Size
+    // Read Subchunk2Size
     fread(&sound.buffer.AudioBytes, sizeof(uint), 1, file_p);
-    // Data
+    // Read Data
     BYTE *buffer = new BYTE[sound.buffer.AudioBytes]; 
     fread((void *)buffer, sizeof(char), sound.buffer.AudioBytes, file_p);
     sound.buffer.pAudioData = buffer;
     delete [] buffer;
-    
-    // Temp debug output
-    //char msg[256];
-    //sprintf_s(msg, "%u", dataSubchunk.subchunk_2_size);
-    //OutputDebugStringA("\n");
-    //OutputDebugStringA(msg);
-    //OutputDebugStringA("\n\n");
     
     fclose(file_p);
     
     return 1;
 }
 
-void soundPlay(Sound& sound)
+void soundPlay(Sound& sound, SoundInterface& soundInterface)
 {
     
-}
-
-////////////////////////////////
-// Struct RiffChunkDescriptor //
-////////////////////////////////
-
-ChunkDescriptor::ChunkDescriptor()
-{
-    chunk_ID[4] = '\0';
-    format[4]   = '\0';
-}
-
-////////////////////////
-// Struct FMTSubChunk //
-////////////////////////
-
-FMTSubchunk::FMTSubchunk()
-{
-    subchunk_1_ID[4]   = '\0';
-}
-
-/////////////////////////
-// Struct DataSubChunk //
-/////////////////////////
-
-DataSubchunk::DataSubchunk()
-{
-    subchunk_2_ID[4] = '\0';
 }

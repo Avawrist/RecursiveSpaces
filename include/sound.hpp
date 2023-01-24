@@ -37,44 +37,13 @@ int soundInterfaceLoadXAudio2();
 
 typedef struct Sound
 {
-    WAVEFORMATEX   waveFormat = {0};
-    XAUDIO2_BUFFER buffer = {0};
+    WAVEFORMATEX         waveFormat = {0};
+    XAUDIO2_BUFFER       buffer = {0};
+    IXAudio2SourceVoice* source_voice_p;
     Sound(c_char* wav_path);
     ~Sound();
 } Sound;
 int  soundLoadWav(Sound& sound, c_char* wav_path);
-void soundPlay(Sound& sound);
-
-//////////////////
-// RIFF Structs //
-//////////////////
-
-typedef struct ChunkDescriptor
-{
-    char chunk_ID[5];
-    uint chunk_size;
-    char format[5];
-    ChunkDescriptor();
-} ChunkDescriptor;
-
-typedef struct FMTSubchunk
-{
-    char  subchunk_1_ID[5];
-    uint  subchunk_1_size;
-    shint audio_format;
-    shint num_channels;
-    uint  sample_rate;
-    uint  byte_rate;
-    shint block_align;
-    shint bits_per_sample;
-    FMTSubchunk();
-} FMTSubchunk;
-
-typedef struct DataSubchunk
-{
-    char  subchunk_2_ID[5];
-    uint  subchunk_2_size;
-    DataSubchunk();
-} DataSubchunk;
+void soundPlay(Sound& sound, SoundInterface& soundInterface);
 
 #endif
