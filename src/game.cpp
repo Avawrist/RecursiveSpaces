@@ -145,7 +145,8 @@ int main()
     //////////////////////////
 
     SoundInterface soundInterface;
-    Sound          testSound("..\\assets\\sfx\\elephant.wav", soundInterface);
+    Sound *test_sound_p = new Sound("..\\assets\\sfx\\elephant.wav", soundInterface);
+    soundPlay(test_sound_p);
     
     //////////////////////////
     // Initialize Test Mesh //
@@ -228,7 +229,7 @@ int main()
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
-
+	
 	///////////////////
 	// Update cursor //
 	///////////////////
@@ -310,7 +311,11 @@ int main()
     // Cleanup //
     /////////////
 
-    // Delete mesh
+    // Stop all sounds
+    soundStop(test_sound_p);
+    
+    // Delete pointers to structs on the heap
+    delete test_sound_p;
     delete mesh_p;
     delete d_texture_p;
     delete n_texture_p;

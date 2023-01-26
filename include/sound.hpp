@@ -43,7 +43,8 @@ typedef struct Sound
     Sound(c_char* wav_path, SoundInterface& soundInterface);
     ~Sound();
 } Sound;
-int  soundLoadWav(Sound& sound, c_char* wav_path);
-void soundPlay(Sound& sound, SoundInterface& soundInterface);
+int  soundLoadWav(Sound* sound, c_char* wav_path);
+void soundPlay(Sound* sound);
+void soundStop(Sound* sound);
 
 #endif
