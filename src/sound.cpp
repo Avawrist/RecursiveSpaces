@@ -20,7 +20,7 @@ SoundInterface::SoundInterface()
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
 	
 	// Init xaudio interface
-	XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
+        XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	if(!interface_p)
 	{
 	    OutputDebugStringA("Failed to initialize XAudio2 interface.\n");
@@ -75,13 +75,24 @@ int soundInterfaceLoadXAudio2()
 // Struct Sound //
 //////////////////
 
-Sound::Sound(c_char* wav_path)
+Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
 {
     // Load audio data to buffer
     if(!soundLoadWav(*this, wav_path))
     {
 	OutputDebugStringA("\nERROR: Failed to load .wav file.\n");
     }
+
+    // Create source voice
+    soundInterface.interface_p->CreateSourceVoice(&source_voice_p,
+						  &waveFormat);
+    if(!source_voice_p)
+    {
+	OutputDebugStringA("ERROR: Failed to create source voice\n");
+    }
+
+    // Submit buffer to the source voice
+    // TODO
 }
 
 Sound::~Sound()
@@ -109,7 +120,6 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     // Skip ChunkSize (4), Format (4), SubchunkID (4),
     // Subchunk1Size (4), AudioFormat (2)
     fseek(file_p, 18, SEEK_CUR);
-
     // Read NumChannels
     fread(&sound.waveFormat.nChannels, sizeof(shint), 1, file_p);
     // Read SampleRate
@@ -118,22 +128,30 @@ int soundLoadWav(Sound& sound, c_char* wav_path)
     fread(&sound.waveFormat.nAvgBytesPerSec, sizeof(uint), 1, file_p);
     // Read BlockAlign
     fread(&sound.waveFormat.nBlockAlign, sizeof(shint), 1, file_p);
+    // Read Bits Per Sample
+    fread(&sound.waveFormat.wBitsPerSample, sizeof(shint), 1, file_p);
+    // FormatTag
+    sound.waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+    // cbSize
+    sound.waveFormat.cbSize = 0;
 
     ////////////////////////////////////
     // Populate XAUDIO2_BUFFER struct //
     ////////////////////////////////////
     
-    // Skip BitsPerSample (2), Subchunk2ID (4)
-    fseek(file_p, 6, SEEK_CUR);
-
+    // Skip Subchunk2ID (4)
+    fseek(file_p, 4, SEEK_CUR);
     // Read Subchunk2Size
     fread(&sound.buffer.AudioBytes, sizeof(uint), 1, file_p);
     // Read Data
     BYTE *buffer = new BYTE[sound.buffer.AudioBytes]; 
     fread((void *)buffer, sizeof(char), sound.buffer.AudioBytes, file_p);
     sound.buffer.pAudioData = buffer;
+    sound.buffer.Flags = XAUDIO2_END_OF_STREAM;
+    // Delete temp buffer pointer
     delete [] buffer;
-    
+
+    // Close file
     fclose(file_p);
     
     return 1;

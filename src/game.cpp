@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <comdef.h>
 
 // 3rd party libs
 #include <glad/glad.h>
@@ -144,14 +145,7 @@ int main()
     //////////////////////////
 
     SoundInterface soundInterface;
-    Sound testSound("..\\assets\\sfx\\elephant.wav");
-
-    HRESULT hr;
-    if(FAILED(hr = soundInterface.interface_p->CreateSourceVoice(&testSound.source_voice_p,
-								 &testSound.waveFormat)))
-    {
-	OutputDebugStringA("\npoop\n");
-    }
+    Sound          testSound("..\\assets\\sfx\\elephant.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //

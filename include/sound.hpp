@@ -40,7 +40,7 @@ typedef struct Sound
     WAVEFORMATEX         waveFormat = {0};
     XAUDIO2_BUFFER       buffer = {0};
     IXAudio2SourceVoice* source_voice_p;
-    Sound(c_char* wav_path);
+    Sound(c_char* wav_path, SoundInterface& soundInterface);
     ~Sound();
 } Sound;
 int  soundLoadWav(Sound& sound, c_char* wav_path);
