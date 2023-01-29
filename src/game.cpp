@@ -240,9 +240,22 @@ int main()
 	/////////////////////////
 
 	//TODO: Implement XAudio2 audio graph
-	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS))
 	{
 	    soundPlay(test_sound_p);
+	}
+	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+	    soundStop(test_sound_p);
+        }
+
+	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+	    soundPlay(test_sound_2_p);
+	}
+	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+	    soundStop(test_sound_2_p);
 	}
 	
 	///////////////////

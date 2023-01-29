@@ -32,6 +32,9 @@ SoundInterface::SoundInterface()
 	{
 	    OutputDebugStringA("Failed to initialize XAudio2 Master Voice\n");
 	}
+
+	// Start XAudio2 engine
+	interface_p->StartEngine();
     }
     else
     {
@@ -43,6 +46,9 @@ SoundInterface::~SoundInterface()
 {
     // Uninitialize COM library
     CoUninitialize();
+
+    // Stop the XAudio2 engine
+    interface_p->StopEngine();
 }
 
 int soundInterfaceLoadXAudio2()
@@ -89,14 +95,6 @@ Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
     if(!source_voice_p)
     {
 	OutputDebugStringA("ERROR: Failed to create source voice.\n");
-    }
-
-    // Submit buffer to the source voice
-    HRESULT hr;
-    hr = source_voice_p->SubmitSourceBuffer(&buffer);
-    if(FAILED(hr))
-    {
-	OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
     }
 }
 
@@ -162,6 +160,26 @@ int soundLoadWav(Sound* sound, c_char* wav_path)
 
 void soundPlay(Sound* sound)
 {
+    // Check buffer state
+    XAUDIO2_VOICE_STATE state_p; 
+    sound->source_voice_p->GetState(&state_p);
+    if(!&state_p)
+    {
+	OutputDebugStringA("\nERROR: Failed to get buffer state from XAudio2.\n");
+	return;
+    }
+
+    if(state_p.BuffersQueued == 0)
+    {
+	// Submit buffer to the source voice
+	HRESULT hr;
+	hr = sound->source_voice_p->SubmitSourceBuffer(&(sound->buffer));
+	if(FAILED(hr))
+	{
+	    OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
+	}
+    }
+    
     sound->source_voice_p->Start(0);
 }
 
