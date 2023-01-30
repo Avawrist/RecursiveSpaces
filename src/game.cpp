@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <comdef.h>
 
 // 3rd party libs
 #include <glad/glad.h>
@@ -144,6 +145,12 @@ int main()
     //////////////////////////
 
     SoundInterface soundInterface;
+
+    ///////////////////////
+    // Initialize Sounds //
+    ///////////////////////
+    
+    Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //
@@ -219,19 +226,19 @@ int main()
     /////////////////
 
     while(!glfwWindowShouldClose(window))
-    {
+    {	
 	///////////////////////
 	// Update delta time //
 	///////////////////////
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
-
+	
 	///////////////////
 	// Update cursor //
 	///////////////////
 	cursorUpdate(global_cursor, window);
-	
+
 	///////////////////
 	// Update camera //
 	///////////////////
@@ -307,8 +314,9 @@ int main()
     /////////////
     // Cleanup //
     /////////////
-
-    // Delete mesh
+    
+    // Delete pointers to structs on the heap
+    delete test_sound_p;
     delete mesh_p;
     delete d_texture_p;
     delete n_texture_p;

@@ -13,8 +13,8 @@
 // Win libs
 #include <windows.h>
 #include <stdio.h>
+#include <cstring>
 #include <xaudio2.h>
-
 // My libs
 #include "typedefs.hpp"
 
@@ -37,12 +37,14 @@ int soundInterfaceLoadXAudio2();
 
 typedef struct Sound
 {
-    WAVEFORMATEX   waveformat_p;
-    XAUDIO2_BUFFER buffer_p;
-    Sound(c_char* wav_path);
+    WAVEFORMATEX         waveFormat = {0};
+    XAUDIO2_BUFFER       buffer = {0};
+    IXAudio2SourceVoice* source_voice_p;
+    Sound(c_char* wav_path, SoundInterface& soundInterface);
     ~Sound();
 } Sound;
-int soundLoadWav(Sound& sound, c_char* wav_path);
-void soundPlay(Sound& sound);
+int  soundLoadWav(Sound* sound, c_char* wav_path);
+void soundPlay(Sound* sound);
+void soundStop(Sound* sound);
 
 #endif
