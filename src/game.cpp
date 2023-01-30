@@ -36,8 +36,8 @@ using namespace std;
 // Window
 c_uint WIN_WIDTH   = 1024;
 c_uint WIN_HEIGHT  = 576;
-c_uint VIEW_WIDTH  = WIN_WIDTH * 0.25f;
-c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.25f;
+c_uint VIEW_WIDTH  = WIN_WIDTH * 1.0f;
+c_uint VIEW_HEIGHT = WIN_HEIGHT * 1.0f;
 c_uint X_CENTER    = WIN_WIDTH * 0.5f;
 c_uint Y_CENTER    = WIN_HEIGHT * 0.5f;
 float  win_ar      = (float)WIN_WIDTH / (float)WIN_HEIGHT;
