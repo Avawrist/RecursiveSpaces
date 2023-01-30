@@ -1,4 +1,7 @@
 *.exe
+*.ilk
+*.pdb
+*.rdbg
 *.cpp~
 *.hpp~
 *.fs~

@@ -1,6 +1,6 @@
 @echo off
 cd ..\src
-cl /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..\\include\\GLFW\\" /I "..\\include\\KHR\\" /c^
+cl /Zi /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..\\include\\GLFW\\" /I "..\\include\\KHR\\" /c^
  game.cpp^
  asset.cpp^
  camera.cpp^
@@ -12,7 +12,7 @@ cl /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..\\in
  shader.cpp^
  sound.cpp
 cd ..\build
-link /NODEFAULTLIB:"msvcrtd.lib" /MACHINE:X64 /LIBPATH:"..\\libs\\"^
+link /NODEFAULTLIB:"msvcrtd.lib" /MACHINE:X64 /DEBUG:FULL /LIBPATH:"..\\libs\\"^
  game.obj^
  asset.obj^
  camera.obj^
