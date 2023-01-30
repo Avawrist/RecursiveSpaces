@@ -145,8 +145,12 @@ int main()
     //////////////////////////
 
     SoundInterface soundInterface;
-    Sound *test_sound_p   = new Sound("..\\assets\\sfx\\elephant.wav", soundInterface);
-    Sound *test_sound_2_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
+
+    ///////////////////////
+    // Initialize Sounds //
+    ///////////////////////
+    
+    Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //
@@ -235,29 +239,6 @@ int main()
 	///////////////////
 	cursorUpdate(global_cursor, window);
 
-	/////////////////////////
-	// Update Sound Output //
-	/////////////////////////
-
-	//TODO: Implement XAudio2 audio graph
-	if((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS))
-	{
-	    soundPlay(test_sound_p);
-	}
-	if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-	    soundStop(test_sound_p);
-        }
-
-	if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-	    soundPlay(test_sound_2_p);
-	}
-	if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-	    soundStop(test_sound_2_p);
-	}
-	
 	///////////////////
 	// Update camera //
 	///////////////////
@@ -333,10 +314,6 @@ int main()
     /////////////
     // Cleanup //
     /////////////
-
-    // Stop all sounds
-    soundStop(test_sound_p);
-    soundStop(test_sound_2_p);
     
     // Delete pointers to structs on the heap
     delete test_sound_p;

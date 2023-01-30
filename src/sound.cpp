@@ -55,24 +55,48 @@ int soundInterfaceLoadXAudio2()
 {
     // Windows 10 
     HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9.dll.\n");
+	return 1;
+    }
 
     x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9redist.dll.\n");
+	return 1;
+    }
 
     // Windows 8
     x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8.dll.\n");
+	return 1;
+    }
 
     x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8redist.dll.\n");
+	return 1;
+    }
 
     // DirectX SDK
     x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7.dll.\n");
+	return 1;
+    }
 
     x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
-    if(x_audio_2_libs) {return 1;}
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7redist.dll.\n");
+	return 1;
+    }
     
     return 0;
 }
@@ -100,7 +124,7 @@ Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
 
 Sound::~Sound()
 {
-    
+    soundStop(this);
 }
 
 int soundLoadWav(Sound* sound, c_char* wav_path)
@@ -177,6 +201,7 @@ void soundPlay(Sound* sound)
 	if(FAILED(hr))
 	{
 	    OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
+	    return;
 	}
     }
     
