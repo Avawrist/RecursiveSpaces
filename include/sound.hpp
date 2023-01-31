@@ -45,6 +45,22 @@ typedef struct Sound
 } Sound;
 int  soundLoadWav(Sound* sound, c_char* wav_path);
 void soundPlay(Sound* sound);
+void soundPause(Sound* sound);
 void soundStop(Sound* sound);
+void soundApplyVolume(VolumeMeter* volumeMeter);
+
+////////////////////////
+// Struct VolumeMeter //
+////////////////////////
+
+typedef struct VolumeMeter
+{
+    IUnknown* XAPO_p;
+    XAUDIO2_EFFECT_DESCRIPTOR descriptor;
+    XAUDIO2_EFFECT_CHAIN      chain;
+    VolumeMeter(int init_volume);
+    ~VolumeMeter();
+} SoundEffect;
+void volumeMeterSetVolume(VolumeMeter* volumeMeter, int value);
 
 #endif

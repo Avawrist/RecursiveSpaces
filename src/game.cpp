@@ -239,9 +239,29 @@ int main()
 	///////////////////
 	cursorUpdate(global_cursor, window);
 
+	//////////////////
+	// Update sound //
+	//////////////////
+
+	if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+	    soundPlay(test_sound_p);
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+	    soundPause(test_sound_p);
+	}
+
+	if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+	    soundStop(test_sound_p);
+	}
+	
 	///////////////////
 	// Update camera //
 	///////////////////
+
 	cameraUpdate(global_cam, window, cursorGetDistance(global_cursor), d_time);
 	
 	////////////////////////////

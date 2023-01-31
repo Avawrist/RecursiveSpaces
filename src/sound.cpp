@@ -208,7 +208,52 @@ void soundPlay(Sound* sound)
     sound->source_voice_p->Start(0);
 }
 
+void soundPause(Sound* sound)
+{
+    sound->source_voice_p->Stop();
+}
+
 void soundStop(Sound* sound)
 {
     sound->source_voice_p->Stop();
+    sound->source_voice_p->FlushSourceBuffers();
+}
+
+void soundApplyVolume(VolumeMeter* volumeMeter)
+{
+    source_voice_p->SetEffectChain(&(volumeMeter->chain));
+}
+
+////////////////////////
+// Struct VolumeMeter //
+////////////////////////
+
+VolumeMeter::VolumeMeter(int init_volume)
+{
+    // Create the effect
+    XAPO_p = nullptr; 
+    XAudio2CreateVolumeMeter(&XAPO_p);
+    if(!XAPO_p)
+    {
+	OutputDebugStringA("\nERROR: Failed to create VolumeMeter in XAudio2.\n");
+    }
+
+    // Populate XAUDIO2_EFFECT_DESCRIPTOR struct
+    descriptor.InitialState = true;
+    descriptor.OutputChannels = 1;
+    descriptor.pEffect = XAPO_p;
+
+    // Populate XAUDIO2_EFFECT_CHAIN struct
+    chain.EffectCount = 1;
+    chain.pEffectDescriptors = &descriptor;
+}
+
+VolumeMeter::~VolumeMeter();
+{
+    XAPO_p->Release();
+}
+
+void volumeMeterSetVolume(VolumeMeter* volumeMeter, int value)
+{
+
 }
