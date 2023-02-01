@@ -54,6 +54,9 @@ Cursor global_cursor(X_CENTER, Y_CENTER);
 // Camera
 Camera global_cam(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, win_ar);
 
+// BGM Volume
+float master_bgm_volume = 50;
+
 /////////////////////////
 // Function Prototypes //
 /////////////////////////
@@ -239,6 +242,20 @@ int main()
 	///////////////////
 	cursorUpdate(global_cursor, window);
 
+	///////////////////
+	// Update Volume //
+	///////////////////
+
+	if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+	    master_bgm_volume += 1;
+	}
+	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+	    master_bgm_volume -= 1;
+	}
+	soundSetVolume(test_sound_p, master_bgm_volume);
+	
 	//////////////////
 	// Update sound //
 	//////////////////
@@ -247,12 +264,10 @@ int main()
 	{
 	    soundPlay(test_sound_p);
 	}
-
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 	    soundPause(test_sound_p);
 	}
-
 	if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
 	    soundStop(test_sound_p);
