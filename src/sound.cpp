@@ -219,6 +219,11 @@ void soundStop(Sound* sound)
     sound->source_voice_p->FlushSourceBuffers();
 }
 
+void soundPlayStream(Sound* sound)
+{
+    
+}
+
 void soundSetVolume(Sound* sound, int volume)
 {
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.

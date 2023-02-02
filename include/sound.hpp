@@ -47,6 +47,7 @@ int  soundLoadWav(Sound* sound, c_char* wav_path);
 void soundPlay(Sound* sound);
 void soundPause(Sound* sound);
 void soundStop(Sound* sound);
+void soundPlayStream(Sound* sound);
 void soundSetVolume(Sound* sound, int volume);
 
 #endif

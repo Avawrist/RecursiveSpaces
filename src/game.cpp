@@ -28,6 +28,9 @@
 #include "light.hpp"
 #include "sound.hpp"
 
+#define STREAM_BUFFER_SIZE 65536
+#define MAX_BUFFER_COUNT 3
+
 using namespace std;
 
 /////////////
@@ -222,11 +225,20 @@ int main()
     // Load initial uniform values to GPU
     glUseProgram(pp_shader_p->program_id);
     shaderAddIntUniform(pp_shader_p, "color_texture", 0);
+
+    ///////////////////////
+    // Prep Audio Stream //
+    ///////////////////////
+
+    BYTE buffers[MAX_BUFFER_COUNT][STREAM_BUFFER_SIZE];
+
+    OVERLAPPED overlapped = {0};
+    overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     
     
-    /////////////////
-    // Render Loop //
-    /////////////////
+    ///////////////
+    // Game Loop //
+    ///////////////
 
     while(!glfwWindowShouldClose(window))
     {	
