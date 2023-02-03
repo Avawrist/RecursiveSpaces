@@ -15,6 +15,11 @@
 #include <stdio.h>
 #include <cstring>
 #include <xaudio2.h>
+
+// C libs
+#include <unistd.h> 
+#include <pthread.h>
+
 // My libs
 #include "typedefs.hpp"
 
