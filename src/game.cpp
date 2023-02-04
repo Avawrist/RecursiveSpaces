@@ -157,7 +157,7 @@ int main()
     ///////////////////////
     
     Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
-    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\sfx\\taunt.wav", soundInterface);
+    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\sfx\\elephant.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //

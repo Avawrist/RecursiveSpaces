@@ -304,6 +304,9 @@ int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
 
 void soundStreamUpdate(SoundStream* soundStream)
 {
+    // TODO: 1. Create SEPARATE XAudio2 buffers (not separate temp buffers)
+    //       2. How can we unqueue buffers that are finished being read? This does not happen automatically!
+    
     // Get sound state from XAudio2
     XAUDIO2_VOICE_STATE state_p; 
     soundStream->source_voice_p->GetState(&state_p);
