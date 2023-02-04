@@ -16,10 +16,6 @@
 #include <cstring>
 #include <xaudio2.h>
 
-// C libs
-#include <unistd.h> 
-#include <pthread.h>
-
 // My libs
 #include "typedefs.hpp"
 
@@ -52,7 +48,28 @@ int  soundLoadWav(Sound* sound, c_char* wav_path);
 void soundPlay(Sound* sound);
 void soundPause(Sound* sound);
 void soundStop(Sound* sound);
-void soundPlayStream(Sound* sound);
 void soundSetVolume(Sound* sound, int volume);
+
+////////////////////////
+// Struct SoundStream //
+////////////////////////
+
+#define NUM_BUFFERS 3
+#define BUFFER_SIZE 65536
+
+typedef struct SoundStream
+{
+    WAVEFORMATEX         waveFormat = {0};
+    XAUDIO2_BUFFER       buffer = {0};
+    IXAudio2SourceVoice* source_voice_p;
+    FILE*                file_p;
+    BYTE                 buffers[NUM_BUFFERS][BUFFER_SIZE];
+    uint                 bytes_read; // In bytes
+    SoundStream(c_char* wav_path, SoundInterface& soundInterface);
+    ~SoundStream();
+} SoundStream;
+int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
+void soundStreamUpdate(SoundStream* soundStream);
+void soundSetVolume(SoundStream* sound, int volume);
 
 #endif

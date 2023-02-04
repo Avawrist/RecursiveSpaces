@@ -219,19 +219,53 @@ void soundStop(Sound* sound)
     sound->source_voice_p->FlushSourceBuffers();
 }
 
-void soundPlayStream(Sound* sound, c_char* wav_path)
+void soundSetVolume(Sound* sound, int volume)
 {
-    // ** This function to be used as a thread ** //
+    // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
+    float value = volume * 0.01; 
+    sound->source_voice_p->SetVolume(value);
+}
+
+////////////////////////
+// Struct SoundStream //
+////////////////////////
+
+SoundStream::SoundStream(c_char* wav_path, SoundInterface& soundInterface)
+{
+    // Init member variables
+    bytes_read = 0;
+    file_p = nullptr;
     
+    //Populate XAudio 2 structs:
+    if(!soundStreamReadWavHeader(this, wav_path))
+    {
+	OutputDebugStringA("ERROR: Unable to populate XAudio2 structs.\n");
+    }
+    
+    // Create source voice
+    soundInterface.interface_p->CreateSourceVoice(&source_voice_p,
+						  &waveFormat);
+    if(!source_voice_p)
+    {
+	OutputDebugStringA("ERROR: Failed to create source voice.\n");
+    }
+}
+
+SoundStream::~SoundStream()
+{
+    fclose(file_p);
+}
+
+int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
+{
     // Open file
-    FILE* file_p = NULL;
-    fopen_s(&file_p, wav_path, "rb");
-    if(!file_p) {return 0;}
+    fopen_s(&soundStream->file_p, wav_path, "rb");
+    if(!soundStream->file_p) {return 0;}
     
     // Verify first ChunkID is "RIFF" format
     char chunk_ID[5];
     chunk_ID[4] = '\0';
-    fread(chunk_ID, sizeof(char), 4, file_p);
+    fread(chunk_ID, sizeof(char), 4, soundStream->file_p);
     if(strcmp(chunk_ID, "RIFF") != 0) {return 0;}
 
     //////////////////////////////////
@@ -240,86 +274,79 @@ void soundPlayStream(Sound* sound, c_char* wav_path)
 
     // Skip ChunkSize (4), Format (4), SubchunkID (4),
     // Subchunk1Size (4), AudioFormat (2)
-    fseek(file_p, 18, SEEK_CUR);
+    fseek(soundStream->file_p, 18, SEEK_CUR);
     // Read NumChannels
-    fread(&sound->waveFormat.nChannels, sizeof(shint), 1, file_p);
+    fread(&soundStream->waveFormat.nChannels, sizeof(shint), 1, soundStream->file_p);
     // Read SampleRate
-    fread(&sound->waveFormat.nSamplesPerSec, sizeof(uint), 1, file_p);
+    fread(&soundStream->waveFormat.nSamplesPerSec, sizeof(uint), 1, soundStream->file_p);
     // Read ByteRate
-    fread(&sound->waveFormat.nAvgBytesPerSec, sizeof(uint), 1, file_p);
+    fread(&soundStream->waveFormat.nAvgBytesPerSec, sizeof(uint), 1, soundStream->file_p);
     // Read BlockAlign
-    fread(&sound->waveFormat.nBlockAlign, sizeof(shint), 1, file_p);
+    fread(&soundStream->waveFormat.nBlockAlign, sizeof(shint), 1, soundStream->file_p);
     // Read Bits Per Sample
-    fread(&sound->waveFormat.wBitsPerSample, sizeof(shint), 1, file_p);
+    fread(&soundStream->waveFormat.wBitsPerSample, sizeof(shint), 1, soundStream->file_p);
     // FormatTag
-    sound->waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+    soundStream->waveFormat.wFormatTag = WAVE_FORMAT_PCM;
     // cbSize
-    sound->waveFormat.cbSize = 0;
+    soundStream->waveFormat.cbSize = 0;
 
     ////////////////////////////////////
     // Populate XAUDIO2_BUFFER struct //
     ////////////////////////////////////
     
     // Skip Subchunk2ID (4)
-    fseek(file_p, 4, SEEK_CUR);
+    fseek(soundStream->file_p, 4, SEEK_CUR);
     // Read Subchunk2Size
-    fread(&sound->buffer.AudioBytes, sizeof(uint), 1, file_p);
+    fread(&soundStream->buffer.AudioBytes, sizeof(uint), 1, soundStream->file_p);
 
-    ////////////////////////////////////////////
-    // Stream audio data to buffer each frame //
-    ////////////////////////////////////////////
-    
-    // Create stream buffer
-    uint bytes_per_frame = sound->waveFormat.nAvgBytesPerSec * 0.1667; // 60 FPS
-    BYTE *buffer = new BYTE[bytes_per_frame * 120]; // 2 second buffer
+    return 1;
+}
 
-    // Load initial data into buffer
-    fread((void *)buffer, sizeof(char), bytes_per_frame, file_p);
-
-    // Point sound buffer to temp buffer
-    sound->buffer.pAudioData = buffer;
-
-    // Submit sound buffer to source sound
-    HRESULT hr;
-    hr = sound->source_voice_p->SubmitSourceBuffer(&(sound->buffer));
-    if(FAILED(hr))
+void soundStreamUpdate(SoundStream* soundStream)
+{
+    // Get sound state from XAudio2
+    XAUDIO2_VOICE_STATE state_p; 
+    soundStream->source_voice_p->GetState(&state_p);
+    if(!&state_p)
     {
-	OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
+	OutputDebugStringA("\nERROR: Failed to get buffer state from XAudio2.\n");
 	return;
     }
 
-    // Begin playing audio
-    sound->source_voice_p->Start(0);
-
-    // Stream the rest of the audio data to the sound buffer each frame
-    uint cycles = 0;
-    while (!feof(file_p))
+    // Fill and submit buffers if they are unqueued
+    if(state_p.BuffersQueued < 3)
     {
-	// Read 1 frame's worth of audio data into the buffer at an offset
-	// Does offsetting this way work?
-	fread((void *)((char *)buffer + (cycles * bytes_per_frame)), sizeof(char), bytes_per_frame, file_p);
-	
-	// Increment cycles
-	cycles++;
+	uint offset = 0;
+	for(int i = 0; i < (3 - state_p.BuffersQueued); i++)
+	{
+	    // Update offset
+	    offset = soundStream->bytes_read; // NOTE: should be header length in bytes + bytes_read
+	    
+	    // Offset file_p by amount of data already read
+	    fseek(soundStream->file_p, offset, SEEK_SET);
+	    
+	    // Fill unqueued buffer with data from the file
+	    fread((void *)&(soundStream->buffers[i]), sizeof(char), BUFFER_SIZE, soundStream->file_p);
 
-	// Reset cycles (resets reads back to start of buffer)
-	if(cycles >= 119) {cycles = 0;}
-
-	// Reset XAudio2 play cursor if it reaches end of buffer
-	// TODO
-	
-	// Sleep for 1 frame (60 FPS)
-        // TODO
+	    // Update bytes_read for next pass
+	    soundStream->bytes_read += BUFFER_SIZE;
+	    
+	    // Submit buffer to queue
+	    soundStream->buffer.pAudioData = soundStream->buffers[i];
+	    HRESULT hr;
+	    hr = soundStream->source_voice_p->SubmitSourceBuffer(&(soundStream->buffer));
+	    if(FAILED(hr))
+	    {
+		OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
+		return;
+	    }
+	}
     }
-    sound->buffer.Flags = XAUDIO2_END_OF_STREAM;
 
-    // Close the file
-    fclose(file_p);
-
-    return;
+    // NOTE: Need check for if file has finished playing
 }
 
-void soundSetVolume(Sound* sound, int volume)
+void soundSetVolume(SoundStream* sound, int volume)
 {
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
     float value = volume * 0.01; 

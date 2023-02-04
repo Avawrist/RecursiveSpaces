@@ -157,6 +157,7 @@ int main()
     ///////////////////////
     
     Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
+    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\sfx\\taunt.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //
@@ -230,13 +231,7 @@ int main()
     // Prep Audio Stream //
     ///////////////////////
 
-    BYTE buffers[MAX_BUFFER_COUNT][STREAM_BUFFER_SIZE];
-
-    OVERLAPPED overlapped = {0};
-    overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-
-    
-    
+    test_soundStream_p->source_voice_p->Start(0);
     
     ///////////////
     // Game Loop //
@@ -250,6 +245,11 @@ int main()
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
+
+	/////////////////////////
+	// Update sound stream //
+	/////////////////////////
+	soundStreamUpdate(test_soundStream_p);
 	
 	///////////////////
 	// Update cursor //
@@ -366,6 +366,7 @@ int main()
     
     // Delete pointers to structs on the heap
     delete test_sound_p;
+    delete test_soundStream_p;
     delete mesh_p;
     delete d_texture_p;
     delete n_texture_p;
