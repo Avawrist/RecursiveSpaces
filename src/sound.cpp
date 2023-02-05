@@ -294,18 +294,17 @@ int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
     // Populate XAUDIO2_BUFFER struct //
     ////////////////////////////////////
     
-    // Skip Subchunk2ID (4)
-    fseek(soundStream->file_p, 4, SEEK_CUR);
-    // Read Subchunk2Size
-    fread(&soundStream->buffer.AudioBytes, sizeof(uint), 1, soundStream->file_p);
+    // Skip Subchunk2ID (4), skip Subchunk2Size (4)
+    fseek(soundStream->file_p, 8, SEEK_CUR);
+    // Set AudioBytes to correct buffer size
+    soundStream->buffer.AudioBytes = BUFFER_SIZE;
 
     return 1;
 }
 
 void soundStreamUpdate(SoundStream* soundStream)
 {
-    // TODO: 1. Create SEPARATE XAudio2 buffers (not separate temp buffers)
-    //       2. How can we unqueue buffers that are finished being read? This does not happen automatically!
+    // TODO: 1. Create SEPARATE XAudio2 buffers (not separate temp buffers). Maybe not necessary?
     
     // Get sound state from XAudio2
     XAUDIO2_VOICE_STATE state_p; 
@@ -315,21 +314,21 @@ void soundStreamUpdate(SoundStream* soundStream)
 	OutputDebugStringA("\nERROR: Failed to get buffer state from XAudio2.\n");
 	return;
     }
-
+    
     // Fill and submit buffers if they are unqueued
-    if(state_p.BuffersQueued < 3)
+    if(state_p.BuffersQueued < NUM_BUFFERS)
     {
 	uint offset = 0;
-	for(int i = 0; i < (3 - state_p.BuffersQueued); i++)
+	for(int i = 0; i < (NUM_BUFFERS - state_p.BuffersQueued); i++)
 	{
 	    // Update offset
-	    offset = soundStream->bytes_read; // NOTE: should be header length in bytes + bytes_read
+	    offset = 44 + soundStream->bytes_read;
 	    
 	    // Offset file_p by amount of data already read
 	    fseek(soundStream->file_p, offset, SEEK_SET);
 	    
 	    // Fill unqueued buffer with data from the file
-	    fread((void *)&(soundStream->buffers[i]), sizeof(char), BUFFER_SIZE, soundStream->file_p);
+	    fread((void *)&(soundStream->buffers[i]), BUFFER_SIZE, 1, soundStream->file_p);
 
 	    // Update bytes_read for next pass
 	    soundStream->bytes_read += BUFFER_SIZE;
