@@ -65,11 +65,13 @@ typedef struct SoundStream
     FILE*                file_p;
     BYTE                 buffers[NUM_BUFFERS][BUFFER_SIZE];
     uint                 bytes_read; // In bytes
+    uint                 cw_buffer;
     SoundStream(c_char* wav_path, SoundInterface& soundInterface);
     ~SoundStream();
 } SoundStream;
 int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
 void soundStreamUpdate(SoundStream* soundStream);
 void soundSetVolume(SoundStream* sound, int volume);
+void soundStreamStop(SoundStream* soundStream);
 
 #endif
