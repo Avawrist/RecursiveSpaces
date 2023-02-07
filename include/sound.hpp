@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <cstring>
 #include <xaudio2.h>
+#include <algorithm>
 
 // My libs
 #include "typedefs.hpp"
@@ -65,13 +66,16 @@ typedef struct SoundStream
     FILE*                file_p;
     BYTE                 buffers[NUM_BUFFERS][BUFFER_SIZE];
     uint                 bytes_read; // In bytes
+    uint                 total_bytes;
     uint                 cw_buffer;
     SoundStream(c_char* wav_path, SoundInterface& soundInterface);
     ~SoundStream();
 } SoundStream;
 int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
 void soundStreamUpdate(SoundStream* soundStream);
-void soundSetVolume(SoundStream* sound, int volume);
+// TODO: soundStreamPlay(SoundStream* soundStream);
+void soundStreamPause(SoundStream* soundStream);
 void soundStreamStop(SoundStream* soundStream);
+void soundSetVolume(SoundStream* sound, int volume);
 
 #endif

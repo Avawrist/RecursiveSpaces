@@ -296,8 +296,10 @@ int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
     // Populate XAUDIO2_BUFFER struct //
     ////////////////////////////////////
     
-    // Skip Subchunk2ID (4), skip Subchunk2Size (4)
-    fseek(soundStream->file_p, 8, SEEK_CUR);
+    // Skip Subchunk2ID (4)
+    fseek(soundStream->file_p, 4, SEEK_CUR);
+    // Read Subchunk2Size into total_bytes
+    fread(&soundStream->total_bytes, sizeof(uint), 1, soundStream->file_p);
     // Set AudioBytes to correct buffer size
     soundStream->buffer.AudioBytes = BUFFER_SIZE;
 
@@ -309,9 +311,6 @@ int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
 
 void soundStreamUpdate(SoundStream* soundStream)
 {
-    // TODO: 1. Review members of the XAudio2 buffer struct for accuracy
-    //       2. Determine when file has finished playing
-    
     // Get sound state from XAudio2
     XAUDIO2_VOICE_STATE state_p; 
     soundStream->source_voice_p->GetState(&state_p);
@@ -322,18 +321,29 @@ void soundStreamUpdate(SoundStream* soundStream)
     }
     
     // Fill and submit buffers if they are unqueued
-    if(state_p.BuffersQueued < NUM_BUFFERS)
+    if(state_p.BuffersQueued < NUM_BUFFERS && soundStream->buffer.Flags != XAUDIO2_END_OF_STREAM)
     {
 	// Offset file_p by amount of data already read
 	fseek(soundStream->file_p, soundStream->bytes_read, SEEK_SET);
 	
-	// Fill unqueued buffer with data from the file
+	// Determine amount to read on this pass
+	uint bytes_left = soundStream->total_bytes - soundStream->bytes_read;
+	uint bytes_to_read = min(bytes_left, BUFFER_SIZE);
+
+	// If final pass, fill buffer with 0s and mark end of stream
+	if(bytes_to_read < BUFFER_SIZE)
+	{
+	    memset(soundStream->buffers[soundStream->cw_buffer], 0, BUFFER_SIZE);
+	    soundStream->buffer.Flags = XAUDIO2_END_OF_STREAM;
+	}
+	
+        // Fill unqueued buffer with data from the file
 	fread((void *)&(soundStream->buffers[soundStream->cw_buffer]),
-	      BUFFER_SIZE, 1, soundStream->file_p);
+	      bytes_to_read, 1, soundStream->file_p);
 
 	// Submit buffer to queue
 	soundStream->buffer.pAudioData = soundStream->buffers[soundStream->cw_buffer];
-	HRESULT hr;
+        HRESULT hr;
 	hr = soundStream->source_voice_p->SubmitSourceBuffer(&(soundStream->buffer));
 	if(FAILED(hr))
 	{
@@ -342,23 +352,39 @@ void soundStreamUpdate(SoundStream* soundStream)
 	}
 
 	// Update bytes_read for next pass
-	soundStream->bytes_read += BUFFER_SIZE;
+	soundStream->bytes_read += bytes_to_read;
 
 	// Update current write buffer for next pass
 	soundStream->cw_buffer++;
-	if(soundStream->cw_buffer > 2) {soundStream->cw_buffer = 0;}
+	soundStream->cw_buffer %= NUM_BUFFERS;
     }
 }
 
-void soundSetVolume(SoundStream* sound, int volume)
+void soundStreamPause(SoundStream* soundStream)
 {
-    // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
-    float value = volume * 0.01; 
-    sound->source_voice_p->SetVolume(value);
+    // TODO: test
+    soundStream->source_voice_p->Stop();
 }
 
 void soundStreamStop(SoundStream* soundStream)
 {
+    // TODO: test
     soundStream->source_voice_p->Stop();
+    // Clear XAudio2's queued buffers
     soundStream->source_voice_p->FlushSourceBuffers();
+    // Clear our temp buffers
+    for(int i = 0; i < NUM_BUFFERS; i++)
+    {
+	memset(soundStream->buffers[i], 0, BUFFER_SIZE);
+    }
+    // Reset our tracking values
+    soundStream->bytes_read = 0;
+    soundStream->cw_buffer  = 0;
+}
+
+void soundSetVolume(SoundStream* soundStream, int volume)
+{
+    // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
+    float value = volume * 0.01; 
+    soundStream->source_voice_p->SetVolume(value);
 }
