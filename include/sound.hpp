@@ -65,7 +65,7 @@ typedef struct SoundStream
     IXAudio2SourceVoice* source_voice_p;
     FILE*                file_p;
     BYTE                 buffers[NUM_BUFFERS][BUFFER_SIZE];
-    uint                 bytes_read; // In bytes
+    uint                 bytes_read;
     uint                 total_bytes;
     uint                 cw_buffer;
     SoundStream(c_char* wav_path, SoundInterface& soundInterface);
@@ -73,7 +73,7 @@ typedef struct SoundStream
 } SoundStream;
 int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
 void soundStreamUpdate(SoundStream* soundStream);
-// TODO: soundStreamPlay(SoundStream* soundStream);
+void soundStreamPlay(SoundStream* soundStream);
 void soundStreamPause(SoundStream* soundStream);
 void soundStreamStop(SoundStream* soundStream);
 void soundSetVolume(SoundStream* sound, int volume);

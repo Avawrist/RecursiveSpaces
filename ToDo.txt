@@ -1,4 +1,18 @@
 -Input library
 -Animation engine
--Editor
+-Editor -> writes all object count/info to a .txt file. 1 file per level. 
+-Loader -> reads all object info from the level .txt file and registers the objects with the game
+-Asset Table -> stores pointers to assets for each gameobject. Gameobjects look up the pointers to their assets upon registration. 
+                meshes, textures, anims, sfx, etc.
+
+	Something like this:
+
+	     goblin     elf    crate     sword
+texture    g_txt_p    null   c_txt_p   s_txt_p
+mesh       g_mesh_p   null   c_mesh_p  s_mesh_p
+sfx        g_sfx_p    null   c_sfx_p   s_sfx_p
+
+The table would be populated when assets are loaded before each level.
+If the sought asset is not loaded, the table lookup function could return a null pointer, a dummy asset, or dynamically load the requested asset. 
+
 -Add multithreading

@@ -358,6 +358,16 @@ void soundStreamUpdate(SoundStream* soundStream)
 	soundStream->cw_buffer++;
 	soundStream->cw_buffer %= NUM_BUFFERS;
     }
+    else if(state_p.BuffersQueued == 0)
+    {
+	soundStreamStop(soundStream);
+    }
+}
+
+void soundStreamPlay(SoundStream* soundStream)
+{
+    soundStream->buffer.Flags = 0;
+    soundStream->source_voice_p->Start(0);
 }
 
 void soundStreamPause(SoundStream* soundStream)
@@ -378,7 +388,7 @@ void soundStreamStop(SoundStream* soundStream)
 	memset(soundStream->buffers[i], 0, BUFFER_SIZE);
     }
     // Reset our tracking values
-    soundStream->bytes_read = 0;
+    soundStream->bytes_read = 44;
     soundStream->cw_buffer  = 0;
 }
 

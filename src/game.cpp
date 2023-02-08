@@ -152,12 +152,17 @@ int main()
 
     SoundInterface soundInterface;
 
-    ///////////////////////
-    // Initialize Sounds //
-    ///////////////////////
+    ////////////////////
+    // Initialize SFX //
+    ////////////////////
     
     Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
-    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\sfx\\elephant.wav", soundInterface);
+
+    ////////////////////
+    // Initialize BGM //
+    ////////////////////
+    
+    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //
@@ -227,12 +232,6 @@ int main()
     glUseProgram(pp_shader_p->program_id);
     shaderAddIntUniform(pp_shader_p, "color_texture", 0);
 
-    ///////////////////////
-    // Prep Audio Stream //
-    ///////////////////////
-
-    test_soundStream_p->source_voice_p->Start(0);
-    
     ///////////////
     // Game Loop //
     ///////////////
@@ -245,11 +244,6 @@ int main()
 	float curr_time = glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
-
-	/////////////////////////
-	// Update sound stream //
-	/////////////////////////
-	soundStreamUpdate(test_soundStream_p);
 	
 	///////////////////
 	// Update cursor //
@@ -276,16 +270,21 @@ int main()
 
 	if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-	    soundPlay(test_sound_p);
+	    soundStreamPlay(test_soundStream_p);
 	}
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-	    soundPause(test_sound_p);
+	    soundStreamPause(test_soundStream_p);
 	}
 	if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-	    soundStop(test_sound_p);
+	    soundStreamStop(test_soundStream_p);
 	}
+
+	/////////////////////////
+	// Update sound stream //
+	/////////////////////////
+	soundStreamUpdate(test_soundStream_p);
 	
 	///////////////////
 	// Update camera //
