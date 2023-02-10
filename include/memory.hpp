@@ -22,19 +22,21 @@
 
 #define POINTER_SIZE 8
 
+#define TOTAL_TEXTURES 20
+
 ///////////////////////////
 // Struct ActiveTextures //
 ///////////////////////////
 
 typedef struct ActiveTextures
 {
-    c_uint   TOTAL_TEXTURES = 20;
     uint     registered_count;
-    Texture* texture_memory_p;
+    Texture* textures[TOTAL_TEXTURES * POINTER_SIZE];
     ActiveTextures();
     ~ActiveTextures();
 } ActiveTextures;
 int  activeTexturesRegister(ActiveTextures* activeTextures, c_char* path);
 void activeTexturesUnregisterAll(ActiveTextures* activeTextures);
+int  activeTexturesGet(ActiveTextures* activeTextures, uint index);
 
 #endif
