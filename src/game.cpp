@@ -27,6 +27,7 @@
 #include "asset.hpp"
 #include "light.hpp"
 #include "sound.hpp"
+#include "memory.hpp"
 
 #define STREAM_BUFFER_SIZE 65536
 #define MAX_BUFFER_COUNT 3
@@ -146,6 +147,12 @@ int main()
     glDebugMessageCallback(glDebugOutput, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
+    ////////////////////////
+    // Prep asset storage //
+    ////////////////////////
+
+    ActiveTextures activeTextures;
+    
     //////////////////////////
     // Load XAudio2 Library //
     //////////////////////////

@@ -10,7 +10,8 @@ cl /Zi /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..
  light.cpp^
  mdcla.cpp^
  shader.cpp^
- sound.cpp
+ sound.cpp^
+ memory.cpp
 cd ..\build
 link /NODEFAULTLIB:"msvcrtd.lib" /MACHINE:X64 /DEBUG:FULL /LIBPATH:"..\\libs\\"^
  game.obj^
@@ -23,6 +24,7 @@ link /NODEFAULTLIB:"msvcrtd.lib" /MACHINE:X64 /DEBUG:FULL /LIBPATH:"..\\libs\\"^
  mdcla.obj^
  shader.obj^
  sound.obj^
+ memory.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^
