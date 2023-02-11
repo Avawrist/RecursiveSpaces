@@ -27,7 +27,7 @@
 #include "asset.hpp"
 #include "light.hpp"
 #include "sound.hpp"
-#include "memory.hpp"
+#include "asset_manager.hpp"
 
 #define STREAM_BUFFER_SIZE 65536
 #define MAX_BUFFER_COUNT 3
@@ -151,7 +151,8 @@ int main()
     // Prep asset storage //
     ////////////////////////
 
-    ActiveTextures activeTextures;
+    AssetManager assetManager;
+    Texture* p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE01);
     
     //////////////////////////
     // Load XAudio2 Library //
@@ -371,6 +372,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
+    delete p;
     delete test_sound_p;
     delete test_soundStream_p;
     delete mesh_p;
