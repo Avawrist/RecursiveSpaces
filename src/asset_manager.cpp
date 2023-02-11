@@ -52,6 +52,11 @@ ActiveTextures::ActiveTextures()
 // Struct Asset Manager //
 //////////////////////////
 
+// TODO:
+// 1. ADD ASSERTIONS TO EVERYTHING. Why are assertions not working?
+// 2. Exception handling
+// 3. Add API specific load code for each asset type to registration code
+
 AssetManager::~AssetManager()
 {
     assetManagerUnregisterAll(*this);
