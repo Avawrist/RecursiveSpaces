@@ -150,49 +150,37 @@ int main()
     ////////////////////////
     // Prep asset storage //
     ////////////////////////
-
     AssetManager assetManager;
-    Texture* p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE01);
     
     //////////////////////////
     // Load XAudio2 Library //
     //////////////////////////
-
     SoundInterface soundInterface;
 
     ////////////////////
     // Initialize SFX //
     ////////////////////
-    
     Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
 
     ////////////////////
     // Initialize BGM //
     ////////////////////
-    
     SoundStream *test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", soundInterface);
     
     //////////////////////////
     // Initialize Test Mesh //
     //////////////////////////
-
-    Mesh *mesh_p = new Mesh("..\\assets\\meshes\\chest.obj");
-    meshDataToGPU(mesh_p);
+    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(assetManager, CHEST, MESH01);
 
     /////////////////////////
     // Initialize Textures //
     /////////////////////////
-
-    Texture *d_texture_p = new Texture("..\\assets\\textures\\chest.bmp");
-    textureDataToGPU(d_texture_p);
-
-    Texture *n_texture_p = new Texture("..\\assets\\textures\\brickwall_normal.bmp");
-    textureDataToGPU(n_texture_p);
+    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE_D);
+    Texture *n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N);
 
     ///////////////////////
     // Initialize Lights //
     ///////////////////////
-
     DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
 					Vec3F(0.0f, -1.0f, -1.0f),
 	                                0.25f);
@@ -372,7 +360,6 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
-    delete p;
     delete test_sound_p;
     delete test_soundStream_p;
     delete mesh_p;

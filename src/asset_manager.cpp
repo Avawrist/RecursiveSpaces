@@ -6,6 +6,10 @@
 
 #include "asset_manager.hpp"
 
+// TODO:
+// 1. ADD ASSERTIONS TO EVERYTHING. Why are assertions not working?
+// 2. Exception handling
+
 /////////////////////////
 // Struct AssetTableID //
 /////////////////////////
@@ -22,20 +26,22 @@ AssetTableID::AssetTableID()
 AssetTableDir::AssetTableDir()
 {
     // Test Object
-    table[TEST][TEXTURE01]  = "";
-    table[TEST][TEXTURE02]  = "..\\assets\\textures\\brickwall_normal.bmp";
-    table[TEST][MESH01]     = "";
+    table[TEST][TEXTURE_D]  = "..\\assets\\textures\\brickwall.bmp";
+    table[TEST][TEXTURE_N]  = "..\\assets\\textures\\brickwall_normal.bmp";
+    table[TEST][TEXTURE_S]  = nullptr;
+    table[TEST][MESH01]     = "..\\assets\\meshes\\cube.obj";
     table[TEST][SFX01]      = "..\\assets\\sfx\\taunt.wav";
-    table[TEST][SFX02]      = "";
-    table[TEST][SFX03]      = "";
+    table[TEST][SFX02]      = nullptr;
+    table[TEST][SFX03]      = nullptr;
 
     // Chest Object
-    table[CHEST][TEXTURE01]  = "..\\assets\\textures\\chest.bmp";
-    table[CHEST][TEXTURE02]  = "";
+    table[CHEST][TEXTURE_D]  = "..\\assets\\textures\\chest.bmp";
+    table[CHEST][TEXTURE_N]  = nullptr;
+    table[CHEST][TEXTURE_S]  = nullptr;
     table[CHEST][MESH01]     = "..\\assets\\meshes\\chest.obj";
-    table[CHEST][SFX01]      = "";
-    table[CHEST][SFX02]      = "";
-    table[CHEST][SFX03]      = "";
+    table[CHEST][SFX01]      = nullptr;
+    table[CHEST][SFX02]      = nullptr;
+    table[CHEST][SFX03]      = nullptr;
 }
 
 ///////////////////////////
@@ -48,14 +54,80 @@ ActiveTextures::ActiveTextures()
     registered_count = 0;
 }
 
-//////////////////////////
-// Struct Asset Manager //
-//////////////////////////
+int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
+			   int object_type, int asset_type, c_char* path)
+{
+    // Assert that there is room to register
 
-// TODO:
-// 1. ADD ASSERTIONS TO EVERYTHING. Why are assertions not working?
-// 2. Exception handling
-// 3. Add API specific load code for each asset type to registration code
+    // Allocate new texture and add pointer to activeTextures registry
+    activeTextures.textures[activeTextures.registered_count] = new Texture(path);
+
+    // Texture specific code: move the texture data to GPU
+    textureDataToGPU(activeTextures.textures[activeTextures.registered_count]);
+    
+    // Add ID to asset table ID
+    assetManager.assetTableID.table[object_type][asset_type] = activeTextures.registered_count;
+
+    // Update registered count
+    activeTextures.registered_count++;
+    
+    return 1;
+}
+
+void activeTexturesUnregisterAll(ActiveTextures &activeTextures)
+{
+    // Delete all pointers
+    for(int i = 0; i < activeTextures.registered_count; i++)
+    {
+	delete activeTextures.textures[i];
+    }
+    // Reset count
+    activeTextures.registered_count = 0;
+}
+
+/////////////////////////
+// Struct ActiveMeshes //
+/////////////////////////
+
+ActiveMeshes::ActiveMeshes()
+{
+    registered_count = 0;
+}
+
+int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
+                         int object_type, int asset_type, c_char* path)
+{
+    // Assert that there is room to register
+
+    // Allocate new mesh and add pointer to activeMeshes registry
+    activeMeshes.meshes[activeMeshes.registered_count] = new Mesh(path);
+
+    // Mesh specific code: move the mesh data to GPU
+    meshDataToGPU(activeMeshes.meshes[activeMeshes.registered_count]);
+
+    // Add ID to asset table ID
+    assetManager.assetTableID.table[object_type][asset_type] = activeMeshes.registered_count;
+
+    // Update registered count
+    activeMeshes.registered_count++;
+
+    return 1;
+}
+
+void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes)
+{
+    // Delete all pointers
+    for(int i = 0; i < activeMeshes.registered_count; i++)
+    {
+	delete activeMeshes.meshes[i];
+    }
+    // Reset count
+    activeMeshes.registered_count = 0;
+}
+
+//////////////////////////
+// Struct AssetManager //
+//////////////////////////
 
 AssetManager::~AssetManager()
 {
@@ -69,18 +141,18 @@ int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_
     
     switch(asset_type)
     {
-    case TEXTURE01:
-	assetManager.activeTextures01.textures[assetManager.activeTextures01.registered_count] = new Texture(path);
-	assetManager.assetTableID.table[object_type][asset_type] = assetManager.activeTextures01.registered_count;
-	assetManager.activeTextures01.registered_count++;
-	return 1;
-    case TEXTURE02:
-	assetManager.activeTextures02.textures[assetManager.activeTextures02.registered_count] = new Texture(path);
-	assetManager.assetTableID.table[object_type][asset_type] = assetManager.activeTextures02.registered_count;
-	assetManager.activeTextures02.registered_count++;
-	return 1;
+    case TEXTURE_D:
+	return activeTexturesRegister(assetManager.activeTexturesD,
+				      assetManager, object_type, asset_type, path);
+    case TEXTURE_N:
+	return activeTexturesRegister(assetManager.activeTexturesN,
+				      assetManager, object_type, asset_type, path);
+    case TEXTURE_S:
+	return activeTexturesRegister(assetManager.activeTexturesS,
+				      assetManager, object_type, asset_type, path);
     case MESH01:
-	return 0; // undefined case
+	return activeMeshesRegister(assetManager.activeMeshes,
+				    assetManager, object_type, asset_type, path);
     case SFX01:
 	return 0; // undefined case
     case SFX02:
@@ -95,24 +167,18 @@ int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_
 void assetManagerUnregisterAll(AssetManager &assetManager)
 {
     
-    // Delete all texture01 pointers
-    for(int i = 0; i < assetManager.activeTextures01.registered_count; i++)
-    {
-	delete assetManager.activeTextures01.textures[i];
-    }
-    // Reset count
-    assetManager.activeTextures01.registered_count = 0;
+    // Unregister Diffuse textures
+    activeTexturesUnregisterAll(assetManager.activeTexturesD);
 
-    // Delete all texture02 pointers
-    for(int i = 0; i < assetManager.activeTextures02.registered_count; i++)
-    {
-	delete assetManager.activeTextures02.textures[i];
-    }
-    // Reset count
-    assetManager.activeTextures02.registered_count = 0;
+    // Unregister Normal textures]
+    activeTexturesUnregisterAll(assetManager.activeTexturesN);
+    
+    // Unregister Specular textures
+    activeTexturesUnregisterAll(assetManager.activeTexturesS);
     
     // Delete all mesh pointers
-
+    activeMeshesUnregisterAll(assetManager.activeMeshes);
+    
     // Delete all sfx01 pointers
 
     // Delete all sfx02 pointers
@@ -131,15 +197,14 @@ void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int ass
     
     switch(asset_type)
     {
-    case TEXTURE01:
-	return (void*)assetManager.activeTextures01.textures[index];
-	break;
-    case TEXTURE02:
-        return (void*)assetManager.activeTextures02.textures[index];
-	break;
+    case TEXTURE_D:
+	return (void*)assetManager.activeTexturesD.textures[index];
+    case TEXTURE_N:
+        return (void*)assetManager.activeTexturesN.textures[index];
+    case TEXTURE_S:
+	return (void*)assetManager.activeTexturesS.textures[index];
     case MESH01:
-	// Undefined 
-	break;
+	return (void*)assetManager.activeMeshes.meshes[index]; 
     case SFX01:
 	// Undefined
 	break;

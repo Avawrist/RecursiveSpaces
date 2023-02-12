@@ -16,13 +16,14 @@
 #include "asset.hpp"
 #include "typedefs.hpp"
 
-#define TEXTURE01         0
-#define TEXTURE02         1
-#define MESH01            2
-#define SFX01             3
-#define SFX02             4
-#define SFX03             5
-#define TOTAL_ASSET_TYPES 6
+#define TEXTURE_D         0
+#define TEXTURE_N         1
+#define TEXTURE_S         2
+#define MESH01            3
+#define SFX01             4
+#define SFX02             5
+#define SFX03             6
+#define TOTAL_ASSET_TYPES 7
 
 #define TEST               0
 #define CHEST              1
@@ -52,7 +53,7 @@ typedef struct AssetTableDir
 // Struct ActiveTextures //
 ///////////////////////////
 
-#define MAX_TEXTURES 20
+#define MAX_TEXTURES 60
 typedef struct ActiveTextures
 {
     uint     registered_count;
@@ -63,6 +64,14 @@ typedef struct ActiveTextures
 /////////////////////////
 // Struct ActiveMeshes //
 /////////////////////////
+
+#define MAX_MESHES 20
+typedef struct ActiveMeshes
+{
+    uint registered_count;
+    Mesh* meshes[MAX_MESHES];
+    ActiveMeshes();
+} ActiveMeshes;
 
 ///////////////////////
 // Struct ActiveSFX //
@@ -76,9 +85,10 @@ typedef struct AssetManager
 {
     AssetTableID   assetTableID;
     AssetTableDir  assetTableDir;
-    ActiveTextures activeTextures01;
-    ActiveTextures activeTextures02;
-    //ActiveMeshes activeMeshes;
+    ActiveTextures activeTexturesD;
+    ActiveTextures activeTexturesN;
+    ActiveTextures activeTexturesS;
+    ActiveMeshes   activeMeshes;
     //ActiveSFX    activeSFX01;
     //ActiveSFX    activeSFX02;
     //ActiveSFX    activeSFX03;
@@ -87,5 +97,13 @@ typedef struct AssetManager
 int  assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type);
 void assetManagerUnregisterAll(AssetManager &assetManager);
 void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int asset_type);
-
+// ActiveTextures function prototypes
+int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
+			   int object_type, int asset_type, c_char* path);
+void activeTexturesUnregisterAll(ActiveTextures &activeTextures);
+// ActiveMeshes function prototypes
+int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
+                         int object_type, int asset_type, c_char* path);
+void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes);
+    
 #endif
