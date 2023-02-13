@@ -20,9 +20,9 @@
 #define TEXTURE_N         1
 #define TEXTURE_S         2
 #define MESH01            3
-#define SFX01             4
-#define SFX02             5
-#define SFX03             6
+#define SOUND01           4
+#define SOUND02           5
+#define SOUND03           6
 #define TOTAL_ASSET_TYPES 7
 
 #define TEST               0
@@ -73,9 +73,17 @@ typedef struct ActiveMeshes
     ActiveMeshes();
 } ActiveMeshes;
 
-///////////////////////
-// Struct ActiveSFX //
-///////////////////////
+/////////////////////////
+// Struct ActiveSounds //
+/////////////////////////
+
+#define MAX_SOUNDS 60
+typedef struct ActiveSounds
+{
+    uint registered_count;
+    Sound* sounds[MAX_SOUNDS];
+    ActiveSounds();
+} ActiveSounds;
 
 //////////////////
 // AssetManager //
@@ -89,14 +97,16 @@ typedef struct AssetManager
     ActiveTextures activeTexturesN;
     ActiveTextures activeTexturesS;
     ActiveMeshes   activeMeshes;
-    //ActiveSFX    activeSFX01;
-    //ActiveSFX    activeSFX02;
-    //ActiveSFX    activeSFX03;
+    ActiveSounds   activeSounds01;
+    ActiveSounds   activeSounds02;
+    ActiveSounds   activeSounds03;
     ~AssetManager();
 } AssetManager;
-int  assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type);
+int  assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP);
 void assetManagerUnregisterAll(AssetManager &assetManager);
-void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int asset_type);
+void* assetManagerGetAssetP(AssetManager &assetManager, int object_type,
+			    int asset_type, void *soundInterfaceP);
+
 // ActiveTextures function prototypes
 int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
 			   int object_type, int asset_type, c_char* path);
@@ -105,5 +115,9 @@ void activeTexturesUnregisterAll(ActiveTextures &activeTextures);
 int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
                          int object_type, int asset_type, c_char* path);
 void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes);
-    
+// ActiveMeshes function prototypes
+int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
+                         int object_type, int asset_type, c_char* path);
+
+
 #endif

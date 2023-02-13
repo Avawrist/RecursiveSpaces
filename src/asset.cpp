@@ -23,6 +23,9 @@ Mesh::Mesh(c_char* obj_path)
 
     // Add tangents to Mesh data vector
     meshCalcTangents(this);
+
+    // Copy mesh data to the GPU
+    meshDataToGPU(this);
 }
 
 Mesh::~Mesh()
@@ -225,6 +228,9 @@ Texture::Texture(c_char* bmp_path)
     {
 	OutputDebugStringA("ERROR: Failed to load texture.\n");
     }
+
+    // Copy texture data to GPU
+    textureDataToGPU(this);
 }
 
 Texture::~Texture()

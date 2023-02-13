@@ -160,8 +160,9 @@ int main()
     ////////////////////
     // Initialize SFX //
     ////////////////////
-    Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
-
+    //Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
+    Sound* test_sound_p = (Sound*)assetManagerGetAssetP(assetManager, TEST, SOUND01, &soundInterface); 
+    
     ////////////////////
     // Initialize BGM //
     ////////////////////
@@ -170,13 +171,13 @@ int main()
     //////////////////////////
     // Initialize Test Mesh //
     //////////////////////////
-    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(assetManager, CHEST, MESH01);
+    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(assetManager, CHEST, MESH01, 0);
 
     /////////////////////////
     // Initialize Textures //
     /////////////////////////
-    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE_D);
-    Texture *n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N);
+    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE_D, 0);
+    Texture *n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N, 0);
 
     ///////////////////////
     // Initialize Lights //
@@ -266,15 +267,18 @@ int main()
 
 	if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-	    soundStreamPlay(test_soundStream_p);
+	    //soundStreamPlay(test_soundStream_p);
+	    soundPlay(test_sound_p);
 	}
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-	    soundStreamPause(test_soundStream_p);
+	    //soundStreamPause(test_soundStream_p);
+	    soundPause(test_sound_p);
 	}
 	if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	{
-	    soundStreamStop(test_soundStream_p);
+	    //soundStreamStop(test_soundStream_p);
+	    soundStop(test_sound_p);
 	}
 
 	/////////////////////////
