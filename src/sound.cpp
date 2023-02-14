@@ -148,15 +148,15 @@ int soundLoadWav(Sound* sound, c_char* wav_path)
     // Subchunk1Size (4), AudioFormat (2)
     fseek(file_p, 18, SEEK_CUR);
     // Read NumChannels
-    fread(&sound->waveFormat.nChannels, sizeof(shint), 1, file_p);
+    fread(&sound->waveFormat.nChannels, sizeof(WORD), 1, file_p);
     // Read SampleRate
-    fread(&sound->waveFormat.nSamplesPerSec, sizeof(uint), 1, file_p);
+    fread(&sound->waveFormat.nSamplesPerSec, sizeof(DWORD), 1, file_p);
     // Read ByteRate
-    fread(&sound->waveFormat.nAvgBytesPerSec, sizeof(uint), 1, file_p);
+    fread(&sound->waveFormat.nAvgBytesPerSec, sizeof(DWORD), 1, file_p);
     // Read BlockAlign
-    fread(&sound->waveFormat.nBlockAlign, sizeof(shint), 1, file_p);
+    fread(&sound->waveFormat.nBlockAlign, sizeof(WORD), 1, file_p);
     // Read Bits Per Sample
-    fread(&sound->waveFormat.wBitsPerSample, sizeof(shint), 1, file_p);
+    fread(&sound->waveFormat.wBitsPerSample, sizeof(WORD), 1, file_p);
     // FormatTag
     sound->waveFormat.wFormatTag = WAVE_FORMAT_PCM;
     // cbSize
@@ -175,7 +175,9 @@ int soundLoadWav(Sound* sound, c_char* wav_path)
     fread((void *)buffer, sizeof(char), sound->buffer.AudioBytes, file_p);
     sound->buffer.pAudioData = buffer;
     sound->buffer.Flags = XAUDIO2_END_OF_STREAM;
-    
+    sound->buffer.PlayBegin = 0;
+    sound->buffer.PlayLength = sound->waveFormat.nSamplesPerSec *
+	                       (sound->buffer.AudioBytes / sound->waveFormat.nAvgBytesPerSec);
     // Close file
     fclose(file_p);
     
