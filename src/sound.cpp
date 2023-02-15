@@ -125,6 +125,7 @@ Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
 Sound::~Sound()
 {
     soundStop(this);
+    OutputDebugStringA("\nTest sound deleted\n");
 }
 
 int soundLoadWav(Sound* sound, c_char* wav_path)
@@ -237,7 +238,7 @@ SoundStream::SoundStream(c_char* wav_path, SoundInterface& soundInterface)
     // Init member variables
     bytes_read = 0;
     cw_buffer  = 0;
-    file_p = nullptr;
+    file_p = NULL;
     
     //Populate XAudio 2 structs:
     if(!soundStreamReadWavHeader(this, wav_path))

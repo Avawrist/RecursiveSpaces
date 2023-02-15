@@ -24,20 +24,20 @@ AssetTableDir::AssetTableDir()
     // Test Object
     table[TEST][TEXTURE_D]  = "..\\assets\\textures\\brickwall.bmp";
     table[TEST][TEXTURE_N]  = "..\\assets\\textures\\brickwall_normal.bmp";
-    table[TEST][TEXTURE_S]  = nullptr;
+    table[TEST][TEXTURE_S]  = NULL;
     table[TEST][MESH01]     = "..\\assets\\meshes\\cube.obj";
-    table[TEST][SOUND01]      = "..\\assets\\sfx\\taunt.wav";
-    table[TEST][SOUND02]      = nullptr;
-    table[TEST][SOUND03]      = nullptr;
+    table[TEST][SOUND01]    = "..\\assets\\sfx\\taunt.wav";
+    table[TEST][SOUND02]    = NULL;
+    table[TEST][SOUND03]    = NULL;
 
     // Chest Object
     table[CHEST][TEXTURE_D]  = "..\\assets\\textures\\chest.bmp";
-    table[CHEST][TEXTURE_N]  = nullptr;
-    table[CHEST][TEXTURE_S]  = nullptr;
+    table[CHEST][TEXTURE_N]  = NULL;
+    table[CHEST][TEXTURE_S]  = NULL;
     table[CHEST][MESH01]     = "..\\assets\\meshes\\chest.obj";
-    table[CHEST][SOUND01]      = nullptr;
-    table[CHEST][SOUND02]      = nullptr;
-    table[CHEST][SOUND03]      = nullptr;
+    table[CHEST][SOUND01]    = NULL;
+    table[CHEST][SOUND02]    = NULL;
+    table[CHEST][SOUND03]    = NULL;
 }
 
 ///////////////////////////
@@ -48,13 +48,15 @@ ActiveTextures::ActiveTextures()
 {
     registered_count = 0;
 
-    // Initialize array to contain all nullptrs
+    // Initialize array to contain all NULL
     memset(textures, 0, sizeof(textures));
 }
 
 int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
 			   int object_type, int asset_type, c_char* path)
 {
+    // Returns 1 on success, 0 on failure.
+    
     // Check that there is room to register
     if(!(activeTextures.registered_count < MAX_TEXTURES)) {return 0;}
 
@@ -90,13 +92,15 @@ ActiveMeshes::ActiveMeshes()
 {
     registered_count = 0;
 
-    // Init array to contain all nullptrs
+    // Init array to contain all NULLs
     memset(meshes, 0, sizeof(meshes));
 }
 
 int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
                          int object_type, int asset_type, c_char* path)
 {
+    // Returns 1 on success, 0 on failure.
+    
     // Check that there is room to register
     if(!(activeMeshes.registered_count < MAX_MESHES)) {return 0;}
     
@@ -132,13 +136,15 @@ ActiveSounds::ActiveSounds()
 {
     registered_count = 0;
 
-    // Init sound pointer array to nullptrs
+    // Init sound pointer array to NULL
     memset(sounds, 0, sizeof(sounds));
 }
 
 int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager, int object_type,
 			 int asset_type, c_char* path, SoundInterface *soundInterface)
 {
+    // Returns 1 on success, 0 on failure.
+    
     // Assert that there is room to register
     if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
 
@@ -152,7 +158,7 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
     // Update registered count
     activeSounds.registered_count++;
 
-    return 0;
+    return 1;
 }
 
 void activeSoundsUnregisterAll(ActiveSounds &activeSounds)
@@ -235,29 +241,44 @@ void assetManagerUnregisterAll(AssetManager &assetManager)
 
 void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
 {
+    // Add assertion that object_type and asset_type are valid
+
+    // init return value
+    void* return_p = NULL;
+    
     int index = assetManager.assetTableID.table[object_type][asset_type];
     if(index < 0)
     {
-	assetManagerRegister(assetManager, object_type, asset_type, soundInterfaceP);
+	if(!assetManagerRegister(assetManager, object_type, asset_type, soundInterfaceP))
+	{
+	    return return_p;
+	}
 	index = assetManager.assetTableID.table[object_type][asset_type];
     }
     
     switch(asset_type)
     {
     case TEXTURE_D:
-	return (void*)assetManager.activeTexturesD.textures[index];
+	return_p = (void*)assetManager.activeTexturesD.textures[index];
+	break;
     case TEXTURE_N:
-        return (void*)assetManager.activeTexturesN.textures[index];
+        return_p = (void*)assetManager.activeTexturesN.textures[index];
+	break;
     case TEXTURE_S:
-	return (void*)assetManager.activeTexturesS.textures[index];
+	return_p = (void*)assetManager.activeTexturesS.textures[index];
+	break;
     case MESH01:
-	return (void*)assetManager.activeMeshes.meshes[index]; 
+	return_p = (void*)assetManager.activeMeshes.meshes[index];
+	break;
     case SOUND01:
-	return (void*)assetManager.activeSounds01.sounds[index];
+	return_p = (void*)assetManager.activeSounds01.sounds[index];
+	break;
     case SOUND02:
-	return (void*)assetManager.activeSounds02.sounds[index];
+	return_p = (void*)assetManager.activeSounds02.sounds[index];
+	break;
     case SOUND03:
-	return (void*)assetManager.activeSounds03.sounds[index];
+	return_p = (void*)assetManager.activeSounds03.sounds[index];
+	break;
     }
-    return nullptr;
+    return return_p;
 }

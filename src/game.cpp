@@ -144,8 +144,8 @@ int main()
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(glDebugOutput, nullptr);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    glDebugMessageCallback(glDebugOutput, NULL);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
     ////////////////////////
     // Prep asset storage //
@@ -160,7 +160,6 @@ int main()
     ////////////////////
     // Initialize SFX //
     ////////////////////
-    //Sound *test_sound_p = new Sound("..\\assets\\sfx\\taunt.wav", soundInterface);
     Sound* test_sound_p = (Sound*)assetManagerGetAssetP(assetManager, TEST, SOUND01, &soundInterface); 
     
     ////////////////////
@@ -364,11 +363,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
-    delete test_sound_p;
     delete test_soundStream_p;
-    delete mesh_p;
-    delete d_texture_p;
-    delete n_texture_p;
     delete bp_shader_p;
     delete pp_shader_p;
     delete ftexture_p;
