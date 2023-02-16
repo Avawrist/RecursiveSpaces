@@ -108,18 +108,20 @@ int soundInterfaceLoadXAudio2()
 Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
 {
     // Load audio data to buffer
-    if(!soundLoadWav(this, wav_path))
+    if(soundLoadWav(this, wav_path))
     {
-	OutputDebugStringA("\nERROR: Failed to load .wav file.\n");
-    }
+	// Create source voice
+	soundInterface.interface_p->CreateSourceVoice(&source_voice_p,
+						      &waveFormat);
+	if(!source_voice_p)
+	{
+	    OutputDebugStringA("ERROR: Failed to create source voice.\n");
+	}
 
-    // Create source voice
-    soundInterface.interface_p->CreateSourceVoice(&source_voice_p,
-						  &waveFormat);
-    if(!source_voice_p)
-    {
-	OutputDebugStringA("ERROR: Failed to create source voice.\n");
+	return; // Success
     }
+    
+    OutputDebugStringA("\nERROR: Failed to load .wav file. Asset not found.\n"); // Failure
 }
 
 Sound::~Sound()

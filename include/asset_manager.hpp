@@ -109,15 +109,15 @@ void* assetManagerGetAssetP(AssetManager &assetManager, int object_type,
 
 // ActiveTextures function prototypes
 int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
-			   int object_type, int asset_type, c_char* path);
+			   int object_type, int asset_type);
 void activeTexturesUnregisterAll(ActiveTextures &activeTextures);
 // ActiveMeshes function prototypes
 int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
-                         int object_type, int asset_type, c_char* path);
+                         int object_type, int asset_type);
 void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes);
 // ActiveMeshes function prototypes
 int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
-                         int object_type, int asset_type, c_char* path);
+                         int object_type, int asset_type);
 
 
 #endif

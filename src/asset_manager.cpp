@@ -53,9 +53,12 @@ ActiveTextures::ActiveTextures()
 }
 
 int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
-			   int object_type, int asset_type, c_char* path)
+			   int object_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
+
+    // Get path
+    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     
     // Check that there is room to register
     if(!(activeTextures.registered_count < MAX_TEXTURES)) {return 0;}
@@ -63,6 +66,8 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
     // Allocate new texture and add pointer to activeTextures registry
     activeTextures.textures[activeTextures.registered_count] = new Texture(path);
     if(!activeTextures.textures[activeTextures.registered_count]) {return 0;}
+
+    // if alloc succeeded but LOAD failed, free the memory, return 0
     
     // Add ID to asset table ID
     assetManager.assetTableID.table[object_type][asset_type] = activeTextures.registered_count;
@@ -97,9 +102,12 @@ ActiveMeshes::ActiveMeshes()
 }
 
 int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
-                         int object_type, int asset_type, c_char* path)
+                         int object_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
+
+    // Get path
+    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     
     // Check that there is room to register
     if(!(activeMeshes.registered_count < MAX_MESHES)) {return 0;}
@@ -141,9 +149,12 @@ ActiveSounds::ActiveSounds()
 }
 
 int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager, int object_type,
-			 int asset_type, c_char* path, SoundInterface *soundInterface)
+			 int asset_type, SoundInterface *soundInterface)
 {
     // Returns 1 on success, 0 on failure.
+
+    // Get path
+    c_char* path   = assetManager.assetTableDir.table[object_type][asset_type];
     
     // Assert that there is room to register
     if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
@@ -183,32 +194,29 @@ AssetManager::~AssetManager()
 
 int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
 {
-    // Get asset path
-    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
-    
     switch(asset_type)
     {
     case TEXTURE_D:
 	return activeTexturesRegister(assetManager.activeTexturesD,
-				      assetManager, object_type, asset_type, path);
+				      assetManager, object_type, asset_type);
     case TEXTURE_N:
 	return activeTexturesRegister(assetManager.activeTexturesN,
-				      assetManager, object_type, asset_type, path);
+				      assetManager, object_type, asset_type);
     case TEXTURE_S:
 	return activeTexturesRegister(assetManager.activeTexturesS,
-				      assetManager, object_type, asset_type, path);
+				      assetManager, object_type, asset_type);
     case MESH01:
 	return activeMeshesRegister(assetManager.activeMeshes,
-				    assetManager, object_type, asset_type, path);
+				    assetManager, object_type, asset_type);
     case SOUND01:
 	return activeSoundsRegister(assetManager.activeSounds01, assetManager,
-	                            object_type, asset_type, path, (SoundInterface*)soundInterfaceP);
+	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
     case SOUND02:
 	return activeSoundsRegister(assetManager.activeSounds02, assetManager,
-	                            object_type, asset_type, path, (SoundInterface*)soundInterfaceP);
+	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
     case SOUND03:
 	return activeSoundsRegister(assetManager.activeSounds03, assetManager,
-	                            object_type, asset_type, path, (SoundInterface*)soundInterfaceP);
+	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
     default:
 	return 0;
     }

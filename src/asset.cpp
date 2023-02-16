@@ -16,16 +16,17 @@ Mesh::Mesh(c_char* obj_path)
     glGenBuffers(1, &vbo);
    
     // Load mesh data
-    if(!meshLoadObj(this, obj_path))
+    if(meshLoadObj(this, obj_path))
     {
-	OutputDebugStringA("ERROR: Failed to load mesh.\n");
+	// Add tangents to Mesh data vector
+	meshCalcTangents(this);
+
+	// Copy mesh data to the GPU
+	meshDataToGPU(this);
+	return; // Success
     }
 
-    // Add tangents to Mesh data vector
-    meshCalcTangents(this);
-
-    // Copy mesh data to the GPU
-    meshDataToGPU(this);
+    OutputDebugStringA("ERROR: Failed to load mesh. Asset not found.\n"); // Failure
 }
 
 Mesh::~Mesh()
@@ -37,8 +38,6 @@ Mesh::~Mesh()
 
 int meshLoadObj(Mesh* mesh_p, c_char* path)
 {
-    // Note: Assumes a pointer to .obj file path is passed.
-
     ///////////////////
     // Get File Data //
     ///////////////////    
@@ -224,13 +223,14 @@ Texture::Texture(c_char* bmp_path)
     glGenTextures(1, &texture_id);
     
     // Load texture data
-    if(!textureLoadBmp(this, bmp_path))
+    if(textureLoadBmp(this, bmp_path))
     {
-	OutputDebugStringA("ERROR: Failed to load texture.\n");
+	// Copy texture data to GPU
+	textureDataToGPU(this);
+	return; // Success
     }
-
-    // Copy texture data to GPU
-    textureDataToGPU(this);
+    
+    OutputDebugStringA("ERROR: Failed to load texture. Asset not found.\n"); // Failure
 }
 
 Texture::~Texture()
