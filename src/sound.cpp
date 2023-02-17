@@ -227,7 +227,7 @@ void soundStop(Sound* sound)
 void soundSetVolume(Sound* sound, int volume)
 {
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
-    float value = volume * 0.01; 
+    float value = (float)(volume * 0.01); 
     sound->source_voice_p->SetVolume(value);
 }
 
@@ -400,6 +400,6 @@ void soundStreamStop(SoundStream* soundStream)
 void soundSetVolume(SoundStream* soundStream, int volume)
 {
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
-    float value = volume * 0.01; 
+    float value = (float)(volume * 0.01); 
     soundStream->source_voice_p->SetVolume(value);
 }

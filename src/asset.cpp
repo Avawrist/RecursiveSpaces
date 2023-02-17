@@ -135,7 +135,7 @@ void meshCalcTangents(Mesh* mesh_p)
     //  16      17      18     19    20     21      22      23
     //vert.x, vert.y, vert.z, uv.x, uv.y, norm.x, norm.y, norm.z)
 
-    int   triangle_count = mesh_p->data.size() / 24; // 24 elements per triangle
+    int   triangle_count = int(mesh_p->data.size() / 24); // 24 elements per triangle
     int   stride = 33; // 33 elements after insertion
     float tangent_vals[3];
     int   index;

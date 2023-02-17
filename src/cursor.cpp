@@ -30,10 +30,10 @@ void cursorUpdate(Cursor& cursor, GLFWwindow* window)
 
 Vec2F cursorGetDistance(Cursor& cursor)
 {
-    float x_dist = cursor.x_pos - cursor.last_x;
-    float y_dist = cursor.y_pos - cursor.last_y;
-    cursor.last_x = cursor.x_pos;
-    cursor.last_y = cursor.y_pos;
+    float x_dist = (float)(cursor.x_pos - cursor.last_x);
+    float y_dist = (float)(cursor.y_pos - cursor.last_y);
+    cursor.last_x = (float)cursor.x_pos;
+    cursor.last_y = (float)cursor.y_pos;
 
     if(cursor.first_mouse)
     {

@@ -14,8 +14,6 @@
 // 3rd party libs
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 // My libs
 #include "typedefs.hpp"
@@ -41,10 +39,10 @@ using namespace std;
 // Window
 c_uint WIN_WIDTH   = 1024;
 c_uint WIN_HEIGHT  = 576;
-c_uint VIEW_WIDTH  = WIN_WIDTH * 0.25f;
-c_uint VIEW_HEIGHT = WIN_HEIGHT * 0.25f;
-c_uint X_CENTER    = WIN_WIDTH * 0.5f;
-c_uint Y_CENTER    = WIN_HEIGHT * 0.5f;
+c_uint VIEW_WIDTH  = (c_uint)(WIN_WIDTH * 0.25f);
+c_uint VIEW_HEIGHT = (c_uint)(WIN_HEIGHT * 0.25f);
+c_uint X_CENTER    = (c_uint)(WIN_WIDTH * 0.5f);
+c_uint Y_CENTER    = (c_uint)(WIN_HEIGHT * 0.5f);
 float  win_ar      = (float)WIN_WIDTH / (float)WIN_HEIGHT;
 
 // Time
@@ -59,7 +57,7 @@ Cursor global_cursor(X_CENTER, Y_CENTER);
 Camera global_cam(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, win_ar);
 
 // BGM Volume
-float master_bgm_volume = 50;
+int master_bgm_volume = 50;
 
 /////////////////////////
 // Function Prototypes //
@@ -176,7 +174,7 @@ int main()
     // Initialize Textures //
     /////////////////////////
     Texture* d_texture_p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE_D, 0);
-    Texture *n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N, 0);
+    Texture* n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N, 0);
 
     ///////////////////////
     // Initialize Lights //
@@ -237,7 +235,7 @@ int main()
 	///////////////////////
 	// Update delta time //
 	///////////////////////
-	float curr_time = glfwGetTime();
+	float curr_time = (float)glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
 	
@@ -334,7 +332,7 @@ int main()
 	glBindTexture(GL_TEXTURE_2D, n_texture_p->texture_id);
 	
 	glBindVertexArray(mesh_p->vao);
-	glDrawArrays(GL_TRIANGLES, 0, mesh_p->data.size());
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
 
 	///////////////////////////////////////////
 	// ** Render pass 2 (Post-processing) ** //
@@ -384,6 +382,9 @@ void odGLFWError()
     int errorCode = glfwGetError(&errorMsg);
     if(errorMsg)
     {
+	char code_buf[256];
+	sprintf_s(code_buf, "ERROR CODE: %i", errorCode);
+	OutputDebugStringA(code_buf);
         OutputDebugStringA(errorMsg);
 	OutputDebugStringA("\n");
     }

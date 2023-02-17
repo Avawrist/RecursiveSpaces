@@ -59,6 +59,7 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
 
     // Get path
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    if(!path) {return 0;}
     
     // Check that there is room to register
     if(!(activeTextures.registered_count < MAX_TEXTURES)) {return 0;}
@@ -67,8 +68,6 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
     activeTextures.textures[activeTextures.registered_count] = new Texture(path);
     if(!activeTextures.textures[activeTextures.registered_count]) {return 0;}
 
-    // if alloc succeeded but LOAD failed, free the memory, return 0
-    
     // Add ID to asset table ID
     assetManager.assetTableID.table[object_type][asset_type] = activeTextures.registered_count;
 
@@ -81,7 +80,7 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
 void activeTexturesUnregisterAll(ActiveTextures &activeTextures)
 {
     // Delete all pointers
-    for(int i = 0; i < activeTextures.registered_count; i++)
+    for(uint i = 0; i < activeTextures.registered_count; i++)
     {
 	delete activeTextures.textures[i];
     }
@@ -108,6 +107,7 @@ int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
 
     // Get path
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    if(!path) {return 0;}
     
     // Check that there is room to register
     if(!(activeMeshes.registered_count < MAX_MESHES)) {return 0;}
@@ -128,7 +128,7 @@ int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
 void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes)
 {
     // Delete all pointers
-    for(int i = 0; i < activeMeshes.registered_count; i++)
+    for(uint i = 0; i < activeMeshes.registered_count; i++)
     {
 	delete activeMeshes.meshes[i];
     }
@@ -154,7 +154,8 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
     // Returns 1 on success, 0 on failure.
 
     // Get path
-    c_char* path   = assetManager.assetTableDir.table[object_type][asset_type];
+    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    if(!path) {return 0;}
     
     // Assert that there is room to register
     if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
@@ -175,7 +176,7 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
 void activeSoundsUnregisterAll(ActiveSounds &activeSounds)
 {
     // Delete all pointers
-    for(int i = 0; i < activeSounds.registered_count; i++)
+    for(uint i = 0; i < activeSounds.registered_count; i++)
     {
 	delete activeSounds.sounds[i];
     }

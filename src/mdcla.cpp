@@ -905,7 +905,7 @@ float clamp(float n, float min, float max)
 
 float degToRads(float d)
 {
-    return (d * 0.0174532925);
+    return (float)(d * 0.0174532925);
 }
 
 Vec3F rotate(const Vec3F& v, const Quaternion& q)

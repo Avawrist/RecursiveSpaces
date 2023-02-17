@@ -1,6 +1,6 @@
 @echo off
 cd ..\src
-cl /Zi /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..\\include\\GLFW\\" /I "..\\include\\KHR\\" /c^
+cl -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\" -I "..\\include\\" -I "..\\include\\glad\\" -I "..\\include\\GLFW\\" -I "..\\include\\KHR\\" -c^
  game.cpp^
  asset.cpp^
  camera.cpp^
@@ -13,7 +13,7 @@ cl /Zi /EHsc /Fo"..\\build\\" /I "..\\include\\" /I "..\\include\\glad\\" /I "..
  sound.cpp^
  asset_manager.cpp
 cd ..\build
-link /NODEFAULTLIB:"msvcrtd.lib" /MACHINE:X64 /DEBUG:FULL /LIBPATH:"..\\libs\\"^
+link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
  asset.obj^
  camera.obj^
