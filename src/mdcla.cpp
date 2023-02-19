@@ -523,7 +523,6 @@ Mat3F operator *(const Mat3F& a, const Mat3F& b)
 		 a(2, 0) * b(0, 0) + a(2, 1) * b(1, 0) + a(2, 2) * b(2, 0),
 		 a(2, 0) * b(0, 1) + a(2, 1) * b(1, 1) + a(2, 2) * b(2, 1),
 		 a(2, 0) * b(0, 2) + a(2, 1) * b(1, 2) + a(2, 2) * b(2, 2));
-
 }
 
 Vec3F operator *(const Mat3F& m, const Vec3F& v)

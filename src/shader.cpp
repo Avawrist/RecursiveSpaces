@@ -24,22 +24,18 @@ Shader::Shader(c_char* _vertPath, c_char* _fragPath)
     vert_id = glCreateShader(GL_VERTEX_SHADER);
     
     // Convert file into NULL terminated const char* from path
-    c_char*       pShaderCodeV;
+    c_char*           pShaderCodeV = NULL;
     std::string       sShaderCodeV;
     std::ifstream     shaderFileV;
     std::stringstream shaderStreamV;
-    try
-    {
-	shaderFileV.open(_vertPath, std::ifstream::in);
-	shaderStreamV << shaderFileV.rdbuf();
-	shaderFileV.close();
-	sShaderCodeV = shaderStreamV.str();
-	pShaderCodeV = sShaderCodeV.c_str();
-    }
-    catch(std::ifstream::failure e)
-    {
-	OutputDebugStringA("ERROR: VERTEX SHADER FILE NOT READ\n");
-    }
+
+    shaderFileV.open(_vertPath, std::ifstream::in);
+    shaderStreamV << shaderFileV.rdbuf();
+    shaderFileV.close();
+    sShaderCodeV = shaderStreamV.str();
+    pShaderCodeV = sShaderCodeV.c_str();
+    if(!pShaderCodeV) {OutputDebugStringA("ERROR: VERTEX SHADER FILE NOT READ\n");}
+
     glShaderSource(vert_id, 1, &pShaderCodeV, NULL); // Assign the shader code with the shader obj
 
     // Compile
@@ -67,18 +63,14 @@ Shader::Shader(c_char* _vertPath, c_char* _fragPath)
     std::string       sShaderCodeF;
     std::ifstream     shaderFileF;
     std::stringstream shaderStreamF;
-    try
-    {
-	shaderFileF.open(_fragPath, std::ifstream::in);
-	shaderStreamF << shaderFileF.rdbuf();
-	shaderFileF.close();
-	sShaderCodeF = shaderStreamF.str();
-	pShaderCodeF = sShaderCodeF.c_str();
-    }
-    catch(std::ifstream::failure e)
-    {
-	OutputDebugStringA("ERROR: FRAGMENT SHADER FILE NOT READ\n");
-    }
+
+    shaderFileF.open(_fragPath, std::ifstream::in);
+    shaderStreamF << shaderFileF.rdbuf();
+    shaderFileF.close();
+    sShaderCodeF = shaderStreamF.str();
+    pShaderCodeF = sShaderCodeF.c_str();
+
+    if(!pShaderCodeF) {OutputDebugStringA("ERROR: FRAGMENT SHADER FILE NOT READ\n");}
     glShaderSource(frag_id, 1, &pShaderCodeF, NULL); // Assign the shader code with the shader obj
 
     // Compile

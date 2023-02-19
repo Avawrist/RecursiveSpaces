@@ -46,7 +46,7 @@ typedef struct Sound
     ~Sound();
 } Sound;
 int  soundLoadWav(Sound* sound, c_char* wav_path);
-void soundPlay(Sound* sound);
+int  soundPlay(Sound* sound);
 void soundPause(Sound* sound);
 void soundStop(Sound* sound);
 void soundSetVolume(Sound* sound, int volume);
@@ -72,7 +72,7 @@ typedef struct SoundStream
     ~SoundStream();
 } SoundStream;
 int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
-void soundStreamUpdate(SoundStream* soundStream);
+int  soundStreamUpdate(SoundStream* soundStream);
 void soundStreamPlay(SoundStream* soundStream);
 void soundStreamPause(SoundStream* soundStream);
 void soundStreamStop(SoundStream* soundStream);

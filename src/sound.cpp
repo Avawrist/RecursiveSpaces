@@ -11,13 +11,13 @@
 
 SoundInterface::SoundInterface()
 {
-    interface_p    = nullptr;
-    master_voice_p = nullptr;
+    interface_p    = NULL;
+    master_voice_p = NULL;
     
     if(soundInterfaceLoadXAudio2())
     {
 	// Init COM library
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+	CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
 	
 	// Init xaudio interface
         XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
@@ -127,7 +127,6 @@ Sound::Sound(c_char* wav_path, SoundInterface& soundInterface)
 Sound::~Sound()
 {
     soundStop(this);
-    OutputDebugStringA("\nTest sound deleted\n");
 }
 
 int soundLoadWav(Sound* sound, c_char* wav_path)
@@ -187,7 +186,7 @@ int soundLoadWav(Sound* sound, c_char* wav_path)
     return 1;
 }
 
-void soundPlay(Sound* sound)
+int soundPlay(Sound* sound)
 {
     // Check buffer state
     XAUDIO2_VOICE_STATE state_p; 
@@ -195,7 +194,7 @@ void soundPlay(Sound* sound)
     if(!&state_p)
     {
 	OutputDebugStringA("\nERROR: Failed to get buffer state from XAudio2.\n");
-	return;
+	return 0;
     }
 
     if(state_p.BuffersQueued == 0)
@@ -206,11 +205,12 @@ void soundPlay(Sound* sound)
 	if(FAILED(hr))
 	{
 	    OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
-	    return;
+	    return 0;
 	}
     }
     
     sound->source_voice_p->Start(0);
+    return 1;
 }
 
 void soundPause(Sound* sound)
@@ -226,6 +226,8 @@ void soundStop(Sound* sound)
 
 void soundSetVolume(Sound* sound, int volume)
 {
+    // Assert value is >= 0 and <= 100
+    
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
     float value = (float)(volume * 0.01); 
     sound->source_voice_p->SetVolume(value);
@@ -314,7 +316,7 @@ int soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path)
     return 1;
 }
 
-void soundStreamUpdate(SoundStream* soundStream)
+int soundStreamUpdate(SoundStream* soundStream)
 {
     // Get sound state from XAudio2
     XAUDIO2_VOICE_STATE state_p; 
@@ -322,7 +324,7 @@ void soundStreamUpdate(SoundStream* soundStream)
     if(!&state_p)
     {
 	OutputDebugStringA("\nERROR: Failed to get buffer state from XAudio2.\n");
-	return;
+	return 0;
     }
     
     // Fill and submit buffers if they are unqueued
@@ -353,7 +355,7 @@ void soundStreamUpdate(SoundStream* soundStream)
 	if(FAILED(hr))
 	{
 	    OutputDebugStringA("\nERROR: Failed to submit audio buffer to source voice.\n");
-	    return;
+	    return 0;
 	}
 
 	// Update bytes_read for next pass
@@ -367,6 +369,8 @@ void soundStreamUpdate(SoundStream* soundStream)
     {
 	soundStreamStop(soundStream);
     }
+
+    return 1;
 }
 
 void soundStreamPlay(SoundStream* soundStream)
@@ -399,6 +403,8 @@ void soundStreamStop(SoundStream* soundStream)
 
 void soundSetVolume(SoundStream* soundStream, int volume)
 {
+    // Assert that volume is >= 0 and <= 100
+    
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
     float value = (float)(volume * 0.01); 
     soundStream->source_voice_p->SetVolume(value);
