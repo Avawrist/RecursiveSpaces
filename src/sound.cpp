@@ -227,6 +227,7 @@ void soundStop(Sound* sound)
 void soundSetVolume(Sound* sound, int volume)
 {
     // Assert value is >= 0 and <= 100
+    _assert(volume >= 0 && volume <= 100);
     
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
     float value = (float)(volume * 0.01); 
@@ -403,8 +404,9 @@ void soundStreamStop(SoundStream* soundStream)
 
 void soundSetVolume(SoundStream* soundStream, int volume)
 {
-    // Assert that volume is >= 0 and <= 100
-    
+    // Assert value is >= 0 and <= 100
+    _assert(volume >= 0 && volume <= 100);    
+
     // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
     float value = (float)(volume * 0.01); 
     soundStream->source_voice_p->SetVolume(value);

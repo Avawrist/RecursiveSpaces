@@ -7,6 +7,7 @@
 #define ENTITY_H
 
 // My libs
+#include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "mdcla.hpp"
 

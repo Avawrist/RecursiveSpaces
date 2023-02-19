@@ -4,17 +4,18 @@
 //              pointers to mesh, texture and sfx assets
 // =======================================================
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef ASSET_MANAGER_H
+#define ASSET_MANAGER_H
 
 // Win libs
 #include <stdlib.h>
 #include <cstring>
 
 // My libs
+#include "preprocessor.hpp"
+#include "typedefs.hpp"
 #include "sound.hpp"
 #include "asset.hpp"
-#include "typedefs.hpp"
 
 #define TEXTURE_D         0
 #define TEXTURE_N         1

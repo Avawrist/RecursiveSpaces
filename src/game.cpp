@@ -16,6 +16,7 @@
 #include <GLFW/glfw3.h>
 
 // My libs
+#include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "shader.hpp"

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 // My libs
+#include "preprocessor.hpp"
 #include "typedefs.hpp"
 
 ///////////////////////////

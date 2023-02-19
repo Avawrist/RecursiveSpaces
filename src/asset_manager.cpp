@@ -57,6 +57,10 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
 {
     // Returns 1 on success, 0 on failure.
 
+    // Assert that object and asset types are within acceptable range
+    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
+
     // Get path
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     if(!path) {return 0;}
@@ -104,7 +108,11 @@ int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
                          int object_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
-
+    
+    // Assert that object and asset types are within acceptable range
+    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
+    
     // Get path
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     if(!path) {return 0;}
@@ -152,12 +160,16 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
 			 int asset_type, SoundInterface *soundInterface)
 {
     // Returns 1 on success, 0 on failure.
+    
+    // Assert that object and asset types are within acceptable range
+    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
 
     // Get path
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     if(!path) {return 0;}
     
-    // Assert that there is room to register
+    // _assert that there is room to register
     if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
 
     // Allocate new sound and add pointer to activeSounds registry
@@ -195,6 +207,12 @@ AssetManager::~AssetManager()
 
 int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
 {
+    // Returns 1 on success, 0 on failure
+    
+    // Assert that object and asset types are within acceptable range
+    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
+    
     switch(asset_type)
     {
     case TEXTURE_D:
@@ -250,8 +268,12 @@ void assetManagerUnregisterAll(AssetManager &assetManager)
 
 void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
 {
-    // Add assertion that object_type and asset_type are valid
+    // Returns void asset pointer on success, NULL on failure.
 
+    // Assert that object and asset types are within acceptable range
+    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
+    
     // init return value
     void* return_p = NULL;
     

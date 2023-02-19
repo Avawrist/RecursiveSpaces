@@ -1,7 +1,7 @@
 @echo off
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 cd F:\src
-cl -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\" -I "..\\include\\" -I "..\\include\\glad\\" -I "..\\include\\GLFW\\" -I "..\\include\\KHR\\" -c^
+cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\" -I "..\\include\\" -I "..\\include\\glad\\" -I "..\\include\\GLFW\\" -I "..\\include\\KHR\\" -c^
  game.cpp^
  asset.cpp^
  camera.cpp^
