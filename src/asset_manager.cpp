@@ -22,22 +22,22 @@ AssetTableID::AssetTableID()
 AssetTableDir::AssetTableDir()
 {
     // Test Object
-    table[TEST][TEXTURE_D]  = "..\\assets\\textures\\brickwall.bmp";
-    table[TEST][TEXTURE_N]  = "..\\assets\\textures\\brickwall_normal.bmp";
-    table[TEST][TEXTURE_S]  = NULL;
-    table[TEST][MESH01]     = "..\\assets\\meshes\\cube.obj";
-    table[TEST][SOUND01]    = "..\\assets\\sfx\\taunt.wav";
-    table[TEST][SOUND02]    = NULL;
-    table[TEST][SOUND03]    = NULL;
-
+    table[TEST][TEXTURE_D] = "..\\assets\\textures\\brickwall.bmp";
+    table[TEST][TEXTURE_N] = "..\\assets\\textures\\brickwall_normal.bmp";
+    table[TEST][TEXTURE_S] = NULL;
+    table[TEST][MESH01]    = "..\\assets\\meshes\\cube.obj";
+    table[TEST][SOUND01]   = "..\\assets\\sfx\\taunt.wav";
+    table[TEST][SOUND02]   = NULL;
+    table[TEST][SOUND03]   = NULL;
+   
     // Chest Object
-    table[CHEST][TEXTURE_D]  = "..\\assets\\textures\\chest.bmp";
-    table[CHEST][TEXTURE_N]  = NULL;
-    table[CHEST][TEXTURE_S]  = NULL;
-    table[CHEST][MESH01]     = "..\\assets\\meshes\\chest.obj";
-    table[CHEST][SOUND01]    = NULL;
-    table[CHEST][SOUND02]    = NULL;
-    table[CHEST][SOUND03]    = NULL;
+    table[CHEST][TEXTURE_D] = "..\\assets\\textures\\chest.bmp";
+    table[CHEST][TEXTURE_N] = NULL;
+    table[CHEST][TEXTURE_S] = NULL;
+    table[CHEST][MESH01]    = "..\\assets\\meshes\\chest.obj";
+    table[CHEST][SOUND01]   = NULL;
+    table[CHEST][SOUND02]   = NULL;
+    table[CHEST][SOUND03]   = NULL;
 }
 
 ///////////////////////////
@@ -313,3 +313,45 @@ void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int ass
     }
     return return_p;
 }
+
+//////////////////////////
+// Struct ShaderTableID //
+//////////////////////////
+
+ShaderTableID::ShaderTableID()
+{
+    memset(table, -1, sizeof(int) * TOTAL_SHADER_OBJECTS * TOTAL_SHADER_TYPES);
+}
+
+///////////////////////////
+// Struct ShaderTableDir //
+///////////////////////////
+
+ShaderTableDir::ShaderTableDir()
+{
+    // Blinn-Phong Shaders
+    table[BLINNPHONG][VERTEX]   = "..\\assets\\shaders\\blinn_phong.vert";
+    table[BLINNPHONG][GEOMETRY] = NULL;
+    table[BLINNPHONG][FRAGMENT] = "..\\assets\\shaders\\blinn_phong.frag";
+
+    // Post-Processing Shaders
+    table[POSTPROCESS][VERTEX]   = "..\\assets\\shaders\\pp.vert";
+    table[POSTPROCESS][GEOMETRY] = NULL;
+    table[POSTPROCESS][FRAGMENT] = "..\\assets\\shaders\\pp.frag";
+}
+
+//////////////////////////
+// Struct ActiveShaders //
+//////////////////////////
+
+ActiveShaders::ActiveShaders()
+{
+    registered_count = 0;
+    
+    // Initialize array to contain all NULL
+    memset(shaders, 0, sizeof(shaders));
+}
+
+//////////////////////////
+// Struct ShaderManager //
+//////////////////////////

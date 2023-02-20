@@ -17,6 +17,10 @@
 #include "sound.hpp"
 #include "asset.hpp"
 
+/////////////////////////
+// Struct AssetTableID //
+/////////////////////////
+
 #define TEXTURE_D         0
 #define TEXTURE_N         1
 #define TEXTURE_S         2
@@ -29,10 +33,6 @@
 #define TEST               0
 #define CHEST              1
 #define TOTAL_OBJECT_TYPES 2
-
-/////////////////////////
-// Struct AssetTableID //
-/////////////////////////
 
 typedef struct AssetTableID
 {
@@ -119,6 +119,52 @@ void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes);
 // ActiveMeshes function prototypes
 int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
                          int object_type, int asset_type);
+// void activeSoundsUnregisterAll(ActiveSounds &activeSounds);
 
+//////////////////////////
+// Struct ShaderTableID //
+//////////////////////////
+
+#define BLINNPHONG           0
+#define POSTPROCESS          1
+#define TOTAL_SHADER_OBJECTS 2
+
+#define VERTEX             0
+#define GEOMETRY           1
+#define FRAGMENT           2
+#define TOTAL_SHADER_TYPES 3
+
+typedef struct ShaderTableID
+{
+    int table[TOTAL_SHADER_OBJECTS][TOTAL_SHADER_TYPES];
+    ShaderTableID();
+} ShaderTableID;
+
+///////////////////////////
+// Struct ShaderTableDir //
+///////////////////////////
+
+typedef struct ShaderTableDir
+{
+    c_char* table[TOTAL_SHADER_OBJECTS][TOTAL_SHADER_TYPES];
+    ShaderTableDir();
+} ShaderTableDir;
+
+//////////////////////////
+// Struct ActiveShaders //
+//////////////////////////
+
+#define MAX_SHADERS 60
+
+typedef struct ActiveShaders
+{
+    uint registered_count;
+    Shader* shaders[MAX_SHADERS];
+    ActiveShaders();
+} ActiveShaders;
+
+//////////////////////////
+// Struct ShaderManager //
+//////////////////////////
 
 #endif
