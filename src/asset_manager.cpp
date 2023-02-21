@@ -169,7 +169,7 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
     c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
     if(!path) {return 0;}
     
-    // _assert that there is room to register
+    // Check that there is room to register
     if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
 
     // Allocate new sound and add pointer to activeSounds registry
@@ -247,7 +247,7 @@ void assetManagerUnregisterAll(AssetManager &assetManager)
     // Unregister Diffuse textures
     activeTexturesUnregisterAll(assetManager.activeTexturesD);
 
-    // Unregister Normal textures]
+    // Unregister Normal textures
     activeTexturesUnregisterAll(assetManager.activeTexturesN);
     
     // Unregister Specular textures
@@ -320,7 +320,7 @@ void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int ass
 
 ShaderTableID::ShaderTableID()
 {
-    memset(table, -1, sizeof(int) * TOTAL_SHADER_OBJECTS * TOTAL_SHADER_TYPES);
+    memset(table, -1, sizeof(int) * TOTAL_SHADER_PROGRAMS);
 }
 
 ///////////////////////////
@@ -329,14 +329,12 @@ ShaderTableID::ShaderTableID()
 
 ShaderTableDir::ShaderTableDir()
 {
-    // Blinn-Phong Shaders
+    // Blinn-Phong Shader Program
     table[BLINNPHONG][VERTEX]   = "..\\assets\\shaders\\blinn_phong.vert";
-    table[BLINNPHONG][GEOMETRY] = NULL;
     table[BLINNPHONG][FRAGMENT] = "..\\assets\\shaders\\blinn_phong.frag";
 
-    // Post-Processing Shaders
+    // Post-Processing Shader Program
     table[POSTPROCESS][VERTEX]   = "..\\assets\\shaders\\pp.vert";
-    table[POSTPROCESS][GEOMETRY] = NULL;
     table[POSTPROCESS][FRAGMENT] = "..\\assets\\shaders\\pp.frag";
 }
 
@@ -352,6 +350,74 @@ ActiveShaders::ActiveShaders()
     memset(shaders, 0, sizeof(shaders));
 }
 
+int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderManager,
+			   int program_type)
+{
+    // Returns 1 on success, 0 on failure
+
+    // Assert that program type is within acceptable range
+    _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
+
+    // Get paths
+    c_char* vertex_path = shaderManager.shaderTableDir.table[program_type][VERTEX];
+    if(!vertex_path) {return 0;}
+    c_char* fragment_path = shaderManager.shaderTableDir.table[program_type][FRAGMENT];
+    if(!fragment_path) {return 0;}
+    
+    // Check that there is room to register
+    if(!(activeShaders.registered_count < MAX_SHADERS)) {return 0;}
+
+    // Allocate new shader and add pointer to the activeShaders registry
+    activeShaders.shaders[activeShaders.registered_count] = new Shader(vertex_path, fragment_path);
+    if(!activeShaders.shaders[activeShaders.registered_count]) {return 0;}
+
+    // Add ID to shader table ID
+    shaderManager.shaderTableID.table[program_type] = activeShaders.registered_count;
+
+    // Update registered count
+    activeShaders.registered_count++;
+
+    return 1;
+}
+
+void activeShadersUnregisterAll(ActiveShaders &activeShaders)
+{
+    // Delete all shader structs
+    for(uint i = 0; i < activeShaders.registered_count; i++)
+    {
+	delete activeShaders.shaders[i];
+    }
+
+    // Reset registered count
+    activeShaders.registered_count = 0;
+}
+
 //////////////////////////
 // Struct ShaderManager //
 //////////////////////////
+
+ShaderManager::~ShaderManager()
+{
+    activeShadersUnregisterAll(this->activeShaders);
+}
+
+void* shaderManagerGetShaderP(ShaderManager &shaderManager, int program_type)
+{
+    // Returns void shader pointer on success, NULL on failure
+
+    // Assert that program type is within acceptable range
+    _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
+
+    int index = shaderManager.shaderTableID.table[program_type];
+    if(index < 0)
+    {
+	if(!activeShadersRegister(shaderManager.activeShaders, shaderManager, program_type))
+	{
+	    return NULL;
+	}
+	index = shaderManager.shaderTableID.table[program_type];
+    }
+
+    return (void*)shaderManager.activeShaders.shaders[index];
+}
+

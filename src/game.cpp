@@ -146,10 +146,11 @@ int main()
     glDebugMessageCallback(glDebugOutput, NULL);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
-    ////////////////////////
-    // Prep asset storage //
-    ////////////////////////
-    AssetManager assetManager;
+    /////////////////////////
+    // Prep asset managers //
+    /////////////////////////
+    AssetManager  assetManager;
+    ShaderManager shaderManager;
     
     //////////////////////////
     // Load XAudio2 Library //
@@ -208,21 +209,20 @@ int main()
     // Create Shaders //
     ////////////////////
 
-    // Simple object shader
-    Shader *bp_shader_p = new Shader("..\\assets\\shaders\\blinn_phong.vert",
-					"..\\assets\\shaders\\blinn_phong.frag");
-
+    // Blinn-phong shader
+    Shader *bp_shader_p = (Shader*)shaderManagerGetShaderP(shaderManager, BLINNPHONG);
+    
     // Load initial uniform values to GPU
     glUseProgram(bp_shader_p->program_id);
     shaderAddMat4Uniform(bp_shader_p, "model",      model.getPointer());
     shaderAddMat4Uniform(bp_shader_p, "view",       view.getPointer());
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
-    shaderAddIntUniform(bp_shader_p, "normal_map", 1);
+    shaderAddIntUniform(bp_shader_p, "normal_map",  1);
     
     // Post-processing shader
-    Shader *pp_shader_p = new Shader("..\\assets\\shaders\\pp.vert",
-				     "..\\assets\\shaders\\pp.frag");
+    Shader *pp_shader_p = (Shader*)shaderManagerGetShaderP(shaderManager, POSTPROCESS);
+	
     // Load initial uniform values to GPU
     glUseProgram(pp_shader_p->program_id);
     shaderAddIntUniform(pp_shader_p, "color_texture", 0);
@@ -363,8 +363,6 @@ int main()
     
     // Delete pointers to structs on the heap
     delete test_soundStream_p;
-    delete bp_shader_p;
-    delete pp_shader_p;
     delete ftexture_p;
     delete dirLight_p;
     

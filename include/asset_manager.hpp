@@ -125,18 +125,17 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
 // Struct ShaderTableID //
 //////////////////////////
 
-#define BLINNPHONG           0
-#define POSTPROCESS          1
-#define TOTAL_SHADER_OBJECTS 2
+#define BLINNPHONG            0
+#define POSTPROCESS           1
+#define TOTAL_SHADER_PROGRAMS 2
 
 #define VERTEX             0
-#define GEOMETRY           1
-#define FRAGMENT           2
-#define TOTAL_SHADER_TYPES 3
+#define FRAGMENT           1
+#define TOTAL_SHADER_TYPES 2
 
 typedef struct ShaderTableID
 {
-    int table[TOTAL_SHADER_OBJECTS][TOTAL_SHADER_TYPES];
+    int table[TOTAL_SHADER_PROGRAMS];
     ShaderTableID();
 } ShaderTableID;
 
@@ -146,7 +145,7 @@ typedef struct ShaderTableID
 
 typedef struct ShaderTableDir
 {
-    c_char* table[TOTAL_SHADER_OBJECTS][TOTAL_SHADER_TYPES];
+    c_char* table[TOTAL_SHADER_PROGRAMS][TOTAL_SHADER_TYPES];
     ShaderTableDir();
 } ShaderTableDir;
 
@@ -154,7 +153,7 @@ typedef struct ShaderTableDir
 // Struct ActiveShaders //
 //////////////////////////
 
-#define MAX_SHADERS 60
+#define MAX_SHADERS 20
 
 typedef struct ActiveShaders
 {
@@ -166,5 +165,19 @@ typedef struct ActiveShaders
 //////////////////////////
 // Struct ShaderManager //
 //////////////////////////
+
+typedef struct ShaderManager
+{
+    ShaderTableID  shaderTableID;
+    ShaderTableDir shaderTableDir;
+    ActiveShaders  activeShaders;
+    ~ShaderManager();
+} ShaderManager;
+void* shaderManagerGetShaderP(ShaderManager &shaderManager, int program_type);
+
+// ActiveShaders function prototypes
+int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderManager,
+			   int program_type);
+void activeShadersUnregisterAll(ActiveShaders &activeShaders);
 
 #endif
