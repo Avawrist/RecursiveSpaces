@@ -7,7 +7,6 @@
 #include <windows.h>
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <comdef.h>
 
@@ -27,9 +26,7 @@
 #include "light.hpp"
 #include "sound.hpp"
 #include "asset_manager.hpp"
-
-#define STREAM_BUFFER_SIZE 65536
-#define MAX_BUFFER_COUNT 3
+#include "render.hpp"
 
 using namespace std;
 
@@ -60,102 +57,39 @@ Camera global_cam(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, win_ar);
 // BGM Volume
 int master_bgm_volume = 50;
 
-/////////////////////////
-// Function Prototypes //
-/////////////////////////
-
-void odGLFWError();
-
-void printGLFWError();
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
-                       GLsizei length, const char *message, const void *userParam);
-
 //////////////////////////
 // Function Definitions //
 //////////////////////////
 
 int main()
 {
-    //////////////////////
-    // Window & Context //
-    //////////////////////
+    /////////////////////////
+    // Init Render & Input //
+    /////////////////////////
     
     // Initialize GLFW (Enumerates windows, joysticks, starts the timer)
-    if(!glfwInit())
-    {
-	OutputDebugStringA("ERROR: Failed to initialize GLFW\n");
-	return -1;
-    }
-    odGLFWError();
-        
-    // Set Context Hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 0); // disable multisampling
-	
-    // Create window & context
-    GLFWwindow* window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "First Game", NULL, NULL);
-    if(!window)
-    {
-	OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
-	return -1;
-    }
-    odGLFWError();
+    if(!initGLFW()) {return -1;}
 
-    //////////////////////////////
-    // Set GLFW event callbacks //
-    //////////////////////////////
+    // Get Game Window
+    GameWindow gameWindow(WIN_WIDTH, WIN_HEIGHT, "First Game"); // GLFW terminates on deletion 
+    if(!gameWindow.window_p) {return -1;}
     
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    odGLFWError();
-
-    // Make created window/context the current context
-    glfwMakeContextCurrent(window);
-    odGLFWError();
-
-    ////////////////////////////////////////
-    // Load OpenGL Functions & Extensions //
-    ////////////////////////////////////////
+    // Get Input Manager
+    // ...
     
-    // Load OpenGL functions with glad
-    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
-	OutputDebugStringA("ERROR: Glad failed to load the OpenGL functions/extensions\n");
-	return -1;
-    }
+    // Load OpenGL Functions & Extensions (Must be called after window creation)
+    if(!initOpenGL()) {return -1;}
 
-    ////////////////////////////
-    // Configure OpenGL State //
-    ////////////////////////////
-    
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0f, 0.71f, 0.89f, 1.0f);
-    // Cull Faces
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
-    // Debug - TO-DO: Remove following lines for release build
-    glEnable(GL_DEBUG_OUTPUT); 
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(glDebugOutput, NULL);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    //////////////////////////
+    // Load XAudio2 Library //
+    //////////////////////////
+    SoundInterface soundInterface;
 
     /////////////////////////
     // Prep asset managers //
     /////////////////////////
     AssetManager  assetManager;
     ShaderManager shaderManager;
-    
-    //////////////////////////
-    // Load XAudio2 Library //
-    //////////////////////////
-    SoundInterface soundInterface;
 
     ////////////////////
     // Initialize SFX //
@@ -231,7 +165,7 @@ int main()
     // Game Loop //
     ///////////////
 
-    while(!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(gameWindow.window_p))
     {	
 	///////////////////////
 	// Update delta time //
@@ -243,17 +177,17 @@ int main()
 	///////////////////
 	// Update cursor //
 	///////////////////
-	cursorUpdate(global_cursor, window);
+	cursorUpdate(global_cursor, gameWindow.window_p);
 
 	///////////////////
 	// Update Volume //
 	///////////////////
 
-	if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_UP) == GLFW_PRESS)
 	{
 	    master_bgm_volume += 1;
 	}
-	if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
 	    master_bgm_volume -= 1;
 	}
@@ -263,17 +197,17 @@ int main()
 	// Update sound //
 	//////////////////
 
-	if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 	    //soundStreamPlay(test_soundStream_p);
 	    soundPlay(test_sound_p);
 	}
-	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_W) == GLFW_PRESS)
 	{
 	    //soundStreamPause(test_soundStream_p);
 	    soundPause(test_sound_p);
 	}
-	if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_E) == GLFW_PRESS)
 	{
 	    //soundStreamStop(test_soundStream_p);
 	    soundStop(test_sound_p);
@@ -288,7 +222,7 @@ int main()
 	// Update camera //
 	///////////////////
 
-	cameraUpdate(global_cam, window, cursorGetDistance(global_cursor), d_time);
+	cameraUpdate(global_cam, gameWindow.window_p, cursorGetDistance(global_cursor), d_time);
 	
 	////////////////////////////
 	// Update Shader Uniforms //
@@ -347,14 +281,15 @@ int main()
 	//////////////////
 	// Swap buffers //
 	//////////////////
-	glfwSwapBuffers(window);
-	glfwPollEvents();
-	odGLFWError();
-
+	GameWindowSwapBuffers(gameWindow);
+	
 	/////////////////////
 	// Close condition //
 	/////////////////////
-	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {glfwSetWindowShouldClose(window, GLFW_TRUE);}
+	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+	    glfwSetWindowShouldClose(gameWindow.window_p, GLFW_TRUE);
+	}
     }
 
     /////////////
@@ -366,77 +301,5 @@ int main()
     delete ftexture_p;
     delete dirLight_p;
     
-    // Delete window
-    glfwDestroyWindow(window);
-	
-    // Terminate GLFW on program exit:
-    glfwTerminate();
-    
     return 0;
-}
-
-void odGLFWError()
-{
-    c_char* errorMsg;
-    int errorCode = glfwGetError(&errorMsg);
-    if(errorMsg)
-    {
-	char code_buf[256];
-	sprintf_s(code_buf, "ERROR CODE: %i", errorCode);
-	OutputDebugStringA(code_buf);
-        OutputDebugStringA(errorMsg);
-	OutputDebugStringA("\n");
-    }
-}
-
-void printGLFWError()
-{
-    c_char* errorMsg;
-    int errorCode = glfwGetError(&errorMsg);
-    if(errorMsg)
-    {
-	cout << "GLFW Error: " << errorMsg << "ID: " << errorCode << endl;
-    }
-}
-
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
-                       GLsizei length, c_char *message, c_void *userParam)
-{
-    // ignore non-significant error/warning codes
-    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return; 
-
-    OutputDebugStringA("---------------\n");
-    OutputDebugStringA("Debug message:\n");
-
-    switch (source)
-    {
-        case GL_DEBUG_SOURCE_API:             OutputDebugStringA("Source: API"); break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   OutputDebugStringA("Source: Window System"); break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: OutputDebugStringA("Source: Shader Compiler"); break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:     OutputDebugStringA("Source: Third Party"); break;
-        case GL_DEBUG_SOURCE_APPLICATION:     OutputDebugStringA("Source: Application"); break;
-        case GL_DEBUG_SOURCE_OTHER:           OutputDebugStringA("Source: Other"); break;
-    } OutputDebugStringA("\n");
-
-    switch (type)
-    {
-        case GL_DEBUG_TYPE_ERROR:               OutputDebugStringA("Type: Error"); break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: OutputDebugStringA("Type: Deprecated Behaviour"); break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  OutputDebugStringA("Type: Undefined Behaviour"); break; 
-        case GL_DEBUG_TYPE_PORTABILITY:         OutputDebugStringA("Type: Portability"); break;
-        case GL_DEBUG_TYPE_PERFORMANCE:         OutputDebugStringA("Type: Performance"); break;
-        case GL_DEBUG_TYPE_MARKER:              OutputDebugStringA("Type: Marker"); break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:          OutputDebugStringA("Type: Push Group"); break;
-        case GL_DEBUG_TYPE_POP_GROUP:           OutputDebugStringA("Type: Pop Group"); break;
-        case GL_DEBUG_TYPE_OTHER:               OutputDebugStringA("Type: Other"); break;
-    } OutputDebugStringA("\n");
-    
-    switch (severity)
-    {
-        case GL_DEBUG_SEVERITY_HIGH:         OutputDebugStringA("Severity: high"); break;
-        case GL_DEBUG_SEVERITY_MEDIUM:       OutputDebugStringA("Severity: medium"); break;
-        case GL_DEBUG_SEVERITY_LOW:          OutputDebugStringA("Severity: low"); break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: OutputDebugStringA("Severity: notification"); break;
-    } OutputDebugStringA("\n");
-    OutputDebugStringA("\n");
 }

@@ -12,7 +12,8 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\
  mdcla.cpp^
  shader.cpp^
  sound.cpp^
- asset_manager.cpp
+ asset_manager.cpp^
+ render.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
@@ -26,6 +27,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  shader.obj^
  sound.obj^
  asset_manager.obj^
+ render.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^
