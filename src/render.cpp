@@ -43,7 +43,7 @@ GameWindow::~GameWindow()
 void GameWindowSwapBuffers(GameWindow& gameWindow)
 {
     glfwSwapBuffers(gameWindow.window_p);
-    glfwPollEvents();
+    glfwPollEvents(); // Move to input codeg
     outputGLFWError();
 }
 

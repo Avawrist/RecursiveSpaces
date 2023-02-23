@@ -71,8 +71,8 @@ int main()
     if(!initGLFW()) {return -1;}
 
     // Get Game Window
-    GameWindow gameWindow(WIN_WIDTH, WIN_HEIGHT, "First Game"); // GLFW terminates on deletion 
-    if(!gameWindow.window_p) {return -1;}
+    GameWindow game_window(WIN_WIDTH, WIN_HEIGHT, "First Game"); // GLFW terminates on deletion 
+    if(!game_window.window_p) {return -1;}
     
     // Get Input Manager
     // ...
@@ -83,34 +83,34 @@ int main()
     //////////////////////////
     // Load XAudio2 Library //
     //////////////////////////
-    SoundInterface soundInterface;
+    SoundInterface sound_interface;
 
     /////////////////////////
     // Prep asset managers //
     /////////////////////////
-    AssetManager  assetManager;
-    ShaderManager shaderManager;
+    AssetManager  asset_manager;
+    ShaderManager shader_manager;
 
     ////////////////////
     // Initialize SFX //
     ////////////////////
-    Sound* test_sound_p = (Sound*)assetManagerGetAssetP(assetManager, TEST, SOUND01, &soundInterface); 
+    Sound* test_sound_p = (Sound*)assetManagerGetAssetP(asset_manager, TEST, SOUND01, &sound_interface); 
     
     ////////////////////
     // Initialize BGM //
     ////////////////////
-    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", soundInterface);
+    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
     
     //////////////////////////
     // Initialize Test Mesh //
     //////////////////////////
-    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(assetManager, CHEST, MESH01, 0);
+    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
 
     /////////////////////////
     // Initialize Textures //
     /////////////////////////
-    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(assetManager, CHEST, TEXTURE_D, 0);
-    Texture* n_texture_p = (Texture*)assetManagerGetAssetP(assetManager, TEST, TEXTURE_N, 0);
+    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(asset_manager, CHEST, TEXTURE_D, 0);
+    Texture* n_texture_p = (Texture*)assetManagerGetAssetP(asset_manager, TEST, TEXTURE_N, 0);
 
     ///////////////////////
     // Initialize Lights //
@@ -144,7 +144,7 @@ int main()
     ////////////////////
 
     // Blinn-phong shader
-    Shader *bp_shader_p = (Shader*)shaderManagerGetShaderP(shaderManager, BLINNPHONG);
+    Shader *bp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
     
     // Load initial uniform values to GPU
     glUseProgram(bp_shader_p->program_id);
@@ -155,7 +155,7 @@ int main()
     shaderAddIntUniform(bp_shader_p, "normal_map",  1);
     
     // Post-processing shader
-    Shader *pp_shader_p = (Shader*)shaderManagerGetShaderP(shaderManager, POSTPROCESS);
+    Shader *pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
 	
     // Load initial uniform values to GPU
     glUseProgram(pp_shader_p->program_id);
@@ -165,7 +165,7 @@ int main()
     // Game Loop //
     ///////////////
 
-    while(!glfwWindowShouldClose(gameWindow.window_p))
+    while(!glfwWindowShouldClose(game_window.window_p))
     {	
 	///////////////////////
 	// Update delta time //
@@ -173,21 +173,27 @@ int main()
 	float curr_time = (float)glfwGetTime();
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
+
+	///////////////
+	// Get input //
+	///////////////
+	
+	// Callback or poll? if poll, how frequently do we poll?
 	
 	///////////////////
 	// Update cursor //
 	///////////////////
-	cursorUpdate(global_cursor, gameWindow.window_p);
+	cursorUpdate(global_cursor, game_window.window_p);
 
 	///////////////////
 	// Update Volume //
 	///////////////////
 
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_UP) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_UP) == GLFW_PRESS)
 	{
 	    master_bgm_volume += 1;
 	}
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_DOWN) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
 	    master_bgm_volume -= 1;
 	}
@@ -197,17 +203,17 @@ int main()
 	// Update sound //
 	//////////////////
 
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_Q) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_Q) == GLFW_PRESS)
 	{
 	    //soundStreamPlay(test_soundStream_p);
 	    soundPlay(test_sound_p);
 	}
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_W) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_W) == GLFW_PRESS)
 	{
 	    //soundStreamPause(test_soundStream_p);
 	    soundPause(test_sound_p);
 	}
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_E) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_E) == GLFW_PRESS)
 	{
 	    //soundStreamStop(test_soundStream_p);
 	    soundStop(test_sound_p);
@@ -222,7 +228,7 @@ int main()
 	// Update camera //
 	///////////////////
 
-	cameraUpdate(global_cam, gameWindow.window_p, cursorGetDistance(global_cursor), d_time);
+	cameraUpdate(global_cam, game_window.window_p, cursorGetDistance(global_cursor), d_time);
 	
 	////////////////////////////
 	// Update Shader Uniforms //
@@ -281,14 +287,14 @@ int main()
 	//////////////////
 	// Swap buffers //
 	//////////////////
-	GameWindowSwapBuffers(gameWindow);
+	GameWindowSwapBuffers(game_window);
 	
 	/////////////////////
 	// Close condition //
 	/////////////////////
-	if(glfwGetKey(gameWindow.window_p, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if(glfwGetKey(game_window.window_p, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
-	    glfwSetWindowShouldClose(gameWindow.window_p, GLFW_TRUE);
+	    glfwSetWindowShouldClose(game_window.window_p, GLFW_TRUE);
 	}
     }
 
