@@ -27,6 +27,7 @@
 #include "sound.hpp"
 #include "asset_manager.hpp"
 #include "render.hpp"
+#include "input.hpp"
 
 using namespace std;
 
@@ -164,9 +165,8 @@ int main()
     ///////////////
     // Game Loop //
     ///////////////
-
     while(!glfwWindowShouldClose(game_window.window_p))
-    {	
+    {
 	///////////////////////
 	// Update delta time //
 	///////////////////////
@@ -174,12 +174,6 @@ int main()
 	d_time    = curr_time - prev_time;
 	prev_time = curr_time;
 
-	///////////////
-	// Get input //
-	///////////////
-	
-	// Callback or poll? if poll, how frequently do we poll?
-	
 	///////////////////
 	// Update cursor //
 	///////////////////
@@ -288,7 +282,13 @@ int main()
 	// Swap buffers //
 	//////////////////
 	GameWindowSwapBuffers(game_window);
-	
+
+	////////////////////
+	// Process Inputs //
+	////////////////////
+        // Store all inputs that occurred this cycle in the input_manager. To be processed next cycle.
+	// inputManagerGetInputsThisFrame(input_manager);
+	 
 	/////////////////////
 	// Close condition //
 	/////////////////////
