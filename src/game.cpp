@@ -10,16 +10,11 @@
 #include <stdlib.h>
 #include <comdef.h>
 
-// 3rd party libs
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 // My libs
 #include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "shader.hpp"
-#include "cursor.hpp"
 #include "camera.hpp"
 #include "entity.hpp"
 #include "asset.hpp"
@@ -31,37 +26,6 @@
 
 using namespace std;
 
-/////////////
-// Globals //
-/////////////
-
-// Window
-c_uint WIN_WIDTH   = 1024;
-c_uint WIN_HEIGHT  = 576;
-c_uint VIEW_WIDTH  = (c_uint)(WIN_WIDTH * 0.25f);
-c_uint VIEW_HEIGHT = (c_uint)(WIN_HEIGHT * 0.25f);
-c_uint X_CENTER    = (c_uint)(WIN_WIDTH * 0.5f);
-c_uint Y_CENTER    = (c_uint)(WIN_HEIGHT * 0.5f);
-float  win_ar      = (float)WIN_WIDTH / (float)WIN_HEIGHT;
-
-// Time
-int   frame_rate  = 60;
-float prev_time   = 0.0f;
-float d_time      = 0.0f;
-
-// Cursor
-Cursor global_cursor(X_CENTER, Y_CENTER);
-
-// Camera
-Camera global_cam(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, win_ar);
-
-// BGM Volume
-int master_bgm_volume = 50;
-
-//////////////////////////
-// Function Definitions //
-//////////////////////////
-
 int main()
 {
     /////////////////////////
@@ -72,15 +36,21 @@ int main()
     if(!initGLFW()) {return -1;}
 
     // Get Game Window
-    GameWindow game_window(WIN_WIDTH, WIN_HEIGHT, "First Game"); // GLFW terminates on deletion 
+    GameWindow game_window(1024, 576, "First Game"); // GLFW terminates on deletion 
     if(!game_window.window_p) {return -1;}
+
+    // Get Camera
+    Camera camera(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, game_window.win_ar);
+    
+    // Get Cursor
+    Cursor cursor(game_window.x_center, game_window.y_center);
     
     // Get Input Manager
-    // ...
+    InputManager input_manager;
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}
-
+    
     //////////////////////////
     // Load XAudio2 Library //
     //////////////////////////
@@ -126,7 +96,7 @@ int main()
     
     // Texture size should match the viewport.
     //We will then blow it up to fit the screen for a low res look.
-    FrameTexture *ftexture_p = new FrameTexture(VIEW_WIDTH, VIEW_HEIGHT);
+    FrameTexture *ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     
     /////////////////////////////
@@ -136,9 +106,9 @@ int main()
     // Model Matrix (Local space -> world space)
     Mat4F model(1.0f);
     // View Matrix (World space -> view space)
-    Mat4F view = cameraGetView(global_cam);
+    Mat4F view = cameraGetView(camera);
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = cameraGetPerspective(global_cam);
+    Mat4F projection = cameraGetPerspective(camera);
     
     ////////////////////
     // Create Shaders //
@@ -167,49 +137,34 @@ int main()
     ///////////////
     while(!glfwWindowShouldClose(game_window.window_p))
     {
+	// At the highest level should boil down to:
+	// 1. GAME - Update game state based on prior cycle inputs
+	// 2. PLATFORM - Render game state
+	// 3. PLATFORM - Get all inputs received this cycle (to be used to update game state next cycle)
+	
 	///////////////////////
 	// Update delta time //
 	///////////////////////
-	float curr_time = (float)glfwGetTime();
-	d_time    = curr_time - prev_time;
-	prev_time = curr_time;
+	gameWindowUpdateTime(game_window);
 
 	///////////////////
 	// Update cursor //
 	///////////////////
-	cursorUpdate(global_cursor, game_window.window_p);
-
-	///////////////////
-	// Update Volume //
-	///////////////////
-
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_UP) == GLFW_PRESS)
-	{
-	    master_bgm_volume += 1;
-	}
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_DOWN) == GLFW_PRESS)
-	{
-	    master_bgm_volume -= 1;
-	}
-	soundSetVolume(test_sound_p, master_bgm_volume);
+	cursorUpdate(cursor, game_window.window_p);
 	
 	//////////////////
 	// Update sound //
 	//////////////////
-
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_Q) == GLFW_PRESS)
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
 	{
-	    //soundStreamPlay(test_soundStream_p);
 	    soundPlay(test_sound_p);
 	}
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_W) == GLFW_PRESS)
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
 	{
-	    //soundStreamPause(test_soundStream_p);
 	    soundPause(test_sound_p);
 	}
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_E) == GLFW_PRESS)
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
 	{
-	    //soundStreamStop(test_soundStream_p);
 	    soundStop(test_sound_p);
 	}
 
@@ -221,32 +176,30 @@ int main()
 	///////////////////
 	// Update camera //
 	///////////////////
-
-	cameraUpdate(global_cam, game_window.window_p, cursorGetDistance(global_cursor), d_time);
+	cameraUpdate(camera, game_window, input_manager, cursorGetDistance(cursor));
 	
 	////////////////////////////
 	// Update Shader Uniforms //
 	////////////////////////////
-
 	glUseProgram(bp_shader_p->program_id);
 	
-	// DirLights //
+	// DirLights
 	shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dirLight_p->color);
 	shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dirLight_p->dir);
 	shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dirLight_p->ambient_strength);
 
-	// Cam Position //
-	shaderAddVec3Uniform(bp_shader_p, "cam_pos", global_cam.pos);
+	// Cam Position
+	shaderAddVec3Uniform(bp_shader_p, "cam_pos", camera.pos);
 	
-	// Transformation Matrices // 
+	// Transformation Matrices
      
 	// Update View
-	view = cameraGetView(global_cam);
+	view = cameraGetView(camera);
 	shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-	projection = cameraGetPerspective(global_cam);
+	projection = cameraGetPerspective(camera);
 	shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
 	/////////////////////////
@@ -254,7 +207,7 @@ int main()
 	/////////////////////////
 
 	// Use this render pass to write pre-processed image to the color texture.
-	glViewport(0, 0, VIEW_WIDTH, VIEW_HEIGHT); // Render to a smaller area first
+	glViewport(0, 0, game_window.view_width, game_window.view_height); // Render to a smaller area first
 	                                           // so we can blow it up and lower the res
 	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
 	glEnable(GL_DEPTH_TEST);
@@ -274,21 +227,21 @@ int main()
 	///////////////////////////////////////////
 
 	// use this render pass to draw post-processed color texture to screen.
-	glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT); // Render to the full screen now,
+	glViewport(0, 0, game_window.win_width, game_window.win_height); // Render to the full screen now,
 	                                         // blowing up the screen texture
         frameTextureDraw(ftexture_p, pp_shader_p);
 	
 	//////////////////
 	// Swap buffers //
 	//////////////////
-	GameWindowSwapBuffers(game_window);
+	gameWindowSwapBuffers(game_window);
 
 	////////////////////
 	// Process Inputs //
 	////////////////////
         // Store all inputs that occurred this cycle in the input_manager. To be processed next cycle.
-	// inputManagerGetInputsThisFrame(input_manager);
-	 
+	inputManagerGetInputsThisFrame(input_manager, game_window);
+	
 	/////////////////////
 	// Close condition //
 	/////////////////////

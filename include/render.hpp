@@ -25,12 +25,20 @@
 typedef struct GameWindow
 {
     GLFWwindow* window_p = NULL;
-    uint width;
-    uint height;
+    uint win_width;
+    uint win_height;
+    uint view_width;
+    uint view_height;
+    float x_center;
+    float y_center;
+    float win_ar;
+    float prev_time;
+    float d_time;
     GameWindow(uint _width, uint _height, c_char* name);
     ~GameWindow();
 } GameWindow;
-void GameWindowSwapBuffers(GameWindow& gameWindow);
+void gameWindowSwapBuffers(GameWindow& game_window);
+void gameWindowUpdateTime(GameWindow& game_window); 
 
 ////////////////////////////
 // Misc. Render Functions //

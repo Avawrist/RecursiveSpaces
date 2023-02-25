@@ -6,13 +6,12 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-// 3rd Party libs
-#include <GLFW/glfw3.h>
-
 // My libs
 #include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "mdcla.hpp"
+#include "render.hpp"
+#include "input.hpp"
 
 typedef struct Camera
 {
@@ -29,7 +28,7 @@ typedef struct Camera
     Camera();
     Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar);
 } Camera;
-void  cameraUpdate(Camera& cam, GLFWwindow* window, const Vec2F& distance, float d_time);
+void  cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager, const Vec2F& distance);
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 Mat4F cameraGetView(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);

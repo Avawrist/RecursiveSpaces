@@ -5,7 +5,6 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\
  game.cpp^
  asset.cpp^
  camera.cpp^
- cursor.cpp^
  entity.cpp^
  glad.c^
  light.cpp^
@@ -20,7 +19,6 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  game.obj^
  asset.obj^
  camera.obj^
- cursor.obj^
  entity.obj^
  glad.obj^
  light.obj^

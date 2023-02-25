@@ -11,11 +11,18 @@
 
 GameWindow::GameWindow(uint _width, uint _height, c_char* name)
 {
-    width = _width;
-    height = _height;
+    win_width   = _width;
+    win_height  = _height;
+    view_width  = (uint)(win_width * 0.25f);
+    view_height = (uint)(win_height * 0.25f);
+    x_center    = win_width * 0.5f;
+    y_center    = win_height * 0.5f;
+    win_ar      = (float)win_width / (float)win_height;
+    prev_time   = 0;
+    d_time      = 0;
     
     // Create window & context
-    window_p = glfwCreateWindow(width, height, name, NULL, NULL);
+    window_p = glfwCreateWindow(win_width, win_height, name, NULL, NULL);
     outputGLFWError();
     if(window_p)
     {
@@ -40,11 +47,18 @@ GameWindow::~GameWindow()
     glfwTerminate(); // This will stop all GLFW functions including timer and input 
 }
 
-void GameWindowSwapBuffers(GameWindow& gameWindow)
+void gameWindowSwapBuffers(GameWindow& game_window)
 {
-    glfwSwapBuffers(gameWindow.window_p);
+    glfwSwapBuffers(game_window.window_p);
     glfwPollEvents(); // Move to input codeg
     outputGLFWError();
+}
+
+void gameWindowUpdateTime(GameWindow& game_window)
+{
+    float curr_time = (float)glfwGetTime();
+    game_window.d_time    = curr_time - game_window.prev_time;
+    game_window.prev_time = curr_time;
 }
 
 //////////////////////

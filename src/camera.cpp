@@ -31,50 +31,34 @@ Camera::Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar)
 // Camera Non-Members //
 ////////////////////////
 
-void cameraUpdate(Camera& cam, GLFWwindow* window, const Vec2F& distance, float d_time)
+void cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager, const Vec2F& distance)
 {
     /////////////////////
     // Camera Strafing //
     /////////////////////
-
-    // polling GLFW for input
-    // TODO: Create our own input data structure and poll that instead?
-    
     Mat4F V          = cameraGetView(cam);
-    float d_time_spd = d_time * cam.speed; 
+    float d_time_spd = game_window.d_time * cam.speed; 
+
     // Move forward
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
     {
 	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
     }
     // Move back
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
     {
         cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
     }
     // Move right
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
     {
         cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
     }
     // Move left
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
     {
         cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
     }
-
-    /////////////////
-    // Camera Zoom //
-    /////////////////
-    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        cam.fov -= cam.z_speed * d_time;
-    }
-    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        cam.fov += cam.z_speed * d_time;
-    }
-    cam.fov = clamp(cam.fov, 45.0f, 115.0f);
 
     ////////////////////
     // Camera Looking //
