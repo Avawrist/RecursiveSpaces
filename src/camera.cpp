@@ -31,31 +31,31 @@ Camera::Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar)
 // Camera Non-Members //
 ////////////////////////
 
-void cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager, const Vec2F& distance)
+void cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager)
 {
-    /////////////////////
-    // Camera Strafing //
-    /////////////////////
     Mat4F V          = cameraGetView(cam);
-    float d_time_spd = game_window.d_time * cam.speed; 
+    float d_time_spd = game_window.d_time * cam.speed;
+    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
+
+    // Camera Strafing
 
     // Move forward
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
     {
 	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
     }
     // Move back
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
     {
         cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
     }
     // Move right
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
     {
         cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
     }
     // Move left
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
     {
         cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
     }

@@ -38,15 +38,12 @@ int main()
     // Get Game Window
     GameWindow game_window(1024, 576, "First Game"); // GLFW terminates on deletion 
     if(!game_window.window_p) {return -1;}
+    
+    // Get Input Manager
+    InputManager input_manager(game_window);
 
     // Get Camera
     Camera camera(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, game_window.win_ar);
-    
-    // Get Cursor
-    Cursor cursor(game_window.x_center, game_window.y_center);
-    
-    // Get Input Manager
-    InputManager input_manager;
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}
@@ -65,17 +62,17 @@ int main()
     ////////////////////
     // Initialize SFX //
     ////////////////////
-    Sound* test_sound_p = (Sound*)assetManagerGetAssetP(asset_manager, TEST, SOUND01, &sound_interface); 
+    //Sound* test_sound_p = (Sound*)assetManagerGetAssetP(asset_manager, TEST, SOUND01, &sound_interface); 
     
     ////////////////////
     // Initialize BGM //
     ////////////////////
-    SoundStream *test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
+    SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
     
     //////////////////////////
     // Initialize Test Mesh //
     //////////////////////////
-    Mesh *mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
+    Mesh* mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
 
     /////////////////////////
     // Initialize Textures //
@@ -86,7 +83,7 @@ int main()
     ///////////////////////
     // Initialize Lights //
     ///////////////////////
-    DirLight *dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
+    DirLight* dirLight_p = new DirLight(Vec3F(1.0f, 1.0f, 1.0f),
 					Vec3F(0.0f, -1.0f, -1.0f),
 	                                0.25f);
 
@@ -96,7 +93,7 @@ int main()
     
     // Texture size should match the viewport.
     //We will then blow it up to fit the screen for a low res look.
-    FrameTexture *ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
+    FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     
     /////////////////////////////
@@ -115,7 +112,7 @@ int main()
     ////////////////////
 
     // Blinn-phong shader
-    Shader *bp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
+    Shader* bp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
     
     // Load initial uniform values to GPU
     glUseProgram(bp_shader_p->program_id);
@@ -126,7 +123,7 @@ int main()
     shaderAddIntUniform(bp_shader_p, "normal_map",  1);
     
     // Post-processing shader
-    Shader *pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
+    Shader* pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
 	
     // Load initial uniform values to GPU
     glUseProgram(pp_shader_p->program_id);
@@ -147,27 +144,6 @@ int main()
 	///////////////////////
 	gameWindowUpdateTime(game_window);
 
-	///////////////////
-	// Update cursor //
-	///////////////////
-	cursorUpdate(cursor, game_window.window_p);
-	
-	//////////////////
-	// Update sound //
-	//////////////////
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
-	{
-	    soundPlay(test_sound_p);
-	}
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
-	{
-	    soundPause(test_sound_p);
-	}
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
-	{
-	    soundStop(test_sound_p);
-	}
-
 	/////////////////////////
 	// Update sound stream //
 	/////////////////////////
@@ -176,7 +152,7 @@ int main()
 	///////////////////
 	// Update camera //
 	///////////////////
-	cameraUpdate(camera, game_window, input_manager, cursorGetDistance(cursor));
+	cameraUpdate(camera, game_window, input_manager);
 	
 	////////////////////////////
 	// Update Shader Uniforms //
@@ -239,15 +215,16 @@ int main()
 	////////////////////
 	// Process Inputs //
 	////////////////////
-        // Store all inputs that occurred this cycle in the input_manager. To be processed next cycle.
-	inputManagerGetInputsThisFrame(input_manager, game_window);
-	
+
+        // Store all inputs this cycle, to be processed next cycle. Update the cursor pos.
+	inputManagerUpdate(input_manager, game_window);
+
 	/////////////////////
 	// Close condition //
 	/////////////////////
-	if(glfwGetKey(game_window.window_p, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC] == KEY_DOWN)
 	{
-	    glfwSetWindowShouldClose(game_window.window_p, GLFW_TRUE);
+	    gameWindowClose(game_window);
 	}
     }
 

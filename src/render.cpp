@@ -61,6 +61,11 @@ void gameWindowUpdateTime(GameWindow& game_window)
     game_window.prev_time = curr_time;
 }
 
+void gameWindowClose(GameWindow& game_window)
+{
+    glfwSetWindowShouldClose(game_window.window_p, GLFW_TRUE);
+}
+
 //////////////////////
 // Render Functions //
 //////////////////////

@@ -29,7 +29,7 @@ typedef struct Cursor
     Cursor();
     Cursor(float _last_x, float _last_y);
 } Cursor;
-void cursorUpdate(Cursor& cursor, GLFWwindow* window);
+void cursorUpdate(Cursor& cursor, GameWindow& game_window);
 Vec2F cursorGetDistance(Cursor& cursor);
 
 /////////////////////////
@@ -40,8 +40,13 @@ Vec2F cursorGetDistance(Cursor& cursor);
 #define KEY_ARROW_DOWN  1
 #define KEY_ARROW_LEFT  2
 #define KEY_ARROW_RIGHT 3
-#define KEY_SPACE 4
-#define TOTAL_KEYS 5
+#define KEY_SPACE       4
+#define KEY_ESC         5
+#define KEY_W           6
+#define KEY_S           7
+#define KEY_A           8
+#define KEY_D           9
+#define TOTAL_KEYS 10
 
 #define KEY_UP   0
 #define KEY_DOWN 1
@@ -59,12 +64,11 @@ Vec2F cursorGetDistance(Cursor& cursor);
 typedef struct InputManager
 {
     int inputs_on_frame[TOTAL_FRAMES][TOTAL_KEYS];
-    //Cursor* cursor_p = NULL; 
-    InputManager();
-    //~InputManager();
+    Cursor cursor; 
+    InputManager(GameWindow& game_window);
 } InputManager;
-void inputManagerUpdate(InputManager& im, GameWindow& game_window);
 void inputManagerGetInputsThisFrame(InputManager& im, GameWindow& game_window);
+void inputManagerUpdate(InputManager& im, GameWindow& game_window);
 
 #endif
 

@@ -38,7 +38,8 @@ typedef struct GameWindow
     ~GameWindow();
 } GameWindow;
 void gameWindowSwapBuffers(GameWindow& game_window);
-void gameWindowUpdateTime(GameWindow& game_window); 
+void gameWindowUpdateTime(GameWindow& game_window);
+void gameWindowClose(GameWindow& game_window);
 
 ////////////////////////////
 // Misc. Render Functions //
