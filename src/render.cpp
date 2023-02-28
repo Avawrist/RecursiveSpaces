@@ -38,7 +38,6 @@ GameWindow::GameWindow(uint _width, uint _height, c_char* name)
     {
 	OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
     }
-
 }
 
 GameWindow::~GameWindow()
