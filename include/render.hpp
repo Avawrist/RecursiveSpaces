@@ -25,20 +25,21 @@
 typedef struct GameWindow
 {
     GLFWwindow* window_p = NULL;
-    uint win_width;
-    uint win_height;
-    uint view_width;
-    uint view_height;
-    float x_center;
-    float y_center;
-    float win_ar;
-    float prev_time;
-    float d_time;
+    uint   win_width;
+    uint   win_height;
+    uint   view_width;
+    uint   view_height;
+    float  x_center;
+    float  y_center;
+    float  win_ar;
+    uint   target_framerate;
+    double target_cycle_length_ms;  
+    double cycle_start_time_ms;
+    float  d_time;
     GameWindow(uint _width, uint _height, c_char* name);
     ~GameWindow();
 } GameWindow;
 void gameWindowSwapBuffers(GameWindow& game_window);
-void gameWindowUpdateTime(GameWindow& game_window);
 void gameWindowClose(GameWindow& game_window);
 
 ////////////////////////////

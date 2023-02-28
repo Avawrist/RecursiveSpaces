@@ -47,16 +47,6 @@ int main()
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}
-
-    ////////////////////
-    // Time variables //
-    ////////////////////
-
-    // TODO: Move to GameWindow object
-    uint  target_framerate = 60; // TODO: Get actual monitor refresh rate from OS
-    double target_cycle_length_ms = 1.0f / target_framerate;  
-    double time_elapsed_this_cycle_ms = 0.0f;
-    double cycle_start_time = 0.0f;
     
     //////////////////////////
     // Load XAudio2 Library //
@@ -148,10 +138,6 @@ int main()
 	// 1. GAME - Update game state based on prior cycle inputs
 	// 2. PLATFORM - Render game state
 	// 3. PLATFORM - Get all inputs received this cycle (to be used to update game state next cycle)
-
-	// TODO: Move to gameWindowUpdateTime function
-	cycle_start_time = glfwGetTime();
-	time_elapsed_this_cycle_ms = 0.0f;
 	
 	/////////////////////////
 	// Update sound stream //
@@ -234,33 +220,7 @@ int main()
 	//////////////////
 	// Swap buffers //
 	//////////////////
-
-	// target_framerate <- get monitor refresh rate
-	// frame_length_given_framerate
-	// time_elapsed_this_cycle
-	// If time_elapsed_this_cycle < frame_length_given_framerate
-	//      wait for the difference in milliseconds
-	// If time_elapsed_this_cylce > frame_length_given_framerate
-	//      We were late. Record it and consider lowering the framerate.
-
-	// TODO: Move to gameWindowUpdateTime function
-	time_elapsed_this_cycle_ms = glfwGetTime() - cycle_start_time;
-
-	// TODO: Replace with more elegant stalling solution
-	if(time_elapsed_this_cycle_ms < target_cycle_length_ms)
-	{
-	    while(time_elapsed_this_cycle_ms < target_cycle_length_ms)
-	    {
-		time_elapsed_this_cycle_ms = glfwGetTime() - cycle_start_time;
-	    }
-	}
-	// TODO: Handle case where cycle takes LONGER than the target cycle length
-	char msg[256];
-	sprintf_s(msg, "Time elapsed this frame: %f\n", time_elapsed_this_cycle_ms);
-	OutputDebugStringA(msg);
-
 	gameWindowSwapBuffers(game_window);
-	gameWindowUpdateTime(game_window);
     }
 
     /////////////

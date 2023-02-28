@@ -11,6 +11,9 @@
 
 GameWindow::GameWindow(uint _width, uint _height, c_char* name)
 {
+    /////////////////////////////
+    // Set window measurements //
+    /////////////////////////////
     win_width   = _width;
     win_height  = _height;
     view_width  = (uint)(win_width * 0.25f);
@@ -18,10 +21,34 @@ GameWindow::GameWindow(uint _width, uint _height, c_char* name)
     x_center    = win_width * 0.5f;
     y_center    = win_height * 0.5f;
     win_ar      = (float)win_width / (float)win_height;
-    prev_time   = 0;
-    d_time      = 0;
-    
-    // Create window & context
+
+    /////////////////////
+    // Set time fields //
+    /////////////////////
+    target_framerate = 0; 
+
+    // Get monitor struct from GLFW
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    if(monitor)
+    {
+	// Get vidmode struct from GLFW, and read the refresh rate from it
+	const GLFWvidmode* vid_mode = glfwGetVideoMode(monitor);
+	if(vid_mode)
+	{
+	    target_framerate = vid_mode->refreshRate;
+	    char msg[256];
+	    sprintf_s(msg, "Target framerate found: %i\n", target_framerate);
+	    OutputDebugStringA(msg);
+	}
+    }
+    if(target_framerate == 0) {target_framerate = 60;} // If framerate not found, set to 60 by default
+    target_cycle_length_ms = 1.0f / target_framerate;  
+    cycle_start_time_ms    = 0.0f;
+    d_time                 = 0;
+
+    /////////////////////////////
+    // Create window & context //
+    /////////////////////////////
     window_p = glfwCreateWindow(win_width, win_height, name, NULL, NULL);
     outputGLFWError();
     if(window_p)
@@ -47,17 +74,29 @@ GameWindow::~GameWindow()
 }
 
 void gameWindowSwapBuffers(GameWindow& game_window)
-{
-    glfwSwapBuffers(game_window.window_p);
-    glfwPollEvents(); // Move to input codeg
-    outputGLFWError();
-}
+{ 
+    double time_elapsed_this_cycle_ms = glfwGetTime() - game_window.cycle_start_time_ms;
 
-void gameWindowUpdateTime(GameWindow& game_window)
-{
-    float curr_time = (float)glfwGetTime();
-    game_window.d_time    = curr_time - game_window.prev_time;
-    game_window.prev_time = curr_time;
+    // TODO: Replace with more elegant stalling solution
+    while(time_elapsed_this_cycle_ms < game_window.target_cycle_length_ms)
+    {
+	time_elapsed_this_cycle_ms = glfwGetTime() - game_window.cycle_start_time_ms;
+    }
+    // TODO: Handle case where cycle takes LONGER than the target cycle length
+    
+    // Swap buffers
+    glfwSwapBuffers(game_window.window_p);
+    outputGLFWError();
+
+    // Update delta time
+    game_window.d_time = (float)time_elapsed_this_cycle_ms;
+
+    char msg2[256];
+    sprintf_s(msg2, "Delta time from previous frame: %f\n", game_window.d_time);
+    OutputDebugStringA(msg2);
+
+    // Reset counters
+    game_window.cycle_start_time_ms = glfwGetTime();
 }
 
 void gameWindowClose(GameWindow& game_window)
