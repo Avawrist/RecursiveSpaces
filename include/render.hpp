@@ -33,9 +33,10 @@ typedef struct GameWindow
     float  y_center;
     float  win_ar;
     uint   target_framerate;
-    double target_cycle_length_ms;  
-    double cycle_start_time_ms;
+    double target_cycle_length_secs;  
+    double cycle_start_time_secs;
     float  d_time;
+    bool   sleep_is_granular;
     GameWindow(uint _width, uint _height, c_char* name);
     ~GameWindow();
 } GameWindow;

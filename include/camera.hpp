@@ -32,5 +32,6 @@ void  cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_man
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 Mat4F cameraGetView(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);
+Mat4F cameraGetOrthographic(const Camera& cam);
 
 #endif

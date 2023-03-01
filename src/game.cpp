@@ -101,7 +101,7 @@ int main()
     /////////////////////////////
 
     // Model Matrix (Local space -> world space)
-    Mat4F model(1.0f);
+    Mat4F model(1.0f); // Each game object will have its own model matrix
     // View Matrix (World space -> view space)
     Mat4F view = cameraGetView(camera);
     // Projection Matrix (View space -> clip space/NDC)
@@ -138,7 +138,7 @@ int main()
 	// 1. GAME - Update game state based on prior cycle inputs
 	// 2. PLATFORM - Render game state
 	// 3. PLATFORM - Get all inputs received this cycle (to be used to update game state next cycle)
-	
+
 	/////////////////////////
 	// Update sound stream //
 	/////////////////////////
@@ -171,6 +171,10 @@ int main()
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
 	projection = cameraGetPerspective(camera);
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
+	{
+	    projection = cameraGetOrthographic(camera);
+	}
 	shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
 	/////////////////////////
@@ -179,7 +183,7 @@ int main()
 
 	// Use this render pass to write pre-processed image to the color texture.
 	glViewport(0, 0, game_window.view_width, game_window.view_height); // Render to a smaller area first
-	                                           // so we can blow it up and lower the res
+                   	                                           // so we can blow it up and lower the res
 	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

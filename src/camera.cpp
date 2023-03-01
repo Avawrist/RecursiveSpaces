@@ -104,7 +104,7 @@ Mat4F cameraGetView(const Camera& cam)
 
 Mat4F cameraGetPerspective(const Camera& cam)
 {
-    // Assumes RH coordinate systems
+    // Assumes RH coordinate system
     // Assumes Column major
     
     float range        = cam.n - cam.f;
@@ -115,4 +115,20 @@ Mat4F cameraGetPerspective(const Camera& cam)
 	         0.0f, 0.0f, (-cam.n - cam.f)/range, (2.0f * cam.f * cam.n)/range, // Row 3
 	         0.0f, 0.0f, -1.0f, 0.0f);                                         // Row 4
     
+}
+
+Mat4F cameraGetOrthographic(const Camera& cam)
+{
+    // Assumes RH coordinate system
+    // Assumes Column major
+    
+    float r = 2.0f;
+    float l = -2.0f;
+    float t = 1.0f;
+    float b = -1.0f;
+
+    return Mat4F(2.0f/(r - l), 0.0f, 0.0f, -(r + l)/(r - l),
+	         0.0f, 2.0f/(t - b), 0.0f, -(t + b)/(t - b),
+	         0.0f, 0.0f, 2.0f/(cam.f - cam.n), -(cam.f + cam.n)/(cam.f - cam.n),
+	         0.0f, 0.0f, 0.0f, 1.0f);
 }

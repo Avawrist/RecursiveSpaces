@@ -36,6 +36,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  kernel32.lib^
  shell32.lib^
  opengl32.lib^
+ winmm.lib^
  /OUT:firstGame.exe
 cd ..\build
 del *.obj
