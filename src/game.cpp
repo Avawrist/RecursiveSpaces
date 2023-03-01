@@ -36,7 +36,7 @@ int main()
     if(!initGLFW()) {return -1;}
 
     // Get Game Window
-    GameWindow game_window(1024, 576, "First Game"); // GLFW terminates on deletion 
+    GameWindow game_window(1024, 512, "First Game"); // GLFW terminates on deletion 
     if(!game_window.window_p) {return -1;}
     
     // Get Input Manager

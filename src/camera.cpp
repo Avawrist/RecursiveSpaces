@@ -129,6 +129,6 @@ Mat4F cameraGetOrthographic(const Camera& cam)
 
     return Mat4F(2.0f/(r - l), 0.0f, 0.0f, -(r + l)/(r - l),
 	         0.0f, 2.0f/(t - b), 0.0f, -(t + b)/(t - b),
-	         0.0f, 0.0f, 2.0f/(cam.f - cam.n), -(cam.f + cam.n)/(cam.f - cam.n),
+	         0.0f, 0.0f, -2.0f/(cam.f - cam.n), -(cam.f + cam.n)/(cam.f - cam.n),
 	         0.0f, 0.0f, 0.0f, 1.0f);
 }
