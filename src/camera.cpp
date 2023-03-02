@@ -11,20 +11,30 @@
 
 Camera::Camera()
 {
-    pos   = Vec3F(0.0f, 0.0f, 0.0f);
-    n     = 1.0f;
-    f     = 100.0f;
-    fov   = 45.0f;
-    ar    = 1.0f;
+    speed       = 8.0f;
+    z_speed     = 20.0f;
+    sensitivity = 1.0f;
+    pitch       = 0.0f;
+    yaw         = 0.0f;
+    pos         = Vec3F(0.0f, 0.0f, 0.0f);
+    n           = 1.0f;
+    f           = 100.0f;
+    fov         = 45.0f;
+    ar          = 1.0f;
 }
 
 Camera::Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar)
 {
-    pos   = _pos;
-    n     = _n;
-    f     = _f;
-    fov   = _fov;
-    ar    = _ar;
+    speed       = 8.0f;
+    z_speed     = 20.0f;
+    sensitivity = 1.0f;
+    pitch       = 0.0f;
+    yaw         = 0.0f;
+    pos         = _pos;
+    n           = _n;
+    f           = _f;
+    fov         = _fov;
+    ar          = _ar;
 }
 
 ////////////////////////
