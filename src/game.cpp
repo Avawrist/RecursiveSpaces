@@ -69,11 +69,12 @@ int main()
     ////////////////////
     SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
     
-    //////////////////////////
-    // Initialize Test Mesh //
-    //////////////////////////
+    ////////////////////////////
+    // Initialize Test Meshes //
+    ////////////////////////////
     Mesh* mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
-
+    Mesh* grid_mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, GRID, MESH01, 0);
+    
     /////////////////////////
     // Initialize Textures //
     /////////////////////////
@@ -105,7 +106,7 @@ int main()
     // View Matrix (World space -> view space)
     Mat4F view = cameraGetView(camera);
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = cameraGetPerspective(camera);
+    Mat4F projection = cameraGetOrthographic();
     
     ////////////////////
     // Create Shaders //
@@ -129,6 +130,15 @@ int main()
     glUseProgram(pp_shader_p->program_id);
     shaderAddIntUniform(pp_shader_p, "color_texture", 0);
 
+    // Line shader
+    Shader* grid_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, GRID);
+
+    // Load initial uniform values to GPU
+    glUseProgram(grid_shader_p->program_id);
+    shaderAddMat4Uniform(grid_shader_p, "model", model.getPointer());
+    shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
+    shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+    
     ///////////////
     // Game Loop //
     ///////////////
@@ -148,10 +158,10 @@ int main()
 	// Update camera //
 	///////////////////
 	cameraUpdate(camera, game_window, input_manager);
-	
-	////////////////////////////
-	// Update Shader Uniforms //
-	////////////////////////////
+        
+	////////////////////////////////////////
+	// Update Blinn-Phong Shader Uniforms //
+	////////////////////////////////////////
 	glUseProgram(bp_shader_p->program_id);
 	
 	// DirLights
@@ -170,13 +180,22 @@ int main()
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-	projection = cameraGetPerspective(camera);
+	projection = cameraGetOrthographic();
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
 	{
-	    projection = cameraGetOrthographic(camera);
+	    projection = cameraGetPerspective(camera);
 	}
 	shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
+	/////////////////////////////////
+	// Update Line Shader Uniforms //
+	/////////////////////////////////
+	glUseProgram(grid_shader_p->program_id);
+
+	// Update view & projection matrix uniforms
+	shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
+	shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+	
 	/////////////////////////
 	// ** Render pass 1 ** //
 	/////////////////////////
@@ -197,6 +216,12 @@ int main()
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
 
+	// Draw points (testing only, not final code)
+	glUseProgram(grid_shader_p->program_id);
+	glBindVertexArray(grid_mesh_p->vao);
+	glPointSize(5.0f);
+	glDrawArrays(GL_POINTS, 0, (GLsizei)grid_mesh_p->data.size());
+	
 	///////////////////////////////////////////
 	// ** Render pass 2 (Post-processing) ** //
 	///////////////////////////////////////////

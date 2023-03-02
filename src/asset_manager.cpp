@@ -38,6 +38,15 @@ AssetTableDir::AssetTableDir()
     table[CHEST][SOUND01]   = NULL;
     table[CHEST][SOUND02]   = NULL;
     table[CHEST][SOUND03]   = NULL;
+
+    // Line Object
+    table[GRID][TEXTURE_D] = NULL;
+    table[GRID][TEXTURE_N] = NULL;
+    table[GRID][TEXTURE_S] = NULL;
+    table[GRID][MESH01]    = "..\\assets\\meshes\\grid.obj";
+    table[GRID][SOUND01]   = NULL;
+    table[GRID][SOUND02]   = NULL;
+    table[GRID][SOUND03]   = NULL;
 }
 
 ///////////////////////////
@@ -336,6 +345,10 @@ ShaderTableDir::ShaderTableDir()
     // Post-Processing Shader Program
     table[POSTPROCESS][VERTEX]   = "..\\assets\\shaders\\pp.vert";
     table[POSTPROCESS][FRAGMENT] = "..\\assets\\shaders\\pp.frag";
+
+    // Grid Shader Program
+    table[GRID][VERTEX]   = "..\\assets\\shaders\\db_grid.vert";
+    table[GRID][FRAGMENT] = "..\\assets\\shaders\\db_grid.frag";
 }
 
 //////////////////////////

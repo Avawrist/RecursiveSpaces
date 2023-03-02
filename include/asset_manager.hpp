@@ -32,7 +32,8 @@
 
 #define TEST               0
 #define CHEST              1
-#define TOTAL_OBJECT_TYPES 2
+#define GRID               2
+#define TOTAL_OBJECT_TYPES 3
 
 typedef struct AssetTableID
 {
@@ -127,7 +128,8 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
 
 #define BLINNPHONG            0
 #define POSTPROCESS           1
-#define TOTAL_SHADER_PROGRAMS 2
+#define GRID                  2
+#define TOTAL_SHADER_PROGRAMS 3
 
 #define VERTEX             0
 #define FRAGMENT           1

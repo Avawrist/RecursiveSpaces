@@ -117,18 +117,21 @@ Mat4F cameraGetPerspective(const Camera& cam)
     
 }
 
-Mat4F cameraGetOrthographic(const Camera& cam)
+Mat4F cameraGetOrthographic()
 {
     // Assumes RH coordinate system
     // Assumes Column major
-    
-    float r = 2.0f;
-    float l = -2.0f;
-    float t = 1.0f;
-    float b = -1.0f;
 
-    return Mat4F(2.0f/(r - l), 0.0f, 0.0f, -(r + l)/(r - l),
-	         0.0f, 2.0f/(t - b), 0.0f, -(t + b)/(t - b),
-	         0.0f, 0.0f, -2.0f/(cam.f - cam.n), -(cam.f + cam.n)/(cam.f - cam.n),
-	         0.0f, 0.0f, 0.0f, 1.0f);
+    // needs to match window aspect ratio
+    float r = 0.2f;
+    float l = -0.2f;
+    float t = 0.1f;
+    float b = -0.1f;
+    float n = 1.0f;
+    float f = 100.0f;
+
+    return Mat4F(2.0f/(r - l), 0.0f,         0.0f,          -(r + l)/(r - l),
+	         0.0f,         2.0f/(t - b), 0.0f,          -(t + b)/(t - b),
+	         0.0f,         0.0f,         -2.0f/(f - n), -(f + n)/(f - n),
+	         0.0f,         0.0f,          0.0f,          1.0f);
 }
