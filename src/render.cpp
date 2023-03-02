@@ -16,8 +16,8 @@ GameWindow::GameWindow(uint _width, uint _height, c_char* name)
     /////////////////////////////
     win_width   = _width;
     win_height  = _height;
-    view_width  = (uint)(win_width * 1.0f); // Set to * 0.25f for low res look
-    view_height = (uint)(win_height * 1.0f); //
+    view_width  = (uint)(win_width * 0.5f);
+    view_height = (uint)(win_height * 0.5f);
     x_center    = win_width * 0.5f;
     y_center    = win_height * 0.5f;
     win_ar      = (float)win_width / (float)win_height;
