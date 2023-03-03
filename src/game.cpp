@@ -43,7 +43,7 @@ int main()
     InputManager input_manager(game_window);
 
     // Get Camera
-    Camera camera(Vec3F(0.0f, 2.0f, 4.0f), 0.8f, 100.0f, 45.0f, game_window.win_ar);
+    Camera camera(Vec3F(0.0f, 0.0f, 40.0f), 0.8f, 100.0f, 45.0f, game_window.win_ar);
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}
@@ -73,7 +73,13 @@ int main()
     // Initialize Test Meshes //
     ////////////////////////////
     Mesh* mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
-    Mesh* grid_mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, GRID, MESH01, 0);
+
+    uint size = 6; 
+    float line_vertices[] = {
+	0.0f, 0.0f, -8.0f,
+	0.0f, 0.0f, 8.0f
+    };
+    Mesh* mesh_line_p = new Mesh(line_vertices, size);
     
     /////////////////////////
     // Initialize Textures //
@@ -102,7 +108,10 @@ int main()
     /////////////////////////////
 
     // Model Matrix (Local space -> world space)
-    Mat4F model(1.0f); // Each game object will have its own model matrix
+    Mat4F model(1.0f, 0.0f, 0.0f, 0.0f,
+	        0.0f, 1.0f, 0.0f, 0.0f,
+	        0.0f, 0.0f, 1.0f, 0.0f,
+	        0.0f, 0.0f, 0.0f, 1.0f); // Each game object will have its own model matrix
     // View Matrix (World space -> view space)
     Mat4F view = cameraGetView(camera);
     // Projection Matrix (View space -> clip space/NDC)
@@ -216,11 +225,11 @@ int main()
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
 
-	// Draw points (testing only, not final code)
+	// Draw lines (testing only, not final code)
 	glUseProgram(grid_shader_p->program_id);
-	glBindVertexArray(grid_mesh_p->vao);
-	glPointSize(5.0f);
-	glDrawArrays(GL_POINTS, 0, (GLsizei)grid_mesh_p->data.size());
+	glBindVertexArray(mesh_line_p->vao);
+	glLineWidth(5.0f);
+	glDrawArrays(GL_LINES, 0, (GLsizei)mesh_line_p->data.size());
 	
 	///////////////////////////////////////////
 	// ** Render pass 2 (Post-processing) ** //
@@ -257,6 +266,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
+    delete mesh_line_p;
     delete test_soundStream_p;
     delete ftexture_p;
     delete dirLight_p;

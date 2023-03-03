@@ -34,6 +34,7 @@ typedef struct Mesh
     GLuint vao;
     GLuint vbo;
     Mesh(c_char* obj_path);
+    Mesh(float* vertices, uint arr_size);
     ~Mesh();
 } Mesh;
 int  meshLoadObj(Mesh* mesh_p, c_char* path);

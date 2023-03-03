@@ -43,9 +43,9 @@ typedef struct GameWindow
 void gameWindowSwapBuffers(GameWindow& game_window);
 void gameWindowClose(GameWindow& game_window);
 
-////////////////////////////
-// Misc. Render Functions //
-////////////////////////////
+////////////////////
+// Init Functions //
+////////////////////
 
 int initGLFW();
 int initOpenGL();

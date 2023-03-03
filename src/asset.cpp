@@ -29,6 +29,38 @@ Mesh::Mesh(c_char* obj_path)
     OutputDebugStringA("ERROR: Failed to load mesh. Asset not found.\n"); // Failure
 }
 
+Mesh::Mesh(float* vertices, uint arr_size)
+{
+    // Generate OpenGL objects
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    // Copy vertex array into data vector
+    data.insert(data.end(), vertices, vertices + arr_size);
+
+    ///////////////////////////////
+    // Copy mesh data to the GPU //
+    ///////////////////////////////
+    
+    // Always bind VAO first
+    glBindVertexArray(vao);
+
+    // Mesh VBO
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER,
+		 data.size() * sizeof(float),
+		 data.data(),
+		 GL_STATIC_DRAW);
+
+    // Vertex Attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    // Unbind buffer and VAO:
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 Mesh::~Mesh()
 {
     // Delete OpenGL objects:
