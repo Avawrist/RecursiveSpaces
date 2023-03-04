@@ -1,8 +1,12 @@
 #version 330 core
 
-out vec4 color;
+// Out Variables
+out vec4 final_color;
+
+// Uniforms
+uniform vec3 color;
 
 void main()
 {
-	color = vec4(0.0f, 0.0f, 1.0f, 1.0f,);
+	final_color = vec4(color, 1.0);
 }

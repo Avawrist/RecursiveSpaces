@@ -15,7 +15,8 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\
  sound.cpp^
  asset_manager.cpp^
  render.cpp^
- input.cpp
+ input.cpp^
+ draw.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
@@ -30,6 +31,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  asset_manager.obj^
  render.obj^
  input.obj^
+ draw.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^

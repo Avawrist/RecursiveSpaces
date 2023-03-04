@@ -23,6 +23,7 @@
 #include "asset_manager.hpp"
 #include "render.hpp"
 #include "input.hpp"
+#include "draw.hpp"
 
 using namespace std;
 
@@ -36,14 +37,14 @@ int main()
     if(!initGLFW()) {return -1;}
 
     // Get Game Window
-    GameWindow game_window(1024, 512, "First Game"); // GLFW terminates on deletion 
+    GameWindow game_window(1920, 1080, "First Game"); // GLFW terminates on deletion 
     if(!game_window.window_p) {return -1;}
     
     // Get Input Manager
     InputManager input_manager(game_window);
 
     // Get Camera
-    Camera camera(Vec3F(0.0f, 0.0f, 40.0f), 0.8f, 100.0f, 45.0f, game_window.win_ar);
+    Camera camera(Vec3F(144.0f, 116.0f, 216.0f), game_window.win_ar);
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}
@@ -73,13 +74,6 @@ int main()
     // Initialize Test Meshes //
     ////////////////////////////
     Mesh* mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
-
-    uint size = 6; 
-    float line_vertices[] = {
-	0.0f, 0.0f, -8.0f,
-	0.0f, 0.0f, 8.0f
-    };
-    Mesh* mesh_line_p = new Mesh(line_vertices, size);
     
     /////////////////////////
     // Initialize Textures //
@@ -108,14 +102,11 @@ int main()
     /////////////////////////////
 
     // Model Matrix (Local space -> world space)
-    Mat4F model(1.0f, 0.0f, 0.0f, 0.0f,
-	        0.0f, 1.0f, 0.0f, 0.0f,
-	        0.0f, 0.0f, 1.0f, 0.0f,
-	        0.0f, 0.0f, 0.0f, 1.0f); // Each game object will have its own model matrix
+    Mat4F model(1.0f); // Each game object will have its own model matrix
     // View Matrix (World space -> view space)
     Mat4F view = cameraGetView(camera);
     // Projection Matrix (View space -> clip space/NDC)
-    Mat4F projection = cameraGetOrthographic();
+    Mat4F projection = cameraGetOrthographic(camera, game_window);
     
     ////////////////////
     // Create Shaders //
@@ -147,6 +138,12 @@ int main()
     shaderAddMat4Uniform(grid_shader_p, "model", model.getPointer());
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+
+    ////////////////////////
+    // Create Line Object //
+    ////////////////////////
+    DebugLine* line_p = new DebugLine(Vec3F(0.0f, 0.0f, -8.0f),
+				      Vec3F(0.0f, 0.0f, 8.0f));
     
     ///////////////
     // Game Loop //
@@ -189,7 +186,7 @@ int main()
 	
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
-	projection = cameraGetOrthographic();
+	projection = cameraGetOrthographic(camera, game_window);
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
 	{
 	    projection = cameraGetPerspective(camera);
@@ -226,10 +223,7 @@ int main()
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
 
 	// Draw lines (testing only, not final code)
-	glUseProgram(grid_shader_p->program_id);
-	glBindVertexArray(mesh_line_p->vao);
-	glLineWidth(5.0f);
-	glDrawArrays(GL_LINES, 0, (GLsizei)mesh_line_p->data.size());
+	debugLineDraw(line_p, grid_shader_p, Vec3F(10.0f, 0.0f, 0.0f), 1.0f);
 	
 	///////////////////////////////////////////
 	// ** Render pass 2 (Post-processing) ** //
@@ -266,7 +260,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
-    delete mesh_line_p;
+    delete line_p;
     delete test_soundStream_p;
     delete ftexture_p;
     delete dirLight_p;

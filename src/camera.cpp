@@ -14,26 +14,26 @@ Camera::Camera()
     speed       = 8.0f;
     z_speed     = 20.0f;
     sensitivity = 1.0f;
-    pitch       = 0.0f;
-    yaw         = 0.0f;
+    pitch       = -24.0f;
+    yaw         = 33.0f;
     pos         = Vec3F(0.0f, 0.0f, 0.0f);
-    n           = 1.0f;
+    n           = 0.8f;
     f           = 100.0f;
     fov         = 45.0f;
     ar          = 1.0f;
 }
 
-Camera::Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar)
+Camera::Camera(Vec3F _pos, float _ar)
 {
     speed       = 8.0f;
     z_speed     = 20.0f;
     sensitivity = 1.0f;
-    pitch       = 0.0f;
-    yaw         = 0.0f;
+    pitch       = -24.0f;
+    yaw         = 33.0f;
     pos         = _pos;
-    n           = _n;
-    f           = _f;
-    fov         = _fov;
+    n           = 0.8f;
+    f           = 100.0f;
+    fov         = 45.0f;
     ar          = _ar;
 }
 
@@ -127,18 +127,21 @@ Mat4F cameraGetPerspective(const Camera& cam)
     
 }
 
-Mat4F cameraGetOrthographic()
+Mat4F cameraGetOrthographic(const Camera& cam, const GameWindow& window)
 {
     // Assumes RH coordinate system
     // Assumes Column major
 
+    float scaled_w = window.win_width / 10000.0f;
+    float scaled_h = window.win_height / 10000.0f;
+    
     // needs to match window aspect ratio
-    float r = 0.2f;
-    float l = -0.2f;
-    float t = 0.1f;
-    float b = -0.1f;
-    float n = 1.0f;
-    float f = 100.0f;
+    float r = scaled_w / 2.0f;
+    float l = -scaled_w / 2.0f;
+    float t = scaled_h / 2.0f;
+    float b = -scaled_h / 2.0f;
+    float n = 0.0f;
+    float f = 10.0f;
 
     return Mat4F(2.0f/(r - l), 0.0f,         0.0f,          -(r + l)/(r - l),
 	         0.0f,         2.0f/(t - b), 0.0f,          -(t + b)/(t - b),

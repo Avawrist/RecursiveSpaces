@@ -26,12 +26,12 @@ typedef struct Camera
     float fov;
     float ar;
     Camera();
-    Camera(Vec3F _pos, float _n, float _f, float _fov, float _ar);
+    Camera(Vec3F _pos, float _ar);
 } Camera;
 void  cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager);
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 Mat4F cameraGetView(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);
-Mat4F cameraGetOrthographic();
+Mat4F cameraGetOrthographic(const Camera& cam, const GameWindow& window);
 
 #endif
