@@ -142,9 +142,8 @@ int main()
     ////////////////////////
     // Create Line Object //
     ////////////////////////
-    DebugLine* line_p = new DebugLine(Vec3F(0.0f, 0.0f, -8.0f),
-				      Vec3F(0.0f, 0.0f, 8.0f));
-    
+    DebugGrid* grid_p = new DebugGrid(5.0f, 10, 10, Vec3F(0.0f, 0.0f, 0.0f));
+				      
     ///////////////
     // Game Loop //
     ///////////////
@@ -222,8 +221,8 @@ int main()
 	glBindVertexArray(mesh_p->vao);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
 
-	// Draw lines (testing only, not final code)
-	debugLineDraw(line_p, grid_shader_p, Vec3F(10.0f, 0.0f, 0.0f), 1.0f);
+	// Draw DebugGrid
+	debugGridDraw(grid_p, grid_shader_p, Vec3F(0.0f, 0.0f, 1.0f), 1.0f);
 	
 	///////////////////////////////////////////
 	// ** Render pass 2 (Post-processing) ** //
@@ -260,7 +259,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
-    delete line_p;
+    delete grid_p;
     delete test_soundStream_p;
     delete ftexture_p;
     delete dirLight_p;

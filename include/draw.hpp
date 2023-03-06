@@ -27,21 +27,21 @@ typedef struct DebugLine
 } DebugLine;
 void debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size);
 
-/////////////////
-// Struct Grid //
-/////////////////
-/*
-typedef struct Grid
+//////////////////////
+// Struct DebugGrid //
+//////////////////////
+
+typedef struct DebugGrid
 {
-    Vec3F color;
-    float line_size;
-    float square_width;
+    float sq_width;
     uint  width_ct;
     uint  length_ct;
-    DebugLine* w_line_arr;
-    DebugLine* l_line_arr;
-    Grid(Vec3F _color, float _square_width, uint _width_ct, uint _length_ct, float _line_size);
-    ~Grid();
-} Grid;
-*/
+    Vec3F center;
+    DebugLine** w_line_arr = NULL;
+    DebugLine** l_line_arr = NULL;
+    DebugGrid(float _square_width, uint _width_ct, uint _length_ct, Vec3F ul_corner);
+    ~DebugGrid();
+} DebugGrid;
+void debugGridDraw(DebugGrid* grid_p, Shader* shader_p, Vec3F color, float size);
+
 #endif
