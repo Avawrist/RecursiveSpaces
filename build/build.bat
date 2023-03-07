@@ -7,7 +7,6 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\
  game.cpp^
  asset.cpp^
  camera.cpp^
- entity.cpp^
  glad.c^
  light.cpp^
  mdcla.cpp^
@@ -16,13 +15,13 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -Z7 -EHsc -Fo"..\\build\\
  asset_manager.cpp^
  render.cpp^
  input.cpp^
- draw.cpp
+ draw.cpp^
+ component.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
  asset.obj^
  camera.obj^
- entity.obj^
  glad.obj^
  light.obj^
  mdcla.obj^
@@ -32,6 +31,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  render.obj^
  input.obj^
  draw.obj^
+ component.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^

@@ -16,7 +16,6 @@
 #include "mdcla.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
-#include "entity.hpp"
 #include "asset.hpp"
 #include "light.hpp"
 #include "sound.hpp"
@@ -24,6 +23,7 @@
 #include "render.hpp"
 #include "input.hpp"
 #include "draw.hpp"
+#include "component.hpp"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ int main()
     InputManager input_manager(game_window);
 
     // Get Camera
-    Camera camera(Vec3F(144.0f, 116.0f, 216.0f), game_window.win_ar);
+    Camera camera(Vec3F(350.0f, 350.0f, 350.0f), game_window.win_ar);
     
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!initOpenGL()) {return -1;}

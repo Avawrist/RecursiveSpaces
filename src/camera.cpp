@@ -14,8 +14,8 @@ Camera::Camera()
     speed       = 8.0f;
     z_speed     = 20.0f;
     sensitivity = 1.0f;
-    pitch       = -24.0f;
-    yaw         = 33.0f;
+    pitch       = -37.0f;
+    yaw         = 45.0f;
     pos         = Vec3F(0.0f, 0.0f, 0.0f);
     n           = 0.8f;
     f           = 100.0f;
@@ -28,8 +28,8 @@ Camera::Camera(Vec3F _pos, float _ar)
     speed       = 8.0f;
     z_speed     = 20.0f;
     sensitivity = 1.0f;
-    pitch       = -24.0f;
-    yaw         = 33.0f;
+    pitch       = -37.0f;
+    yaw         = 45.0f;
     pos         = _pos;
     n           = 0.8f;
     f           = 100.0f;
