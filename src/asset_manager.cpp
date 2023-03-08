@@ -12,7 +12,7 @@
 
 AssetTableID::AssetTableID()
 {
-    memset(table, -1, sizeof(int) * TOTAL_OBJECT_TYPES * TOTAL_ASSET_TYPES);
+    memset(table, -1, sizeof(int) * TOTAL_ENTITY_TYPES * TOTAL_ASSET_TYPES);
 }
 
 //////////////////////////
@@ -67,7 +67,7 @@ int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetMa
     // Returns 1 on success, 0 on failure.
 
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
 
     // Get path
@@ -119,7 +119,7 @@ int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
     // Returns 1 on success, 0 on failure.
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     // Get path
@@ -171,7 +171,7 @@ int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
     // Returns 1 on success, 0 on failure.
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
 
     // Get path
@@ -219,7 +219,7 @@ int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_
     // Returns 1 on success, 0 on failure
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     switch(asset_type)
@@ -280,7 +280,7 @@ void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int ass
     // Returns void asset pointer on success, NULL on failure.
 
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_OBJECT_TYPES);
+    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     // init return value

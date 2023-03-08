@@ -16,28 +16,27 @@
 #include "typedefs.hpp"
 #include "sound.hpp"
 #include "asset.hpp"
+#include "entity.hpp"
 
 /////////////////////////
 // Struct AssetTableID //
 /////////////////////////
 
-#define TEXTURE_D         0
-#define TEXTURE_N         1
-#define TEXTURE_S         2
-#define MESH01            3
-#define SOUND01           4
-#define SOUND02           5
-#define SOUND03           6
-#define TOTAL_ASSET_TYPES 7
-
-#define TEST               0
-#define CHEST              1
-#define GRID               2
-#define TOTAL_OBJECT_TYPES 3
+typedef enum AssetType
+{
+    TEXTURE_D         = 0,
+    TEXTURE_N         = 1,
+    TEXTURE_S         = 2,
+    MESH01            = 3,
+    SOUND01           = 4,
+    SOUND02           = 5,
+    SOUND03           = 6,
+    TOTAL_ASSET_TYPES = 7
+} AssetType;
 
 typedef struct AssetTableID
 {
-    int table[TOTAL_OBJECT_TYPES][TOTAL_ASSET_TYPES];
+    int table[TOTAL_ENTITY_TYPES][TOTAL_ASSET_TYPES];
     AssetTableID();
 } AssetTableID;
 
@@ -47,7 +46,7 @@ typedef struct AssetTableID
 
 typedef struct AssetTableDir
 {
-    c_char* table[TOTAL_OBJECT_TYPES][TOTAL_ASSET_TYPES];
+    c_char* table[TOTAL_ENTITY_TYPES][TOTAL_ASSET_TYPES];
     AssetTableDir();
 } AssetTableDir;
 

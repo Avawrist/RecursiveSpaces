@@ -24,6 +24,7 @@
 #include "input.hpp"
 #include "draw.hpp"
 #include "component.hpp"
+#include "entity.hpp"
 
 using namespace std;
 
@@ -143,7 +144,14 @@ int main()
     // Create Line Object //
     ////////////////////////
     DebugGrid* grid_p = new DebugGrid(5.0f, 10, 10, Vec3F(0.0f, 0.0f, 0.0f));
-				      
+
+    ///////////////////////////
+    // Create ActiveEntities //
+    ///////////////////////////
+
+    ActiveEntities ae;
+    activeEntitiesCreateEntity(ae, Vec3F(0.0f, 5.0f, 0.0f), CHEST);
+    
     ///////////////
     // Game Loop //
     ///////////////
