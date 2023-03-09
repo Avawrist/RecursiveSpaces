@@ -92,34 +92,17 @@ typedef struct ActiveSounds
 
 typedef struct AssetManager
 {
-    AssetTableID   assetTableID;
-    AssetTableDir  assetTableDir;
-    ActiveTextures activeTexturesD;
-    ActiveTextures activeTexturesN;
-    ActiveTextures activeTexturesS;
-    ActiveMeshes   activeMeshes;
-    ActiveSounds   activeSounds01;
-    ActiveSounds   activeSounds02;
-    ActiveSounds   activeSounds03;
+    AssetTableID   asset_table_ID;
+    AssetTableDir  asset_table_dir;
+    ActiveTextures active_textures_d;
+    ActiveTextures active_textures_n;
+    ActiveTextures active_textures_s;
+    ActiveMeshes   active_meshes;
+    ActiveSounds   active_sounds_01;
+    ActiveSounds   active_sounds_02;
+    ActiveSounds   active_sounds_03;
     ~AssetManager();
 } AssetManager;
-int  assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP);
-void assetManagerUnregisterAll(AssetManager &assetManager);
-void* assetManagerGetAssetP(AssetManager &assetManager, int object_type,
-			    int asset_type, void *soundInterfaceP);
-
-// ActiveTextures function prototypes
-int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
-			   int object_type, int asset_type);
-void activeTexturesUnregisterAll(ActiveTextures &activeTextures);
-// ActiveMeshes function prototypes
-int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
-                         int object_type, int asset_type);
-void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes);
-// ActiveMeshes function prototypes
-int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager,
-                         int object_type, int asset_type);
-// void activeSoundsUnregisterAll(ActiveSounds &activeSounds);
 
 //////////////////////////
 // Struct ShaderTableID //
@@ -169,16 +152,55 @@ typedef struct ActiveShaders
 
 typedef struct ShaderManager
 {
-    ShaderTableID  shaderTableID;
-    ShaderTableDir shaderTableDir;
-    ActiveShaders  activeShaders;
+    ShaderTableID  shader_table_ID;
+    ShaderTableDir shader_table_dir;
+    ActiveShaders  active_shaders;
     ~ShaderManager();
 } ShaderManager;
-void* shaderManagerGetShaderP(ShaderManager &shaderManager, int program_type);
+
+/////////////////////////
+// Function Prototypes //
+/////////////////////////
+
+// AssetManager function prototypes
+
+int  assetManagerRegister(AssetManager &asset_manager, int entity_type,
+			  int asset_type, void *sound_interface_p);
+
+void assetManagerUnregisterAll(AssetManager &asset_manager);
+
+void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
+			    int asset_type, void *sound_interface_p);
+    
+// ActiveTextures function prototypes
+
+int activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_manager,
+			   int entity_type, int asset_type);
+
+void activeTexturesUnregisterAll(ActiveTextures &active_textures);
+
+// ActiveMeshes function prototypes
+
+int activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manager,
+                         int entity_type, int asset_type);
+
+void activeMeshesUnregisterAll(ActiveMeshes &active_meshes);
+
+// ActiveMeshes function prototypes
+
+int activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manager,
+                         int entity_type, int asset_type);
+
+// void activeSoundsUnregisterAll(ActiveSounds &activeSounds);
+
+void* shaderManagerGetShaderP(ShaderManager &shader_manager, int program_type);
 
 // ActiveShaders function prototypes
-int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderManager,
+
+int activeShadersRegister(ActiveShaders &active_shaders, ShaderManager &shader_manager,
 			   int program_type);
-void activeShadersUnregisterAll(ActiveShaders &activeShaders);
+
+void activeShadersUnregisterAll(ActiveShaders &active_shaders);
+
 
 #endif

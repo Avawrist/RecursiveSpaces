@@ -32,10 +32,10 @@ AssetTableDir::AssetTableDir()
    
     // Chest Object
     table[CHEST][TEXTURE_D] = "..\\assets\\textures\\chest.bmp";
-    table[CHEST][TEXTURE_N] = NULL;
+    table[CHEST][TEXTURE_N] = "..\\assets\\textures\\brickwall_normal.bmp";
     table[CHEST][TEXTURE_S] = NULL;
     table[CHEST][MESH01]    = "..\\assets\\meshes\\chest.obj";
-    table[CHEST][SOUND01]   = NULL;
+    table[CHEST][SOUND01]   = "..\\assets\\sfx\\taunt.wav";;
     table[CHEST][SOUND02]   = NULL;
     table[CHEST][SOUND03]   = NULL;
 
@@ -61,44 +61,44 @@ ActiveTextures::ActiveTextures()
     memset(textures, 0, sizeof(textures));
 }
 
-int activeTexturesRegister(ActiveTextures &activeTextures, AssetManager &assetManager,
-			   int object_type, int asset_type)
+int activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_manager,
+			   int entity_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
 
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
 
     // Get path
-    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    c_char* path = asset_manager.asset_table_dir.table[entity_type][asset_type];
     if(!path) {return 0;}
     
     // Check that there is room to register
-    if(!(activeTextures.registered_count < MAX_TEXTURES)) {return 0;}
+    if(!(active_textures.registered_count < MAX_TEXTURES)) {return 0;}
 
     // Allocate new texture and add pointer to activeTextures registry
-    activeTextures.textures[activeTextures.registered_count] = new Texture(path);
-    if(!activeTextures.textures[activeTextures.registered_count]) {return 0;}
+    active_textures.textures[active_textures.registered_count] = new Texture(path);
+    if(!active_textures.textures[active_textures.registered_count]) {return 0;}
 
     // Add ID to asset table ID
-    assetManager.assetTableID.table[object_type][asset_type] = activeTextures.registered_count;
+    asset_manager.asset_table_ID.table[entity_type][asset_type] = active_textures.registered_count;
 
     // Update registered count
-    activeTextures.registered_count++;
+    active_textures.registered_count++;
     
     return 1;
 }
 
-void activeTexturesUnregisterAll(ActiveTextures &activeTextures)
+void activeTexturesUnregisterAll(ActiveTextures &active_textures)
 {
     // Delete all pointers
-    for(uint i = 0; i < activeTextures.registered_count; i++)
+    for(uint i = 0; i < active_textures.registered_count; i++)
     {
-	delete activeTextures.textures[i];
+	delete active_textures.textures[i];
     }
     // Reset count
-    activeTextures.registered_count = 0;
+    active_textures.registered_count = 0;
 }
 
 /////////////////////////
@@ -113,44 +113,44 @@ ActiveMeshes::ActiveMeshes()
     memset(meshes, 0, sizeof(meshes));
 }
 
-int activeMeshesRegister(ActiveMeshes &activeMeshes, AssetManager &assetManager,
-                         int object_type, int asset_type)
+int activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manager,
+                         int entity_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     // Get path
-    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    c_char* path = asset_manager.asset_table_dir.table[entity_type][asset_type];
     if(!path) {return 0;}
     
     // Check that there is room to register
-    if(!(activeMeshes.registered_count < MAX_MESHES)) {return 0;}
+    if(!(active_meshes.registered_count < MAX_MESHES)) {return 0;}
     
     // Allocate new mesh and add pointer to activeMeshes registry
-    activeMeshes.meshes[activeMeshes.registered_count] = new Mesh(path);
-    if(!activeMeshes.meshes[activeMeshes.registered_count]) {return 0;}
+    active_meshes.meshes[active_meshes.registered_count] = new Mesh(path);
+    if(!active_meshes.meshes[active_meshes.registered_count]) {return 0;}
 
     // Add ID to asset table ID
-    assetManager.assetTableID.table[object_type][asset_type] = activeMeshes.registered_count;
+    asset_manager.asset_table_ID.table[entity_type][asset_type] = active_meshes.registered_count;
 
     // Update registered count
-    activeMeshes.registered_count++;
+    active_meshes.registered_count++;
 
     return 1;
 }
 
-void activeMeshesUnregisterAll(ActiveMeshes &activeMeshes)
+void activeMeshesUnregisterAll(ActiveMeshes &active_meshes)
 {
     // Delete all pointers
-    for(uint i = 0; i < activeMeshes.registered_count; i++)
+    for(uint i = 0; i < active_meshes.registered_count; i++)
     {
-	delete activeMeshes.meshes[i];
+	delete active_meshes.meshes[i];
     }
     // Reset count
-    activeMeshes.registered_count = 0;
+    active_meshes.registered_count = 0;
 }
 
 /////////////////////////
@@ -165,44 +165,44 @@ ActiveSounds::ActiveSounds()
     memset(sounds, 0, sizeof(sounds));
 }
 
-int activeSoundsRegister(ActiveSounds &activeSounds, AssetManager &assetManager, int object_type,
-			 int asset_type, SoundInterface *soundInterface)
+int activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manager, int entity_type,
+			 int asset_type, SoundInterface* sound_interface_p)
 {
     // Returns 1 on success, 0 on failure.
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
 
     // Get path
-    c_char* path = assetManager.assetTableDir.table[object_type][asset_type];
+    c_char* path = asset_manager.asset_table_dir.table[entity_type][asset_type];
     if(!path) {return 0;}
     
     // Check that there is room to register
-    if(!(activeSounds.registered_count < MAX_SOUNDS)) {return 0;}
+    if(!(active_sounds.registered_count < MAX_SOUNDS)) {return 0;}
 
     // Allocate new sound and add pointer to activeSounds registry
-    activeSounds.sounds[activeSounds.registered_count] = new Sound(path, *soundInterface);
-    if(!activeSounds.sounds[activeSounds.registered_count]) {return 0;}
+    active_sounds.sounds[active_sounds.registered_count] = new Sound(path, *sound_interface_p);
+    if(!active_sounds.sounds[active_sounds.registered_count]) {return 0;}
     
     // Add ID to asset table ID
-    assetManager.assetTableID.table[object_type][asset_type] = activeSounds.registered_count;
+    asset_manager.asset_table_ID.table[entity_type][asset_type] = active_sounds.registered_count;
 
     // Update registered count
-    activeSounds.registered_count++;
+    active_sounds.registered_count++;
 
     return 1;
 }
 
-void activeSoundsUnregisterAll(ActiveSounds &activeSounds)
+void activeSoundsUnregisterAll(ActiveSounds &active_sounds)
 {
     // Delete all pointers
-    for(uint i = 0; i < activeSounds.registered_count; i++)
+    for(uint i = 0; i < active_sounds.registered_count; i++)
     {
-	delete activeSounds.sounds[i];
+	delete active_sounds.sounds[i];
     }
     // Reset count
-    activeSounds.registered_count = 0;
+    active_sounds.registered_count = 0;
 }
 
 //////////////////////////
@@ -214,110 +214,111 @@ AssetManager::~AssetManager()
     assetManagerUnregisterAll(*this);
 }
 
-int assetManagerRegister(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
+int assetManagerRegister(AssetManager &asset_manager, int entity_type, int asset_type, void *sound_interface_p)
 {
     // Returns 1 on success, 0 on failure
     
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     switch(asset_type)
     {
     case TEXTURE_D:
-	return activeTexturesRegister(assetManager.activeTexturesD,
-				      assetManager, object_type, asset_type);
+	return activeTexturesRegister(asset_manager.active_textures_d,
+				      asset_manager, entity_type, asset_type);
     case TEXTURE_N:
-	return activeTexturesRegister(assetManager.activeTexturesN,
-				      assetManager, object_type, asset_type);
+	return activeTexturesRegister(asset_manager.active_textures_n,
+				      asset_manager, entity_type, asset_type);
     case TEXTURE_S:
-	return activeTexturesRegister(assetManager.activeTexturesS,
-				      assetManager, object_type, asset_type);
+	return activeTexturesRegister(asset_manager.active_textures_s,
+				      asset_manager, entity_type, asset_type);
     case MESH01:
-	return activeMeshesRegister(assetManager.activeMeshes,
-				    assetManager, object_type, asset_type);
+	return activeMeshesRegister(asset_manager.active_meshes,
+				    asset_manager, entity_type, asset_type);
     case SOUND01:
-	return activeSoundsRegister(assetManager.activeSounds01, assetManager,
-	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
+	return activeSoundsRegister(asset_manager.active_sounds_01, asset_manager,
+	                            entity_type, asset_type, (SoundInterface*)sound_interface_p);
     case SOUND02:
-	return activeSoundsRegister(assetManager.activeSounds02, assetManager,
-	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
+	return activeSoundsRegister(asset_manager.active_sounds_02, asset_manager,
+	                            entity_type, asset_type, (SoundInterface*)sound_interface_p);
     case SOUND03:
-	return activeSoundsRegister(assetManager.activeSounds03, assetManager,
-	                            object_type, asset_type, (SoundInterface*)soundInterfaceP);
+	return activeSoundsRegister(asset_manager.active_sounds_03, asset_manager,
+	                            entity_type, asset_type, (SoundInterface*)sound_interface_p);
     default:
 	return 0;
     }
 }
 
-void assetManagerUnregisterAll(AssetManager &assetManager)
+void assetManagerUnregisterAll(AssetManager &asset_manager)
 {
     
     // Unregister Diffuse textures
-    activeTexturesUnregisterAll(assetManager.activeTexturesD);
+    activeTexturesUnregisterAll(asset_manager.active_textures_d);
 
     // Unregister Normal textures
-    activeTexturesUnregisterAll(assetManager.activeTexturesN);
+    activeTexturesUnregisterAll(asset_manager.active_textures_n);
     
     // Unregister Specular textures
-    activeTexturesUnregisterAll(assetManager.activeTexturesS);
+    activeTexturesUnregisterAll(asset_manager.active_textures_s);
     
     // Delete all mesh pointers
-    activeMeshesUnregisterAll(assetManager.activeMeshes);
+    activeMeshesUnregisterAll(asset_manager.active_meshes);
     
     // Delete all sound01 pointers
-    activeSoundsUnregisterAll(assetManager.activeSounds01);
+    activeSoundsUnregisterAll(asset_manager.active_sounds_01);
     
     // Delete all sound02 pointers
-    activeSoundsUnregisterAll(assetManager.activeSounds02);
+    activeSoundsUnregisterAll(asset_manager.active_sounds_02);
     
     // Delete all sound03 pointers
-    activeSoundsUnregisterAll(assetManager.activeSounds03);
+    activeSoundsUnregisterAll(asset_manager.active_sounds_03);
 }
 
-void* assetManagerGetAssetP(AssetManager &assetManager, int object_type, int asset_type, void *soundInterfaceP)
+void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
+			    int asset_type, void *sound_interface_p)
 {
     // Returns void asset pointer on success, NULL on failure.
 
     // Assert that object and asset types are within acceptable range
-    _assert(object_type >= 0 && object_type <= TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type <= TOTAL_ENTITY_TYPES);
     _assert(asset_type >= 0 && asset_type <= TOTAL_ASSET_TYPES);
     
     // init return value
     void* return_p = NULL;
     
-    int index = assetManager.assetTableID.table[object_type][asset_type];
+    int index = asset_manager.asset_table_ID.table[entity_type][asset_type];
     if(index < 0)
     {
-	if(!assetManagerRegister(assetManager, object_type, asset_type, soundInterfaceP))
+	if(!assetManagerRegister(asset_manager, entity_type, asset_type, sound_interface_p))
 	{
 	    return return_p;
 	}
-	index = assetManager.assetTableID.table[object_type][asset_type];
+	index = asset_manager.asset_table_ID.table[entity_type][asset_type];
     }
     
     switch(asset_type)
     {
     case TEXTURE_D:
-	return_p = (void*)assetManager.activeTexturesD.textures[index];
+	return_p = (void*)asset_manager.active_textures_d.textures[index];
 	break;
     case TEXTURE_N:
-        return_p = (void*)assetManager.activeTexturesN.textures[index];
+        return_p = (void*)asset_manager.active_textures_n.textures[index];
 	break;
     case TEXTURE_S:
-	return_p = (void*)assetManager.activeTexturesS.textures[index];
+	return_p = (void*)asset_manager.active_textures_s.textures[index];
 	break;
     case MESH01:
-	return_p = (void*)assetManager.activeMeshes.meshes[index];
+	return_p = (void*)asset_manager.active_meshes.meshes[index];
 	break;
     case SOUND01:
-	return_p = (void*)assetManager.activeSounds01.sounds[index];
+	return_p = (void*)asset_manager.active_sounds_01.sounds[index];
 	break;
     case SOUND02:
-	return_p = (void*)assetManager.activeSounds02.sounds[index];
+	return_p = (void*)asset_manager.active_sounds_02.sounds[index];
 	break;
     case SOUND03:
-	return_p = (void*)assetManager.activeSounds03.sounds[index];
+	return_p = (void*)asset_manager.active_sounds_03.sounds[index];
 	break;
     }
     return return_p;
@@ -372,9 +373,9 @@ int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderMan
     _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
 
     // Get paths
-    c_char* vertex_path = shaderManager.shaderTableDir.table[program_type][VERTEX];
+    c_char* vertex_path = shaderManager.shader_table_dir.table[program_type][VERTEX];
     if(!vertex_path) {return 0;}
-    c_char* fragment_path = shaderManager.shaderTableDir.table[program_type][FRAGMENT];
+    c_char* fragment_path = shaderManager.shader_table_dir.table[program_type][FRAGMENT];
     if(!fragment_path) {return 0;}
     
     // Check that there is room to register
@@ -385,7 +386,7 @@ int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderMan
     if(!activeShaders.shaders[activeShaders.registered_count]) {return 0;}
 
     // Add ID to shader table ID
-    shaderManager.shaderTableID.table[program_type] = activeShaders.registered_count;
+    shaderManager.shader_table_ID.table[program_type] = activeShaders.registered_count;
 
     // Update registered count
     activeShaders.registered_count++;
@@ -411,26 +412,26 @@ void activeShadersUnregisterAll(ActiveShaders &activeShaders)
 
 ShaderManager::~ShaderManager()
 {
-    activeShadersUnregisterAll(this->activeShaders);
+    activeShadersUnregisterAll(this->active_shaders);
 }
 
-void* shaderManagerGetShaderP(ShaderManager &shaderManager, int program_type)
+void* shaderManagerGetShaderP(ShaderManager &shader_manager, int program_type)
 {
     // Returns void shader pointer on success, NULL on failure
 
     // Assert that program type is within acceptable range
     _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
 
-    int index = shaderManager.shaderTableID.table[program_type];
+    int index = shader_manager.shader_table_ID.table[program_type];
     if(index < 0)
     {
-	if(!activeShadersRegister(shaderManager.activeShaders, shaderManager, program_type))
+	if(!activeShadersRegister(shader_manager.active_shaders, shader_manager, program_type))
 	{
 	    return NULL;
 	}
-	index = shaderManager.shaderTableID.table[program_type];
+	index = shader_manager.shader_table_ID.table[program_type];
     }
 
-    return (void*)shaderManager.activeShaders.shaders[index];
+    return (void*)shader_manager.active_shaders.shaders[index];
 }
 

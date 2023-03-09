@@ -62,26 +62,10 @@ int main()
     ShaderManager shader_manager;
 
     ////////////////////
-    // Initialize SFX //
-    ////////////////////
-    //Sound* test_sound_p = (Sound*)assetManagerGetAssetP(asset_manager, TEST, SOUND01, &sound_interface); 
-    
-    ////////////////////
     // Initialize BGM //
     ////////////////////
     SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
     
-    ////////////////////////////
-    // Initialize Test Meshes //
-    ////////////////////////////
-    Mesh* mesh_p = (Mesh*)assetManagerGetAssetP(asset_manager, CHEST, MESH01, 0);
-    
-    /////////////////////////
-    // Initialize Textures //
-    /////////////////////////
-    Texture* d_texture_p = (Texture*)assetManagerGetAssetP(asset_manager, CHEST, TEXTURE_D, 0);
-    Texture* n_texture_p = (Texture*)assetManagerGetAssetP(asset_manager, TEST, TEXTURE_N, 0);
-
     ///////////////////////
     // Initialize Lights //
     ///////////////////////
@@ -131,7 +115,7 @@ int main()
     glUseProgram(pp_shader_p->program_id);
     shaderAddIntUniform(pp_shader_p, "color_texture", 0);
 
-    // Line shader
+    // Grid shader
     Shader* grid_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, GRID);
 
     // Load initial uniform values to GPU
@@ -141,7 +125,7 @@ int main()
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
     ////////////////////////
-    // Create Line Object //
+    // Create Grid Object //
     ////////////////////////
     DebugGrid* grid_p = new DebugGrid(5.0f, 10, 10, Vec3F(0.0f, 0.0f, 0.0f));
 
@@ -149,8 +133,17 @@ int main()
     // Create ActiveEntities //
     ///////////////////////////
 
-    ActiveEntities ae;
-    activeEntitiesCreateEntity(ae, Vec3F(0.0f, 5.0f, 0.0f), CHEST);
+    ActiveEntities* active_entities_p = new ActiveEntities();
+
+    ////////////////////////////
+    // Add some test entities //
+    ////////////////////////////
+    for(int i = 0; i < 10; i++)
+    {
+	Vec3F pos = Vec3F(i * 5.0f, 0.0f, 0.0f);
+	activeEntitiesCreateEntity(*active_entities_p, asset_manager, shader_manager,
+			           pos, CHEST, &sound_interface);
+    }
     
     ///////////////
     // Game Loop //
@@ -194,10 +187,6 @@ int main()
 	// Update perspective matrix with potential new AR
 	// (TO-DO: this is expensive, only calculate new projection mat if ar changes )
 	projection = cameraGetOrthographic(camera, game_window);
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE] == KEY_DOWN)
-	{
-	    projection = cameraGetPerspective(camera);
-	}
 	shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
 
 	/////////////////////////////////
@@ -212,23 +201,10 @@ int main()
 	/////////////////////////
 	// ** Render pass 1 ** //
 	/////////////////////////
-
-	// Use this render pass to write pre-processed image to the color texture.
-	glViewport(0, 0, game_window.view_width, game_window.view_height); // Render to a smaller area first
-                   	                                           // so we can blow it up and lower the res
-	glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo); // bind the fbo with color texture
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(bp_shader_p->program_id); // Use the basic object shader
-	// Move into gameobject draw code eventually:
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, d_texture_p->texture_id);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, n_texture_p->texture_id);
+        
+	// Render Entities
+	activeEntitiesRender(*active_entities_p, game_window, *ftexture_p);
 	
-	glBindVertexArray(mesh_p->vao);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_p->data.size());
-
 	// Draw DebugGrid
 	debugGridDraw(grid_p, grid_shader_p, Vec3F(0.0f, 0.0f, 1.0f), 1.0f);
 	
@@ -267,6 +243,7 @@ int main()
     /////////////
     
     // Delete pointers to structs on the heap
+    delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
     delete ftexture_p;

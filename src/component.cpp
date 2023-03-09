@@ -11,26 +11,44 @@
 
 Transform::Transform()
 {
-    scale = 0.0f;
+    x_scale = 1.0f;
+    y_scale = 1.0f;
+    z_scale = 1.0f;
 }
 
-/////////////////////////////
-// Struct Component Render //
-/////////////////////////////
+// ActiveEntities Function Prototypes
 
-Render::Render()
+void activeEntitiesSetRenderPointers(AssetManager& asset_manager, ShaderManager& shader_manager,
+                                     Render& render_comp, uint entity_type)
 {
-    mesh_count       = 1;
-    has_diffuse_map  = true;
-    has_specular_map = false;
-    has_normal_map   = false;
+    // Mesh 01
+    render_comp.mesh_01_p   = (Mesh*)assetManagerGetAssetP(asset_manager, entity_type, MESH01, 0);
+    // Diffuse Texture
+    render_comp.texture_d_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_D, 0);
+    // Normal Texture
+    render_comp.texture_n_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_N, 0);
+    // Specular Texture
+    render_comp.texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_S, 0);
+    // Shader | TODO: Merge shader manager code into asset manager?
+    render_comp.shader_p    = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
 }
 
-////////////////////////////////
-// Struct of Component Arrays //
-////////////////////////////////
+void activeEntitiesSetSFXPointers(AssetManager& asset_manager, void* sound_interface_p,
+                                    SFX& sound_comp, uint entity_type)
+{
+    // Sound 01
+    sound_comp.sound_01_p = (Sound*)assetManagerGetAssetP(asset_manager, entity_type,
+							  SOUND01, sound_interface_p);
+    // Sound 02
+    sound_comp.sound_02_p = (Sound*)assetManagerGetAssetP(asset_manager, entity_type,
+							  SOUND02, sound_interface_p);
+    // Sound 03
+    sound_comp.sound_03_p = (Sound*)assetManagerGetAssetP(asset_manager, entity_type,
+							  SOUND03, sound_interface_p);
+}
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint type)
+int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager,
+			       ShaderManager& shader_manager, Vec3F origin, uint type, void* sound_interface_p)
 {
     // Returns entity ID on success, -1 on failure
     
@@ -42,13 +60,23 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint type
 	if(entities.mask[i] == COMPONENT_NONE)
 	{
 	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
-	    entities.mask[i] = COMPONENT_TRANSFORM | COMPONENT_RENDER; 
+	    entities.mask[i] = COMPONENT_TRANSFORM | COMPONENT_RENDER | COMPONENT_SFX; 
 	    // Record type in entities
 	    entities.type[i] = type;
 	    // Set transform position with origin
 	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_TRANSFORM)) == COMPONENT_TRANSFORM)
 	    {
 		entities.transform[i].position = origin;
+	    }
+	    // Set render asset pointers
+	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER)) == COMPONENT_RENDER)
+	    {
+	        activeEntitiesSetRenderPointers(asset_manager, shader_manager, entities.render[i], type);
+	    }
+	    // Set sound asset pointers
+	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_SFX)) == COMPONENT_SFX)
+	    {
+	        activeEntitiesSetSFXPointers(asset_manager, sound_interface_p, entities.sfx[i], type);
 	    }
 	    
 	    return i;
@@ -66,35 +94,58 @@ void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID)
     entities.mask[entity_ID] = COMPONENT_NONE;
 }
 
-////////////////////////////////
-// Component Update Functions //
-////////////////////////////////
-
-uint activeEntitiesRender(ActiveEntities& entities, uint entity_ID, AssetManager& asset_manager,
-			  ShaderManager& shader_manager, Camera& camera, GameWindow& game_window,
-			  FrameTexture& framebuffer)
+// Component Function Prototypes
+Mat4F transformGetModel(Transform& transform)
 {
-    _assert(entity_ID >= 0 && entity_ID < MAX_ENTITIES);
+    Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, 0.0f,
+	                0.0f, transform.y_scale, 0.0f, 0.0f,
+	                0.0f, 0.0f, transform.z_scale, 0.0f,
+	                transform.position.x, transform.position.y, transform.position.z, 1.0f);
+    return model;
+}
 
-    // returns 1 on success, 0 on failure
+// Component Update Functions
 
-    // 0. Set GL state
+void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer)
+{
+    //////////////////
+    // Set GL state //
+    //////////////////
+    glViewport(0, 0, game_window.view_width, game_window.view_height);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    ////////////////////////////
+    // Update Shader Uniforms //
+    ////////////////////////////
+
+    // Update Blinn-Phong Shader Uniforms
+
+    // Update Grid Shader Uniforms
+    
+    ////////////////////////////////////////
+    // Render Entites w/ Render Component //
+    ////////////////////////////////////////
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
 	if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER)) == COMPONENT_RENDER)
 	{
-	    uint entity_type = entities.type[i];
-	    // 1. Get meshes from asset manager using type
-	    // 2. Get textures from asset manager using type
-	    // 3. Get shader from shader manager using type
-	    // 4. Update shader uniforms (will need to check shader type)
-            // 5. bind shader
-	    // 6. bind textures
-	    // 7. bind VAO from mesh
-	    // 8. draw
+	    // Set Shader
+	    glUseProgram(entities.render[i].shader_p->program_id);
+	    // Update Model Uniform in Shader
+	    Mat4F model = transformGetModel(entities.transform[i]);
+	    shaderAddMat4Uniform(entities.render[i].shader_p, "model", model.getPointer());
+            // Bind Diffuse Texture
+	    glActiveTexture(GL_TEXTURE0);
+	    glBindTexture(GL_TEXTURE_2D, entities.render[i].texture_d_p->texture_id);
+	    // Bind Normal Texture
+	    glActiveTexture(GL_TEXTURE1);
+	    glBindTexture(GL_TEXTURE_2D, entities.render[i].texture_n_p->texture_id);
+	    // Bind Mesh
+	    glBindVertexArray(entities.render[i].mesh_01_p->vao);
+	    // Draw
+	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)entities.render[i].mesh_01_p->data.size());
 	}
     }
-
-    return 1;
 }
