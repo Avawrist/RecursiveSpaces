@@ -106,7 +106,9 @@ Mat4F transformGetModel(Transform& transform)
 
 // Component Update Functions
 
-void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer)
+void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer,
+			  ShaderManager& shader_manager, Camera& camera, DirLight& dir_light,
+			  DebugGrid* grid_p)
 {
     //////////////////
     // Set GL state //
@@ -116,20 +118,36 @@ void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, Fra
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ////////////////////////////
-    // Update Shader Uniforms //
-    ////////////////////////////
+    /////////////////////////////////
+    // Update Blinn-Phong Uniforms //
+    /////////////////////////////////
 
     // Update Blinn-Phong Shader Uniforms
-
-    // Update Grid Shader Uniforms
+    Shader* bp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
+    glUseProgram(bp_shader_p->program_id);
+    // View Mat
+    Mat4F view = cameraGetView(camera);
+    shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
+    // Projection Mat
+    Mat4F projection = cameraGetOrthographic(camera, game_window);
+    shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
+    // Cam Pos
+    shaderAddVec3Uniform(bp_shader_p, "cam_pos", camera.pos);
+    // Single Dir Light (TODO: Make DirLight a component)
+    shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dir_light.color);
+    shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dir_light.dir);
+    shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dir_light.ambient_strength);
+    // Textures
+    shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
+    shaderAddIntUniform(bp_shader_p, "normal_map",  1);
     
     ////////////////////////////////////////
     // Render Entites w/ Render Component //
     ////////////////////////////////////////
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
-	if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER)) == COMPONENT_RENDER)
+	if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER | COMPONENT_TRANSFORM)) ==
+	   (COMPONENT_RENDER | COMPONENT_TRANSFORM))
 	{
 	    // Set Shader
 	    glUseProgram(entities.render[i].shader_p->program_id);
@@ -148,4 +166,22 @@ void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, Fra
 	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)entities.render[i].mesh_01_p->data.size());
 	}
     }
+	
+    /////////////////////////////////
+    // Update Grid Shader Uniforms //
+    /////////////////////////////////
+    Shader* grid_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, GRID);
+    glUseProgram(grid_shader_p->program_id);
+    // Model
+    Mat4F grid_model = Mat4F(1.0f);
+    shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
+    // View
+    shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
+    // Projection
+    shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+    
+    ///////////////////////
+    // Render Debug Grid //
+    ///////////////////////
+    debugGridDraw(grid_p, grid_shader_p, Vec3F(0.0f, 0.0f, 1.0f), 1.0f);
 }

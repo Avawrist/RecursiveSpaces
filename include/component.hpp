@@ -11,8 +11,10 @@
 #include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "camera.hpp"
+#include "light.hpp"
 #include "asset_manager.hpp"
 #include "entity.hpp"
+#include "draw.hpp"
 
 // C++ Utility Lib
 #include <bitset>
@@ -111,6 +113,8 @@ Mat4F transformGetModel(Transform& transform);
 
 // Component Update Functions
 
-void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer);
+void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer,
+			  ShaderManager& shader_manager, Camera& camera, DirLight& dir_light,
+			  DebugGrid* grid_p);
 
 #endif
