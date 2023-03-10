@@ -40,10 +40,8 @@ int main()
     // Get Game Window
     GameWindow game_window(1920, 1080, "First Game"); // GLFW terminates on deletion 
     if(!game_window.window_p) {return -1;}
-    
     // Get Input Manager
     InputManager input_manager(game_window);
-
     // Get Camera
     Camera camera(Vec3F(350.0f, 350.0f, 350.0f), game_window.win_ar);
     
@@ -78,10 +76,9 @@ int main()
     /////////////////////////////
     
     // Texture size should match the viewport.
-    //We will then blow it up to fit the screen for a low res look.
+    // We will then blow it up to fit the screen for a low res look.
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
-        
 
     ///////////////////////////
     // Create ActiveEntities //
@@ -108,38 +105,36 @@ int main()
     ///////////////
     while(!glfwWindowShouldClose(game_window.window_p))
     {
-	// At the highest level should boil down to:
-	// 1. GAME - Update game state based on prior cycle inputs
-	// 2. PLATFORM - Render game state
-	// 3. PLATFORM - Get all inputs received this cycle (to be used to update game state next cycle)
+	///////////////////////
+	// Update Game State //
+	///////////////////////
 
-	/////////////////////////
-	// Update sound stream //
-	/////////////////////////
+	// Update soundstream
 	soundStreamUpdate(test_soundStream_p);
 	
-	///////////////////
-	// Update camera //
-	///////////////////
+	// Update camera - TODO: Move camera to component, update with entities
 	cameraUpdate(camera, game_window, input_manager);
-        
+
+	// Update Entities
+	//...
+	
 	/////////////////
 	// Render Game //
 	/////////////////
         
-	// Render Entities -- Pass 1
+	// Pass 1 - Render Entities
 	activeEntitiesRender(*active_entities_p, game_window, *ftexture_p,
 			     shader_manager, camera, dir_light, grid_p);
 
-        // Post Processing -- Pass 2
+        // Pass 2 - Post Processing
 	glViewport(0, 0, game_window.win_width, game_window.win_height);
 	Shader* pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
 	shaderAddIntUniform(pp_shader_p, "color_texture", 0);
-	frameTextureDraw(&framebuffer, pp_shader_p);
+	frameTextureDraw(ftexture_p, pp_shader_p);
 
-	////////////////////
-	// Process Inputs //
-	////////////////////
+	////////////////
+	// Get Inputs //
+	////////////////
 
         // Store all inputs this cycle, to be processed next cycle. Update the cursor pos.
 	inputManagerUpdate(input_manager, game_window);
