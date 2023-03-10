@@ -140,7 +140,7 @@ void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, Fra
     // Textures
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
     shaderAddIntUniform(bp_shader_p, "normal_map",  1);
-    
+
     ////////////////////////////////////////
     // Render Entites w/ Render Component //
     ////////////////////////////////////////

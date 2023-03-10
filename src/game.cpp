@@ -132,6 +132,9 @@ int main()
 	shaderAddIntUniform(pp_shader_p, "color_texture", 0);
 	frameTextureDraw(ftexture_p, pp_shader_p);
 
+	// Swap buffers
+	gameWindowSwapBuffers(game_window);
+	
 	////////////////
 	// Get Inputs //
 	////////////////
@@ -139,18 +142,11 @@ int main()
         // Store all inputs this cycle, to be processed next cycle. Update the cursor pos.
 	inputManagerUpdate(input_manager, game_window);
 
-	/////////////////////
-	// Close condition //
-	/////////////////////
+	// Close condition
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC] == KEY_DOWN)
 	{
 	    gameWindowClose(game_window);
 	}
-	
-	//////////////////
-	// Swap buffers //
-	//////////////////
-	gameWindowSwapBuffers(game_window);
     }
 
     /////////////
