@@ -20,6 +20,7 @@
 #include "typedefs.hpp"
 #include "mdcla.hpp"
 #include "shader.hpp"
+#include "game_window.hpp"
 
 /////////////////
 // Struct Mesh //
@@ -83,6 +84,6 @@ typedef struct FrameTexture
     ~FrameTexture();
 } FrameTexture;
 void frameTextureDataToGPU(FrameTexture* ftexture_p);
-void frameTextureDraw(FrameTexture* ftexture_p, Shader* shader_p);
+void frameTextureRender(FrameTexture* ftexture_p, GameWindow& game_window, Shader* shader_p);
 
 #endif

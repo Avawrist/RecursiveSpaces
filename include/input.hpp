@@ -12,7 +12,7 @@
 // My libs
 #include "preprocessor.hpp"
 #include "typedefs.hpp"
-#include "render.hpp"
+#include "game_window.hpp"
 #include "mdcla.hpp"
 
 ///////////////////

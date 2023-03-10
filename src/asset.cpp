@@ -461,13 +461,16 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
     glBindVertexArray(0);
 }
 
-void frameTextureDraw(FrameTexture* ftexture_p, Shader* shader_p)
+void frameTextureRender(FrameTexture* ftexture_p, GameWindow& game_window, Shader* shader_p)
 {
     // Set proper state to render
+    glViewport(0, 0, game_window.win_width, game_window.win_height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); // clear screen
     glDisable(GL_DEPTH_TEST); // Disable so quad is visible
+
     glUseProgram(shader_p->program_id); // Set post-process shader
+    shaderAddIntUniform(shader_p, "color_texture", 0); // Update uniformxb
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id); // Bind color texture to post-process shader
     glBindVertexArray(ftexture_p->quad_vao); // Bind quad vao

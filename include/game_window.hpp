@@ -1,5 +1,5 @@
 // ==========================================================================
-// Title: render.hpp
+// Title: game_window.hpp
 // Description: The header file for the window struct, built on the GLFW API
 // ==========================================================================
 

@@ -20,7 +20,7 @@
 #include "light.hpp" // Move light to component
 #include "sound.hpp" // Move sound to component
 #include "asset_manager.hpp"
-#include "render.hpp"
+#include "game_window.hpp"
 #include "input.hpp"
 #include "draw.hpp" // Move debug grid to component
 #include "component.hpp"
@@ -127,10 +127,8 @@ int main()
 			     shader_manager, camera, dir_light, grid_p);
 
         // Pass 2 - Post Processing
-	glViewport(0, 0, game_window.win_width, game_window.win_height);
 	Shader* pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
-	shaderAddIntUniform(pp_shader_p, "color_texture", 0);
-	frameTextureDraw(ftexture_p, pp_shader_p);
+	frameTextureRender(ftexture_p, game_window, pp_shader_p);
 
 	// Swap buffers
 	gameWindowSwapBuffers(game_window);

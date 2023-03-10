@@ -1,9 +1,9 @@
 // ==========================================================================
-// Title: render.cpp
+// Title: game_window.cpp
 // Description: The source file for the window struct, built on the GLFW API
 // ==========================================================================
 
-#include "render.hpp"
+#include "game_window.hpp"
 
 ///////////////////////
 // Struct GameWindow //

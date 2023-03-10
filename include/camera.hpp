@@ -10,7 +10,7 @@
 #include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "mdcla.hpp"
-#include "render.hpp"
+#include "game_window.hpp"
 #include "input.hpp"
 
 typedef struct Camera

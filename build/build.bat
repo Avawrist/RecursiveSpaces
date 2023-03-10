@@ -13,7 +13,7 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  shader.cpp^
  sound.cpp^
  asset_manager.cpp^
- render.cpp^
+ game_window.cpp^
  input.cpp^
  draw.cpp^
  component.cpp
@@ -28,7 +28,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  shader.obj^
  sound.obj^
  asset_manager.obj^
- render.obj^
+ game_window.obj^
  input.obj^
  draw.obj^
  component.obj^

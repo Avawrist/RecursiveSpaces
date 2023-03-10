@@ -10,7 +10,7 @@
 #include "preprocessor.hpp"
 #include "typedefs.hpp"
 #include "asset.hpp"
-#include "render.hpp"
+#include "game_window.hpp"
 #include "mdcla.hpp"
 
 //////////////////////
