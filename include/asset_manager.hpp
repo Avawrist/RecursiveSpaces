@@ -86,36 +86,24 @@ typedef struct ActiveSounds
     ActiveSounds();
 } ActiveSounds;
 
-//////////////////
-// AssetManager //
-//////////////////
-
-typedef struct AssetManager
-{
-    AssetTableID   asset_table_ID;
-    AssetTableDir  asset_table_dir;
-    ActiveTextures active_textures_d;
-    ActiveTextures active_textures_n;
-    ActiveTextures active_textures_s;
-    ActiveMeshes   active_meshes;
-    ActiveSounds   active_sounds_01;
-    ActiveSounds   active_sounds_02;
-    ActiveSounds   active_sounds_03;
-    ~AssetManager();
-} AssetManager;
-
 //////////////////////////
 // Struct ShaderTableID //
 //////////////////////////
 
-#define BLINNPHONG            0
-#define POSTPROCESS           1
-#define GRID                  2
-#define TOTAL_SHADER_PROGRAMS 3
+typedef enum ShaderProgram
+{
+    BLINNPHONG            = 0,
+    POSTPROCESS           = 1,
+    DEBUG                 = 2,
+    TOTAL_SHADER_PROGRAMS = 3
+} ShaderProgram;
 
-#define VERTEX             0
-#define FRAGMENT           1
-#define TOTAL_SHADER_TYPES 2
+typedef enum ShaderType
+{
+    VERTEX             = 0,
+    FRAGMENT           = 1,
+    TOTAL_SHADER_TYPES = 2
+} ShaderType;
 
 typedef struct ShaderTableID
 {
@@ -146,17 +134,26 @@ typedef struct ActiveShaders
     ActiveShaders();
 } ActiveShaders;
 
-//////////////////////////
-// Struct ShaderManager //
-//////////////////////////
+//////////////////
+// AssetManager //
+//////////////////
 
-typedef struct ShaderManager
+typedef struct AssetManager
 {
+    AssetTableID   asset_table_ID;
+    AssetTableDir  asset_table_dir;
+    ActiveTextures active_textures_d;
+    ActiveTextures active_textures_n;
+    ActiveTextures active_textures_s;
+    ActiveMeshes   active_meshes;
+    ActiveSounds   active_sounds_01;
+    ActiveSounds   active_sounds_02;
+    ActiveSounds   active_sounds_03;
     ShaderTableID  shader_table_ID;
     ShaderTableDir shader_table_dir;
     ActiveShaders  active_shaders;
-    ~ShaderManager();
-} ShaderManager;
+    ~AssetManager();
+} AssetManager;
 
 /////////////////////////
 // Function Prototypes //
@@ -164,43 +161,43 @@ typedef struct ShaderManager
 
 // AssetManager function prototypes
 
-int  assetManagerRegister(AssetManager &asset_manager, int entity_type,
-			  int asset_type, void *sound_interface_p);
+int assetManagerRegister(AssetManager& asset_manager, int entity_type,
+			  int asset_type, void* sound_interface_p);
 
-void assetManagerUnregisterAll(AssetManager &asset_manager);
+void assetManagerUnregisterAll(AssetManager& asset_manager);
 
-void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
-			    int asset_type, void *sound_interface_p);
+void* assetManagerGetAssetP(AssetManager& asset_manager, int entity_type,
+			    int asset_type, void* sound_interface_p);
     
 // ActiveTextures function prototypes
 
-int activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_manager,
+int activeTexturesRegister(ActiveTextures& active_textures, AssetManager& asset_manager,
 			   int entity_type, int asset_type);
 
-void activeTexturesUnregisterAll(ActiveTextures &active_textures);
+void activeTexturesUnregisterAll(ActiveTextures& active_textures);
 
 // ActiveMeshes function prototypes
 
-int activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manager,
+int activeMeshesRegister(ActiveMeshes& active_meshes, AssetManager& asset_manager,
                          int entity_type, int asset_type);
 
-void activeMeshesUnregisterAll(ActiveMeshes &active_meshes);
+void activeMeshesUnregisterAll(ActiveMeshes& active_meshes);
 
 // ActiveMeshes function prototypes
 
-int activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manager,
+int activeSoundsRegister(ActiveSounds& active_sounds, AssetManager& asset_manager,
                          int entity_type, int asset_type);
 
 // void activeSoundsUnregisterAll(ActiveSounds &activeSounds);
 
-void* shaderManagerGetShaderP(ShaderManager &shader_manager, int program_type);
+void* assetManagerGetShaderP(AssetManager& asset_manager, int program_type);
 
 // ActiveShaders function prototypes
 
-int activeShadersRegister(ActiveShaders &active_shaders, ShaderManager &shader_manager,
+int activeShadersRegister(ActiveShaders& active_shaders, AssetManager& asset_manager,
 			   int program_type);
 
-void activeShadersUnregisterAll(ActiveShaders &active_shaders);
+void activeShadersUnregisterAll(ActiveShaders& active_shaders);
 
 
 #endif

@@ -11,7 +11,7 @@
 // On creation, the struct will create the required vertex and fragment shaders,
 // set the shader source code, compile and link the shader program.
 
-Shader::Shader(c_char* _vertPath, c_char* _fragPath)
+Shader::Shader(c_char* _vert_path, c_char* _frag_path)
 {
     // Create Shader Program
     program_id = glCreateProgram();
@@ -29,7 +29,7 @@ Shader::Shader(c_char* _vertPath, c_char* _fragPath)
     std::ifstream     shaderFileV;
     std::stringstream shaderStreamV;
 
-    shaderFileV.open(_vertPath, std::ifstream::in);
+    shaderFileV.open(_vert_path, std::ifstream::in);
     shaderStreamV << shaderFileV.rdbuf();
     shaderFileV.close();
     sShaderCodeV = shaderStreamV.str();
@@ -64,7 +64,7 @@ Shader::Shader(c_char* _vertPath, c_char* _fragPath)
     std::ifstream     shaderFileF;
     std::stringstream shaderStreamF;
 
-    shaderFileF.open(_fragPath, std::ifstream::in);
+    shaderFileF.open(_frag_path, std::ifstream::in);
     shaderStreamF << shaderFileF.rdbuf();
     shaderFileF.close();
     sShaderCodeF = shaderStreamF.str();

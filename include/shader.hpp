@@ -25,7 +25,7 @@ typedef struct Shader {
     GLuint program_id;
     GLuint vert_id;
     GLuint frag_id;
-    Shader(c_char* _vertPath, c_char* _fragPath);
+    Shader(c_char* _vert_path, c_char* _frag_path);
     ~Shader();
 } Shader;
 void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m);

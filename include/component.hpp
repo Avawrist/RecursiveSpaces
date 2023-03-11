@@ -96,15 +96,13 @@ typedef struct ActiveEntities
 
 // ActiveEntities Function Prototypes
 
-void activeEntitiesSetRenderPointers(AssetManager& asset_manager, ShaderManager& shader_manager,
-                                     Render& render_comp, uint type);
+void activeEntitiesSetRenderPointers(AssetManager& asset_manager, Render& render_comp, uint type);
 
 void activeEntitiesSetSFXPointers(AssetManager& asset_manager, void* sound_interface_p,
                                      SFX& sound_comp, uint type);
 
-int  activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager,
-	                        ShaderManager& shader_manager, Vec3F origin, uint type,
-				void* sound_interface_p);
+int  activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
+				uint type, void* sound_interface_p);
 
 void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
 
@@ -114,7 +112,7 @@ Mat4F transformGetModel(Transform& transform);
 // Component Update Functions
 
 void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer,
-			  ShaderManager& shader_manager, Camera& camera, DirLight& dir_light,
+			  AssetManager& asset_manager, Camera& camera, DirLight& dir_light,
 			  DebugGrid* grid_p);
 
 #endif

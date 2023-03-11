@@ -16,10 +16,9 @@ Transform::Transform()
     z_scale = 1.0f;
 }
 
-// ActiveEntities Function Prototypes
+// ActiveEntities Functions
 
-void activeEntitiesSetRenderPointers(AssetManager& asset_manager, ShaderManager& shader_manager,
-                                     Render& render_comp, uint entity_type)
+void activeEntitiesSetRenderPointers(AssetManager& asset_manager, Render& render_comp, uint entity_type)
 {
     // Mesh 01
     render_comp.mesh_01_p   = (Mesh*)assetManagerGetAssetP(asset_manager, entity_type, MESH01, 0);
@@ -30,7 +29,7 @@ void activeEntitiesSetRenderPointers(AssetManager& asset_manager, ShaderManager&
     // Specular Texture
     render_comp.texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_S, 0);
     // Shader | TODO: Merge shader manager code into asset manager?
-    render_comp.shader_p    = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
+    render_comp.shader_p    = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
 }
 
 void activeEntitiesSetSFXPointers(AssetManager& asset_manager, void* sound_interface_p,
@@ -47,8 +46,8 @@ void activeEntitiesSetSFXPointers(AssetManager& asset_manager, void* sound_inter
 							  SOUND03, sound_interface_p);
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager,
-			       ShaderManager& shader_manager, Vec3F origin, uint type, void* sound_interface_p)
+int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
+			       uint type, void* sound_interface_p)
 {
     // Returns entity ID on success, -1 on failure
     
@@ -71,7 +70,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_man
 	    // Set render asset pointers
 	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER)) == COMPONENT_RENDER)
 	    {
-	        activeEntitiesSetRenderPointers(asset_manager, shader_manager, entities.render[i], type);
+	        activeEntitiesSetRenderPointers(asset_manager, entities.render[i], type);
 	    }
 	    // Set sound asset pointers
 	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_SFX)) == COMPONENT_SFX)
@@ -94,7 +93,7 @@ void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID)
     entities.mask[entity_ID] = COMPONENT_NONE;
 }
 
-// Component Function Prototypes
+// Component Functions
 Mat4F transformGetModel(Transform& transform)
 {
     Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, 0.0f,
@@ -107,8 +106,7 @@ Mat4F transformGetModel(Transform& transform)
 // Component Update Functions
 
 void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer,
-			  ShaderManager& shader_manager, Camera& camera, DirLight& dir_light,
-			  DebugGrid* grid_p)
+			  AssetManager& asset_manager, Camera& camera, DirLight& dir_light, DebugGrid* grid_p)
 {
     //////////////////
     // Set GL state //
@@ -123,7 +121,7 @@ void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, Fra
     /////////////////////////////////
 
     // Update Blinn-Phong Shader Uniforms
-    Shader* bp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, BLINNPHONG);
+    Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // View Mat
     Mat4F view = cameraGetView(camera);
@@ -170,7 +168,7 @@ void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, Fra
     /////////////////////////////////
     // Update Grid Shader Uniforms //
     /////////////////////////////////
-    Shader* grid_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, GRID);
+    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
     glUseProgram(grid_shader_p->program_id);
     // Model
     Mat4F grid_model = Mat4F(1.0f);

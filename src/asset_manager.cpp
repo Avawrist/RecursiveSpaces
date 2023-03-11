@@ -273,6 +273,9 @@ void assetManagerUnregisterAll(AssetManager &asset_manager)
     
     // Delete all sound03 pointers
     activeSoundsUnregisterAll(asset_manager.active_sounds_03);
+
+    // Delete all shaders
+    activeShadersUnregisterAll(asset_manager.active_shaders);
 }
 
 void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
@@ -324,6 +327,26 @@ void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
     return return_p;
 }
 
+void* assetManagerGetShaderP(AssetManager &asset_manager, int program_type)
+{
+    // Returns void shader pointer on success, NULL on failure
+
+    // Assert that program type is within acceptable range
+    _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
+
+    int index = asset_manager.shader_table_ID.table[program_type];
+    if(index < 0)
+    {
+	if(!activeShadersRegister(asset_manager.active_shaders, asset_manager, program_type))
+	{
+	    return NULL;
+	}
+	index = asset_manager.shader_table_ID.table[program_type];
+    }
+
+    return (void*)asset_manager.active_shaders.shaders[index];
+}
+
 //////////////////////////
 // Struct ShaderTableID //
 //////////////////////////
@@ -364,7 +387,7 @@ ActiveShaders::ActiveShaders()
     memset(shaders, 0, sizeof(shaders));
 }
 
-int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderManager,
+int activeShadersRegister(ActiveShaders &active_shaders, AssetManager &asset_manager,
 			   int program_type)
 {
     // Returns 1 on success, 0 on failure
@@ -373,65 +396,37 @@ int activeShadersRegister(ActiveShaders &activeShaders, ShaderManager &shaderMan
     _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
 
     // Get paths
-    c_char* vertex_path = shaderManager.shader_table_dir.table[program_type][VERTEX];
+    c_char* vertex_path = asset_manager.shader_table_dir.table[program_type][VERTEX];
     if(!vertex_path) {return 0;}
-    c_char* fragment_path = shaderManager.shader_table_dir.table[program_type][FRAGMENT];
+    c_char* fragment_path = asset_manager.shader_table_dir.table[program_type][FRAGMENT];
     if(!fragment_path) {return 0;}
     
     // Check that there is room to register
-    if(!(activeShaders.registered_count < MAX_SHADERS)) {return 0;}
+    if(!(active_shaders.registered_count < MAX_SHADERS)) {return 0;}
 
     // Allocate new shader and add pointer to the activeShaders registry
-    activeShaders.shaders[activeShaders.registered_count] = new Shader(vertex_path, fragment_path);
-    if(!activeShaders.shaders[activeShaders.registered_count]) {return 0;}
+    active_shaders.shaders[active_shaders.registered_count] = new Shader(vertex_path, fragment_path);
+    if(!active_shaders.shaders[active_shaders.registered_count]) {return 0;}
 
     // Add ID to shader table ID
-    shaderManager.shader_table_ID.table[program_type] = activeShaders.registered_count;
+    asset_manager.shader_table_ID.table[program_type] = active_shaders.registered_count;
 
     // Update registered count
-    activeShaders.registered_count++;
+    active_shaders.registered_count++;
 
     return 1;
 }
 
-void activeShadersUnregisterAll(ActiveShaders &activeShaders)
+void activeShadersUnregisterAll(ActiveShaders &active_shaders)
 {
     // Delete all shader structs
-    for(uint i = 0; i < activeShaders.registered_count; i++)
+    for(uint i = 0; i < active_shaders.registered_count; i++)
     {
-	delete activeShaders.shaders[i];
+	delete active_shaders.shaders[i];
     }
 
     // Reset registered count
-    activeShaders.registered_count = 0;
+    active_shaders.registered_count = 0;
 }
 
-//////////////////////////
-// Struct ShaderManager //
-//////////////////////////
-
-ShaderManager::~ShaderManager()
-{
-    activeShadersUnregisterAll(this->active_shaders);
-}
-
-void* shaderManagerGetShaderP(ShaderManager &shader_manager, int program_type)
-{
-    // Returns void shader pointer on success, NULL on failure
-
-    // Assert that program type is within acceptable range
-    _assert(program_type >= 0 && program_type <= TOTAL_SHADER_PROGRAMS);
-
-    int index = shader_manager.shader_table_ID.table[program_type];
-    if(index < 0)
-    {
-	if(!activeShadersRegister(shader_manager.active_shaders, shader_manager, program_type))
-	{
-	    return NULL;
-	}
-	index = shader_manager.shader_table_ID.table[program_type];
-    }
-
-    return (void*)shader_manager.active_shaders.shaders[index];
-}
 

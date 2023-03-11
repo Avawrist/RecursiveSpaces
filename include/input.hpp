@@ -23,9 +23,9 @@ typedef struct Cursor
 {
     double x_pos;
     double y_pos;
-    float last_x;
-    float last_y;
-    bool  first_mouse;
+    float  last_x;
+    float  last_y;
+    bool   first_mouse;
     Cursor();
     Cursor(float _last_x, float _last_y);
 } Cursor;
@@ -36,30 +36,39 @@ Vec2F cursorGetDistance(Cursor& cursor);
 // Struct InputManager //
 /////////////////////////
 
-#define KEY_ARROW_UP    0
-#define KEY_ARROW_DOWN  1
-#define KEY_ARROW_LEFT  2
-#define KEY_ARROW_RIGHT 3
-#define KEY_SPACE       4
-#define KEY_ESC         5
-#define KEY_W           6
-#define KEY_S           7
-#define KEY_A           8
-#define KEY_D           9
-#define TOTAL_KEYS 10
+typedef enum Key
+{
+    KEY_ARROW_UP    = 0,
+    KEY_ARROW_DOWN  = 1,
+    KEY_ARROW_LEFT  = 2,
+    KEY_ARROW_RIGHT = 3,
+    KEY_SPACE       = 4,
+    KEY_ESC         = 5,
+    KEY_W           = 6,
+    KEY_S           = 7,
+    KEY_A           = 8,
+    KEY_D           = 9,
+    TOTAL_KEYS      = 10
+} Key;
 
-#define KEY_UP   0
-#define KEY_DOWN 1
+typedef enum KeyState
+{
+    KEY_UP   = 0,
+    KEY_DOWN = 1
+} KeyState;
 
-#define FRAME_1_PRIOR 0
-#define FRAME_2_PRIOR 1
-#define FRAME_3_PRIOR 2
-#define FRAME_4_PRIOR 3
-#define FRAME_5_PRIOR 4
-#define FRAME_6_PRIOR 5
-#define FRAME_7_PRIOR 6
-#define FRAME_8_PRIOR 7
-#define TOTAL_FRAMES 8
+typedef enum Frame
+{
+    FRAME_1_PRIOR = 0,
+    FRAME_2_PRIOR = 1,
+    FRAME_3_PRIOR = 2,
+    FRAME_4_PRIOR = 3,
+    FRAME_5_PRIOR = 4,
+    FRAME_6_PRIOR = 5,
+    FRAME_7_PRIOR = 6,
+    FRAME_8_PRIOR = 7,
+    TOTAL_FRAMES  = 8
+} Frame;
 
 typedef struct InputManager
 {

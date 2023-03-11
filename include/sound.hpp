@@ -43,7 +43,7 @@ typedef struct Sound
     WAVEFORMATEX         waveFormat = {0};
     XAUDIO2_BUFFER       buffer = {0};
     IXAudio2SourceVoice* source_voice_p;
-    Sound(c_char* wav_path, SoundInterface& soundInterface);
+    Sound(c_char* wav_path, SoundInterface& sound_interface);
     ~Sound();
 } Sound;
 int  soundLoadWav(Sound* sound, c_char* wav_path);
@@ -69,14 +69,14 @@ typedef struct SoundStream
     uint                 bytes_read;
     uint                 total_bytes;
     uint                 cw_buffer;
-    SoundStream(c_char* wav_path, SoundInterface& soundInterface);
+    SoundStream(c_char* wav_path, SoundInterface& sound_interface);
     ~SoundStream();
 } SoundStream;
-int  soundStreamReadWavHeader(SoundStream* soundStream, c_char* wav_path);
-int  soundStreamUpdate(SoundStream* soundStream);
-void soundStreamPlay(SoundStream* soundStream);
-void soundStreamPause(SoundStream* soundStream);
-void soundStreamStop(SoundStream* soundStream);
+int  soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path);
+int  soundStreamUpdate(SoundStream* sound_stream);
+void soundStreamPlay(SoundStream* sound_stream);
+void soundStreamPause(SoundStream* sound_stream);
+void soundStreamStop(SoundStream* sound_stream);
 void soundSetVolume(SoundStream* sound, int volume);
 
 #endif

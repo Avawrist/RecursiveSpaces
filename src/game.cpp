@@ -56,8 +56,7 @@ int main()
     /////////////////////////
     // Prep asset managers //
     /////////////////////////
-    AssetManager  asset_manager;
-    ShaderManager shader_manager;
+    AssetManager asset_manager;
 
     ////////////////////
     // Initialize BGM //
@@ -91,8 +90,7 @@ int main()
     for(int i = 0; i < 10; i++)
     {
 	Vec3F pos = Vec3F(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateEntity(*active_entities_p, asset_manager, shader_manager,
-			           pos, CHEST, &sound_interface);
+	activeEntitiesCreateEntity(*active_entities_p, asset_manager, pos, CHEST, &sound_interface);
     }
 
     ////////////////////////
@@ -124,10 +122,10 @@ int main()
         
 	// Pass 1 - Render Entities
 	activeEntitiesRender(*active_entities_p, game_window, *ftexture_p,
-			     shader_manager, camera, dir_light, grid_p);
+			     asset_manager, camera, dir_light, grid_p);
 
         // Pass 2 - Post Processing
-	Shader* pp_shader_p = (Shader*)shaderManagerGetShaderP(shader_manager, POSTPROCESS);
+	Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
 	frameTextureRender(ftexture_p, game_window, pp_shader_p);
 
 	// Swap buffers
