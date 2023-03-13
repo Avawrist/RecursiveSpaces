@@ -10,13 +10,11 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  glad.c^
  light.cpp^
  mdcla.cpp^
- shader.cpp^
  sound.cpp^
- asset_manager.cpp^
- game_window.cpp^
  input.cpp^
  draw.cpp^
- component.cpp
+ component.cpp^
+ platform.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
@@ -25,13 +23,11 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  glad.obj^
  light.obj^
  mdcla.obj^
- shader.obj^
  sound.obj^
- asset_manager.obj^
- game_window.obj^
  input.obj^
  draw.obj^
  component.obj^
+ platform.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^

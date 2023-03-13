@@ -7,8 +7,7 @@
 #define CAMERA_H
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 #include "mdcla.hpp"
 #include "game_window.hpp"
 #include "input.hpp"

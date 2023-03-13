@@ -7,8 +7,7 @@
 #define DRAW_H
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 #include "asset.hpp"
 #include "game_window.hpp"
 #include "mdcla.hpp"

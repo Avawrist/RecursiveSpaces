@@ -1,33 +1,50 @@
-// ==========================================================================
-// Title: game_window.cpp
-// Description: The source file for the window struct, built on the GLFW API
-// ==========================================================================
+// ====================================================================================
+// Title: platform.cpp
+// Description: The source file for the platform layer, abstracting the
+//              platform dependent APIs
+// ====================================================================================
 
-#include "game_window.hpp"
+#include "platform.hpp"
 
-///////////////////////
-// Struct GameWindow //
-///////////////////////
-
-GameWindow::GameWindow(uint _width, uint _height, c_char* name)
+int platformInitAPIs(GameWindow& game_window)
 {
-    /////////////////////////////
-    // Set window measurements //
-    /////////////////////////////
-    win_width   = _width;
-    win_height  = _height;
-    view_width  = (uint)(win_width * 1.0f);
-    view_height = (uint)(win_height * 1.0f);
-    x_center    = win_width * 0.5f;
-    y_center    = win_height * 0.5f;
-    win_ar      = (float)win_width / (float)win_height;
+    // Returns 1 on success, 0 on failure
+    
+    // Initialize GLFW (Enumerates windows, joysticks, starts the timer)
+    if(!platformInitGLFW()) {return 0;}
 
-    /////////////////////
-    // Set time fields //
-    /////////////////////
-    target_framerate = 0; 
+    // Initialize window
+    if(!platformInitWindow(game_window, 1920, 1080, "First Game")) {return 0;}
 
-    // Get monitor struct from GLFW
+    // Load OpenGL Functions & Extensions (Must be called after window creation)
+    if(!platformInitOpenGL()) {return 0;}
+
+    return 1;
+}
+
+int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name)
+{
+    // Returns 1 on success, 0 on failure
+    
+    /////////////////
+    // Init Values //
+    /////////////////
+    // Set window measurements
+    game_window.win_width   = _width;
+    game_window.win_height  = _height;
+    game_window.view_width  = (uint)(game_window.win_width * 1.0f);
+    game_window.view_height = (uint)(game_window.win_height * 1.0f);
+    game_window.x_center    = game_window.win_width * 0.5f;
+    game_window.y_center    = game_window.win_height * 0.5f;
+    game_window.win_ar      = (float)game_window.win_width / (float)game_window.win_height;
+    // Set close condition
+    game_window.close = false;
+    // Set time fields
+    game_window.target_framerate = 0;
+
+    /////////////////////////////
+    // Get framerate from GLFW //
+    /////////////////////////////
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     if(monitor)
     {
@@ -35,50 +52,55 @@ GameWindow::GameWindow(uint _width, uint _height, c_char* name)
 	const GLFWvidmode* vid_mode = glfwGetVideoMode(monitor);
 	if(vid_mode)
 	{
-	    target_framerate = vid_mode->refreshRate;
+	    game_window.target_framerate = vid_mode->refreshRate;
 	    char msg[256];
-	    sprintf_s(msg, "Target framerate found: %i\n", target_framerate);
+	    sprintf_s(msg, "Target framerate found: %i\n", game_window.target_framerate);
 	    OutputDebugStringA(msg);
 	}
     }
-    if(target_framerate == 0) {target_framerate = 60;} // If framerate not found, set to 60 by default
-    target_cycle_length_secs = 1.0f / target_framerate;  
-    cycle_start_time_secs    = 0.0f;
-    d_time                 = 0;
+    // If framerate not found, set to 60 by default
+    if(game_window.target_framerate == 0) {game_window.target_framerate = 60;} 
+    game_window.target_cycle_length_secs = 1.0f / game_window.target_framerate;  
+    game_window.cycle_start_time_secs    = 0.0f;
+    game_window.d_time                   = 0;
 
     ///////////////////////////////////
     // Set sleep granularity to 1 MS //
     ///////////////////////////////////
-    sleep_is_granular = (timeBeginPeriod(1) == TIMERR_NOERROR);
+    game_window.sleep_is_granular = (timeBeginPeriod(1) == TIMERR_NOERROR);
     
     /////////////////////////////
     // Create window & context //
     /////////////////////////////
-    window_p = glfwCreateWindow(win_width, win_height, name, NULL, NULL);
+    game_window.window_p = (void*)glfwCreateWindow(game_window.win_width, game_window.win_height,
+						   name, NULL, NULL);
     outputGLFWError();
-    if(window_p)
+    if(game_window.window_p)
     {
 	// Make new window the current context	
-	glfwMakeContextCurrent(window_p);
+	glfwMakeContextCurrent((GLFWwindow*)game_window.window_p);
 	outputGLFWError();
 	
 	// Disable cursor
-	glfwSetInputMode(window_p, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode((GLFWwindow*)game_window.window_p, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	outputGLFWError();
+
+	return 1;
     }
     else
     {
 	OutputDebugStringA("ERROR: GLFW failed to create window/context\n");
+	return 0;
     }
 }
 
-GameWindow::~GameWindow()
+void platformFreeWindow(GameWindow& game_window)
 {
-    glfwDestroyWindow(window_p);
-    glfwTerminate(); // This will stop all GLFW functions including timer and input 
+    glfwDestroyWindow((GLFWwindow*)game_window.window_p);
+    glfwTerminate(); // This will stop all GLFW functions including timer and input
 }
 
-void gameWindowSwapBuffers(GameWindow& game_window)
+void platformSwapBuffers(GameWindow& game_window)
 {
     double time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
 
@@ -88,7 +110,8 @@ void gameWindowSwapBuffers(GameWindow& game_window)
 	// Wait for the difference of time between the current cycle time and the target time
 	if(game_window.sleep_is_granular)
 	{
-	    DWORD sleep_time_ms = (DWORD)(1000.0f * (game_window.target_cycle_length_secs - time_elapsed_this_cycle_secs));
+	    DWORD sleep_time_ms = (DWORD)(1000.0f * (game_window.target_cycle_length_secs -
+						     time_elapsed_this_cycle_secs));
 	    Sleep(sleep_time_ms);
 	    time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
 	}
@@ -96,7 +119,7 @@ void gameWindowSwapBuffers(GameWindow& game_window)
     // TODO: Handle case where cycle takes LONGER than the target cycle length
     
     // Swap buffers
-    glfwSwapBuffers(game_window.window_p);
+    glfwSwapBuffers((GLFWwindow*)game_window.window_p);
     outputGLFWError();
 
     // Update delta time
@@ -110,16 +133,32 @@ void gameWindowSwapBuffers(GameWindow& game_window)
     game_window.cycle_start_time_secs = glfwGetTime();
 }
 
-void gameWindowClose(GameWindow& game_window)
+void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
 {
-    glfwSetWindowShouldClose(game_window.window_p, GLFW_TRUE);
+    glfwPollEvents(); // Processes all input events that occurred this cycle
+    
+    // Populate all inputs received this cycle into inputs_on_frame[1_FRAME_PRIOR]
+    // Will be processed in the game layer next cycle
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP]    = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_UP);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN]  = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_DOWN);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT]  = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_LEFT);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_RIGHT);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_SPACE]       = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_SPACE);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC]         = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_ESCAPE);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_W]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_W);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_S]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_S);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_A]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_A);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_D]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_D);
+
+    // Get cursor input
+    glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
 
-//////////////////////
-// Render Functions //
-//////////////////////
+////////////////////////
+// API Init Functions //
+////////////////////////
 
-int initGLFW()
+int platformInitGLFW()
 {
     // Init GLFW library
     if(!glfwInit())
@@ -138,7 +177,7 @@ int initGLFW()
     return 1;
 }
 
-int initOpenGL()
+int platformInitOpenGL()
 {
     // Load OpenGL procedures through GLAD
     if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))

@@ -11,8 +11,7 @@
 #include <stdio.h> // TO-DO: Remove from release ver w/ print functions
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 
 //////////////////
 // Struct Vec2F //

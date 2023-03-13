@@ -7,12 +7,11 @@
 #define COMPONENT_H
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 #include "mdcla.hpp"
 #include "camera.hpp"
 #include "light.hpp"
-#include "asset_manager.hpp"
+#include "asset.hpp"
 #include "entity.hpp"
 #include "draw.hpp"
 

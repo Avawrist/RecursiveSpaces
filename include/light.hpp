@@ -7,8 +7,7 @@
 #define LIGHT_H
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 #include "mdcla.hpp"
 
 //////////////////////////////

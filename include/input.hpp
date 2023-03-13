@@ -10,8 +10,7 @@
 #include <cstring>
 
 // My libs
-#include "preprocessor.hpp"
-#include "typedefs.hpp"
+#include "utility.hpp"
 #include "game_window.hpp"
 #include "mdcla.hpp"
 
@@ -29,7 +28,6 @@ typedef struct Cursor
     Cursor();
     Cursor(float _last_x, float _last_y);
 } Cursor;
-void cursorUpdate(Cursor& cursor, GameWindow& game_window);
 Vec2F cursorGetDistance(Cursor& cursor);
 
 /////////////////////////
@@ -76,8 +74,6 @@ typedef struct InputManager
     Cursor cursor; 
     InputManager(GameWindow& game_window);
 } InputManager;
-void inputManagerGetInputsThisFrame(InputManager& im, GameWindow& game_window);
-void inputManagerUpdate(InputManager& im, GameWindow& game_window);
 
 #endif
 
