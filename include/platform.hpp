@@ -17,8 +17,37 @@
 
 // My libs
 #include "utility.hpp"
-#include "game_window.hpp"
 #include "input.hpp"
+#include "asset.hpp"
+#include "camera.hpp"
+#include "draw.hpp"
+#include "light.hpp"
+
+///////////////////////
+// Struct GameWindow //
+///////////////////////
+
+typedef struct GameWindow
+{
+    void*  window_p;
+    uint   win_width;
+    uint   win_height;
+    uint   view_width;
+    uint   view_height;
+    float  x_center;
+    float  y_center;
+    float  win_ar;
+    uint   target_framerate;
+    double target_cycle_length_secs;  
+    double cycle_start_time_secs;
+    float  d_time;
+    bool   sleep_is_granular;
+    bool   close;
+} GameWindow;
+
+//////////////////////////////////
+// Platform Function Prototypes //
+//////////////////////////////////
 
 int platformInitAPIs(GameWindow& game_window);
 
@@ -29,6 +58,19 @@ void platformFreeWindow(GameWindow& game_window);
 void platformSwapBuffers(GameWindow& game_window);
 
 void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
+
+void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& framebuffer);
+
+void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
+			       Camera& camera, DirLight& dir_light);
+
+void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera);
+
+void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model);
+
+void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p);
+
+void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p);
 
 ////////////////////
 // Init Functions //

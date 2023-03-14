@@ -10,7 +10,6 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  glad.c^
  light.cpp^
  mdcla.cpp^
- sound.cpp^
  input.cpp^
  draw.cpp^
  component.cpp^
@@ -23,7 +22,6 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  glad.obj^
  light.obj^
  mdcla.obj^
- sound.obj^
  input.obj^
  draw.obj^
  component.obj^

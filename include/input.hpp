@@ -11,7 +11,6 @@
 
 // My libs
 #include "utility.hpp"
-#include "game_window.hpp"
 #include "mdcla.hpp"
 
 ///////////////////
@@ -26,7 +25,6 @@ typedef struct Cursor
     float  last_y;
     bool   first_mouse;
     Cursor();
-    Cursor(float _last_x, float _last_y);
 } Cursor;
 Vec2F cursorGetDistance(Cursor& cursor);
 
@@ -72,7 +70,7 @@ typedef struct InputManager
 {
     int inputs_on_frame[TOTAL_FRAMES][TOTAL_KEYS];
     Cursor cursor; 
-    InputManager(GameWindow& game_window);
+    InputManager();
 } InputManager;
 
 #endif

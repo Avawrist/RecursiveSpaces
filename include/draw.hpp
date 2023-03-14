@@ -9,7 +9,6 @@
 // My libs
 #include "utility.hpp"
 #include "asset.hpp"
-#include "game_window.hpp"
 #include "mdcla.hpp"
 
 //////////////////////

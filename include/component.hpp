@@ -57,22 +57,6 @@ typedef struct Transform
     Transform();
 } Transform;
 
-typedef struct Render
-{
-    Mesh*    mesh_01_p   = NULL;
-    Texture* texture_d_p = NULL;
-    Texture* texture_n_p = NULL;
-    Texture* texture_s_p = NULL;
-    Shader*  shader_p    = NULL;
-} Render;
-
-typedef struct SFX
-{
-    Sound* sound_01_p = NULL;
-    Sound* sound_02_p = NULL;
-    Sound* sound_03_p = NULL;
-} SFX;
-
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -85,8 +69,6 @@ typedef struct ActiveEntities
     std::bitset<MAX_COMPONENTS> mask[MAX_ENTITIES];
     uint                        type[MAX_ENTITIES];
     Transform                   transform[MAX_ENTITIES];
-    Render                      render[MAX_ENTITIES];
-    SFX                         sfx[MAX_ENTITIES];
 } ActiveEntities;
 
 /////////////////////////
@@ -94,24 +76,12 @@ typedef struct ActiveEntities
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-
-void activeEntitiesSetRenderPointers(AssetManager& asset_manager, Render& render_comp, uint type);
-
-void activeEntitiesSetSFXPointers(AssetManager& asset_manager, void* sound_interface_p,
-                                     SFX& sound_comp, uint type);
-
-int  activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
+int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
 				uint type, void* sound_interface_p);
 
 void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
 
 // Component Function Prototypes
 Mat4F transformGetModel(Transform& transform);
-
-// Component Update Functions
-
-void activeEntitiesRender(ActiveEntities& entities, GameWindow& game_window, FrameTexture& framebuffer,
-			  AssetManager& asset_manager, Camera& camera, DirLight& dir_light,
-			  DebugGrid* grid_p);
 
 #endif

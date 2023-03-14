@@ -9,7 +9,6 @@
 // My libs
 #include "utility.hpp"
 #include "mdcla.hpp"
-#include "game_window.hpp"
 #include "input.hpp"
 
 typedef struct Camera
@@ -27,10 +26,9 @@ typedef struct Camera
     Camera();
     Camera(Vec3F _pos, float _ar);
 } Camera;
-void  cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager);
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 Mat4F cameraGetView(const Camera& cam);
 Mat4F cameraGetPerspective(const Camera& cam);
-Mat4F cameraGetOrthographic(const Camera& cam, const GameWindow& window);
+Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
 
 #endif

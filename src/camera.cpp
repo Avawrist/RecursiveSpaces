@@ -37,46 +37,9 @@ Camera::Camera(Vec3F _pos, float _ar)
     ar          = _ar;
 }
 
-////////////////////////
-// Camera Non-Members //
-////////////////////////
-
-void cameraUpdate(Camera& cam, GameWindow& game_window, InputManager& input_manager)
-{
-    Mat4F V          = cameraGetView(cam);
-    float d_time_spd = game_window.d_time * cam.speed;
-    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
-
-    // Camera Strafing
-
-    // Move forward
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
-    {
-	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
-    }
-    // Move back
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
-    {
-        cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
-    }
-    // Move right
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
-    {
-        cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
-    }
-    // Move left
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
-    {
-        cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
-    }
-
-    ////////////////////
-    // Camera Looking //
-    ////////////////////
-    cameraOffsetAngles(cam,
-		       cam.sensitivity * distance.x,
-		       cam.sensitivity * distance.y);
-}
+//////////////////////
+// Camera Functions //
+//////////////////////
 
 void cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch)
 {
@@ -127,13 +90,13 @@ Mat4F cameraGetPerspective(const Camera& cam)
     
 }
 
-Mat4F cameraGetOrthographic(const Camera& cam, const GameWindow& window)
+Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
 {
     // Assumes RH coordinate system
     // Assumes Column major
 
-    float scaled_w = window.win_width / 10000.0f;
-    float scaled_h = window.win_height / 10000.0f;
+    float scaled_w = win_width / 10000.0f;
+    float scaled_h = win_height / 10000.0f;
     
     // needs to match window aspect ratio
     float r = scaled_w / 2.0f;

@@ -3,43 +3,45 @@
 // Description: The primary source file for an untitled game, containing the game loop.
 // ====================================================================================
 
-// Win libs
-#include <windows.h>
-#include <iostream>
-#include <string.h>
-#include <stdlib.h>
-#include <comdef.h>
+// Utility libs
+
+// Platform lib
+#include "platform.hpp"
+
+// Game libs
+#include "input.hpp"
+#include "asset.hpp"
+#include "component.hpp"
+#include "draw.hpp"
+
+#include "camera.hpp" // Move camera to component
+#include "light.hpp" // Move light to component
 
 // Utility libs
 #include "utility.hpp"
 #include "mdcla.hpp"
 
-// Game libs
-#include "game_window.hpp"
-#include "input.hpp"
-#include "asset.hpp"
-#include "component.hpp"
-#include "entity.hpp"
-
-#include "camera.hpp" // Move camera to component
-#include "light.hpp" // Move light to component
-#include "sound.hpp" // Move sound to component
-#include "draw.hpp" // Move debug grid to component
-
-// Platform lib
-#include "platform.hpp"
-
 using namespace std;
 
+////////////////////////
+// Function Prototpes //
+////////////////////////
+
 void gameInit(GameWindow& game_window, InputManager& input_manager);
+
+void gameUpdateCamera(Camera& cam, GameWindow& game_window, InputManager& input_manager);
 
 void gameUpdate(SoundStream* sound_stream_p, Camera& camera, GameWindow& game_window,
 		InputManager& input_manager, ActiveEntities* active_entities_p);
 
-void gameRender(ActiveEntities* active_entities_p, GameWindow& game_window, FrameTexture* ftexture_p,
+void gameRender(ActiveEntities& active_entities, GameWindow& game_window, FrameTexture* ftexture_p,
                 AssetManager& asset_manager, Camera& camera, DirLight& dir_light, DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
+
+//////////
+// Main //
+//////////
 
 int main()
 {
@@ -47,7 +49,7 @@ int main()
     // Initialize Window, Input, Render, AssetManager, Sound, Entities //
     /////////////////////////////////////////////////////////////////////
     GameWindow      game_window;
-    InputManager    input_manager(game_window);
+    InputManager    input_manager;
     AssetManager    asset_manager;
     SoundInterface  sound_interface;
     ActiveEntities* active_entities_p = new ActiveEntities();
@@ -65,9 +67,7 @@ int main()
     DirLight dir_light(Vec3F(1.0f, 1.0f, 1.0f),
 		       Vec3F(0.0f, -1.0f, -1.0f),
 	               0.25f);
-    // Initialize Framebuffers    
-    // Texture size should match the viewport.
-    // We will then blow it up to fit the screen for a low res look.
+    // Initialize Framebuffer
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     // Create Grid Object
@@ -87,9 +87,11 @@ int main()
     ///////////////
     while(!game_window.close)
     {
-	gameUpdate(test_soundStream_p, camera, game_window, input_manager, active_entities_p); // Update entities
-	gameRender(active_entities_p, game_window, ftexture_p, asset_manager, camera, dir_light, grid_p); // Render entities
-        gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle, processed next cycle
+	gameUpdate(test_soundStream_p, camera, game_window,
+		   input_manager, active_entities_p); // Update entities
+	gameRender(*active_entities_p, game_window, ftexture_p, asset_manager,
+		   camera, dir_light, grid_p); // Render entities
+        gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 
 	// Close condition
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC] == KEY_DOWN) { game_window.close = true;}
@@ -109,10 +111,51 @@ int main()
     return 0;
 }
 
+//////////////////////////
+// Function Definitions //
+//////////////////////////
+
 void gameInit(GameWindow& game_window, InputManager& input_manager)
 {
     platformInitAPIs(game_window);
     gameUpdateInputs(input_manager, game_window);
+}
+
+void gameUpdateCamera(Camera& cam, GameWindow& game_window, InputManager& input_manager)
+{
+    Mat4F V          = cameraGetView(cam);
+    float d_time_spd = game_window.d_time * cam.speed;
+    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
+
+    // Camera Strafing
+
+    // Move forward
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+    {
+	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
+    }
+    // Move back
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+    {
+        cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
+    }
+    // Move right
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
+    {
+        cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
+    }
+    // Move left
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
+    {
+        cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
+    }
+
+    ////////////////////
+    // Camera Looking //
+    ////////////////////
+    cameraOffsetAngles(cam,
+		       cam.sensitivity * distance.x,
+		       cam.sensitivity * distance.y);
 }
 
 void gameUpdate(SoundStream* sound_stream_p, Camera& camera, GameWindow& game_window,
@@ -122,22 +165,32 @@ void gameUpdate(SoundStream* sound_stream_p, Camera& camera, GameWindow& game_wi
 	soundStreamUpdate(sound_stream_p);
 	
 	// Update camera - TODO: Move camera to component, update with entities
-	cameraUpdate(camera, game_window, input_manager);
+        gameUpdateCamera(camera, game_window, input_manager);
 
 	// Update Entities
 	//...
 }
 
-void gameRender(ActiveEntities* active_entities_p, GameWindow& game_window, FrameTexture* ftexture_p,
+void gameRender(ActiveEntities& active_entities, GameWindow& game_window, FrameTexture* ftexture_p,
                 AssetManager& asset_manager, Camera& camera, DirLight& dir_light, DebugGrid* grid_p)
 {
     // Pass 1 - Render Entities
-    activeEntitiesRender(*active_entities_p, game_window, *ftexture_p,
-			 asset_manager, camera, dir_light, grid_p);
-
+    platformSetRenderStateDefault(game_window, *ftexture_p);
+    platformPrepShaderDefault(game_window, asset_manager, camera, dir_light);    
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER | COMPONENT_TRANSFORM)) ==
+	   (COMPONENT_RENDER | COMPONENT_TRANSFORM))
+	{
+	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    platformRenderEntity(asset_manager, active_entities.type[i], model);
+	}
+    }
+    platformPrepShaderDebug(game_window, asset_manager, camera);
+    platformRenderDebug(asset_manager, grid_p);
+    
     // Pass 2 - Post Processing
-    Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
-    frameTextureRender(ftexture_p, game_window, pp_shader_p);
+    platformRenderPP(asset_manager, game_window, ftexture_p);
 
     // Swap buffers
     platformSwapBuffers(game_window);

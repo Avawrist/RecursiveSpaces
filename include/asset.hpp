@@ -6,7 +6,7 @@
 #ifndef ASSET_H
 #define ASSET_H
 
-// Win libs
+// Win/C libs
 #include <stdlib.h>
 #include <cstring>
 #include <vector>
@@ -15,14 +15,76 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <xaudio2.h>
+#include <algorithm>
+#include <comdef.h>
+
+// 3rd party libs
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 // My libs
 #include "utility.hpp"
 #include "mdcla.hpp"
-#include "sound.hpp"
-#include "game_window.hpp"
-#include "platform.hpp"
 #include "entity.hpp"
+
+///////////////////////////
+// Struct SoundInterface //
+///////////////////////////
+
+typedef struct SoundInterface
+{
+    IXAudio2*               interface_p;
+    IXAudio2MasteringVoice* master_voice_p;
+    SoundInterface();
+    ~SoundInterface();
+} SoundInterface;
+int soundInterfaceLoadXAudio2();
+
+//////////////////
+// Struct Sound //
+//////////////////
+
+typedef struct Sound
+{
+    WAVEFORMATEX         waveFormat = {0};
+    XAUDIO2_BUFFER       buffer = {0};
+    IXAudio2SourceVoice* source_voice_p;
+    Sound(c_char* wav_path, SoundInterface& sound_interface);
+    ~Sound();
+} Sound;
+int  soundLoadWav(Sound* sound, c_char* wav_path);
+int  soundPlay(Sound* sound);
+void soundPause(Sound* sound);
+void soundStop(Sound* sound);
+void soundSetVolume(Sound* sound, int volume);
+
+////////////////////////
+// Struct SoundStream //
+////////////////////////
+
+#define NUM_BUFFERS 3
+#define BUFFER_SIZE 65536
+
+typedef struct SoundStream
+{
+    WAVEFORMATEX         waveFormat = {0};
+    XAUDIO2_BUFFER       buffer = {0};
+    IXAudio2SourceVoice* source_voice_p;
+    FILE*                file_p;
+    BYTE                 buffers[NUM_BUFFERS][BUFFER_SIZE];
+    uint                 bytes_read;
+    uint                 total_bytes;
+    uint                 cw_buffer;
+    SoundStream(c_char* wav_path, SoundInterface& sound_interface);
+    ~SoundStream();
+} SoundStream;
+int  soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path);
+int  soundStreamUpdate(SoundStream* sound_stream);
+void soundStreamPlay(SoundStream* sound_stream);
+void soundStreamPause(SoundStream* sound_stream);
+void soundStreamStop(SoundStream* sound_stream);
+void soundSetVolume(SoundStream* sound, int volume);
 
 ///////////////////
 // Struct Shader //
@@ -102,7 +164,6 @@ typedef struct FrameTexture
     ~FrameTexture();
 } FrameTexture;
 void frameTextureDataToGPU(FrameTexture* ftexture_p);
-void frameTextureRender(FrameTexture* ftexture_p, GameWindow& game_window, Shader* shader_p);
 
 /////////////////////////
 // Struct AssetTableID //

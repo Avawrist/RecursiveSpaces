@@ -154,6 +154,118 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
     glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
 
+void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& framebuffer)
+{
+    // Set GL state
+    glViewport(0, 0, game_window.view_width, game_window.view_height);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
+			       Camera& camera, DirLight& dir_light)
+{
+    /////////////////////////////////
+    // Update Blinn-Phong Uniforms //
+    /////////////////////////////////
+
+    // Update Blinn-Phong Shader Uniforms
+    Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
+    glUseProgram(bp_shader_p->program_id);
+    // View Mat
+    Mat4F view = cameraGetView(camera);
+    shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
+    // Projection Mat
+    Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
+    shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
+    // Cam Pos
+    shaderAddVec3Uniform(bp_shader_p, "cam_pos", camera.pos);
+    // Single Dir Light (TODO: Make DirLight a component)
+    shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dir_light.color);
+    shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dir_light.dir);
+    shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dir_light.ambient_strength);
+    // Textures
+    shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
+    shaderAddIntUniform(bp_shader_p, "normal_map",  1);
+}
+
+void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model)
+{
+    // Mesh 01
+    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager, entity_type, MESH01, 0);
+    // Diffuse Texture
+    Texture* texture_d_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_D, 0);
+    // Normal Texture
+    Texture* texture_n_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_N, 0);
+    // Specular Texture
+    Texture* texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_S, 0);
+    // Shader
+    Shader* shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
+    
+    // Set Shader
+    glUseProgram(shader_p->program_id);
+    // Update Model Uniform in Shader
+    shaderAddMat4Uniform(shader_p, "model", model.getPointer());
+    // Bind Diffuse Texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_d_p->texture_id);
+    // Bind Normal Texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
+    // Bind Mesh
+    glBindVertexArray(mesh_01_p->vao);
+    // Draw
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
+}
+
+void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera)
+{
+    /////////////////////////////////
+    // Update Grid Shader Uniforms //
+    /////////////////////////////////
+    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
+    glUseProgram(grid_shader_p->program_id);
+    // Model
+    Mat4F grid_model = Mat4F(1.0f);
+    shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
+    // View
+    Mat4F view = cameraGetView(camera);
+    shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
+    // Projection
+    Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
+    shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+}
+
+void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p)
+{
+    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
+    glUseProgram(grid_shader_p->program_id);
+    
+    debugGridDraw(grid_p, grid_shader_p, Vec3F(0.0f, 0.0f, 1.0f), 1.0f);
+}
+
+void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p)
+{
+    // Get PP shader
+    Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
+    
+    // Set proper state to render
+    glViewport(0, 0, game_window.win_width, game_window.win_height);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
+    glClear(GL_COLOR_BUFFER_BIT); // clear screen
+    glDisable(GL_DEPTH_TEST); // Disable so quad is visible
+
+    glUseProgram(pp_shader_p->program_id); // Set post-process shader
+    shaderAddIntUniform(pp_shader_p, "color_texture", 0); // Update uniformxb
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id); // Bind color texture to post-process shader
+    glBindVertexArray(ftexture_p->quad_vao); // Bind quad vao
+
+    glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices in the quad data
+    glEnable(GL_DEPTH_TEST);
+}
+
 ////////////////////////
 // API Init Functions //
 ////////////////////////
