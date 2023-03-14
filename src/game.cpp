@@ -12,7 +12,7 @@
 #include "ecs.hpp"
 #include "draw.hpp"
 
-#include "camera.hpp" // Move camera to component
+//#include "camera.hpp" // Move camera to component
 #include "light.hpp" // Move light to component
 
 // Utility libs
@@ -27,13 +27,12 @@ using namespace std;
 
 void gameInit(GameWindow& game_window, InputManager& input_manager);
 
-void gameUpdateCamera(Camera& cam, GameWindow& game_window, InputManager& input_manager);
+uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
+		       InputManager& input_manager);
 
-void gameUpdate(SoundStream* sound_stream_p, Camera& camera, GameWindow& game_window,
-		InputManager& input_manager, ActiveEntities* active_entities_p);
-
-void gameRender(ActiveEntities& active_entities, GameWindow& game_window, FrameTexture* ftexture_p,
-                AssetManager& asset_manager, Camera& camera, DirLight& dir_light, DebugGrid* grid_p);
+int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
+			ActiveEntities& active_entities, AssetManager& asset_manager, DirLight& dir_light,
+			FrameTexture* ftexture_p, DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
@@ -60,7 +59,7 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
     // Init Camera
-    Camera camera(Vec3F(350.0f, 350.0f, 350.0f), game_window.win_ar);
+    //Camera camera(Vec3F(350.0f, 350.0f, 350.0f), game_window.win_ar);
     // Initialize Lights
     DirLight dir_light(Vec3F(1.0f, 1.0f, 1.0f),
 		       Vec3F(0.0f, -1.0f, -1.0f),
@@ -76,19 +75,21 @@ int main()
     ///////////////////
     for(int i = 0; i < 10; i++)
     {
-	Vec3F pos = Vec3F(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST, &sound_interface);
+	Vec3F pos(i * 5.0f, 0.0f, 0.0f);
+	activeEntitiesCreateChest(*active_entities_p, pos, CHEST);
     }
 
+    Vec3F pos(350.0f, 350.0f, 350.0f);
+    uint cam_id = activeEntitiesCreateCamera(*active_entities_p, pos, CAMERA);
+    active_entities_p->camera[cam_id].is_selected = true;
+    
     ///////////////
     // Game Loop //
     ///////////////
     while(!game_window.close)
     {
-	gameUpdate(test_soundStream_p, camera, game_window,
-		   input_manager, active_entities_p); // Update entities
-	gameRender(*active_entities_p, game_window, ftexture_p, asset_manager,
-		   camera, dir_light, grid_p); // Render entities
+	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
+			    asset_manager, dir_light, ftexture_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 
 	// Close condition
@@ -119,62 +120,98 @@ void gameInit(GameWindow& game_window, InputManager& input_manager)
     gameUpdateInputs(input_manager, game_window);
 }
 
-void gameUpdateCamera(Camera& cam, GameWindow& game_window, InputManager& input_manager)
+uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
+		       InputManager& input_manager)
 {
-    Mat4F V          = cameraGetView(cam);
-    float d_time_spd = game_window.d_time * cam.speed;
-    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
+    float speed       = 8.0f;
+    float z_speed     = 20.0f;
+    float sensitivity = 1.0f;
+    int   entity_id   = 0;
+    
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_CAMERA | COMPONENT_TRANSFORM)) ==
+	   (COMPONENT_CAMERA | COMPONENT_TRANSFORM))
+	{
+	    Mat4F V          = cameraGetView(active_entities.camera[i],
+		                             active_entities.transform[i].position);
+	    float d_time_spd = game_window.d_time * speed;
+	    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
 
-    // Camera Strafing
+	    // Camera Strafing
 
-    // Move forward
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
-    {
-	cam.pos -= normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
-    }
-    // Move back
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
-    {
-        cam.pos += normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2))) * d_time_spd;
-    }
-    // Move right
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
-    {
-        cam.pos += normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
-    }
-    // Move left
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
-    {
-        cam.pos -= normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0))) * d_time_spd;
+	    // Move forward
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+	    {
+		active_entities.transform[i].position -= (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
+							  * d_time_spd);
+	    }
+	    // Move back
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+	    {
+		active_entities.transform[i].position += (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
+							  * d_time_spd);
+	    }
+	    // Move right
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
+	    {
+	        active_entities.transform[i].position += (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
+							  * d_time_spd);
+	    }
+	    // Move left
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
+	    {
+	        active_entities.transform[i].position -= (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
+							  * d_time_spd);
+	    }
+
+	    ////////////////////
+	    // Camera Looking //
+	    ////////////////////
+	    cameraOffsetAngles(active_entities.camera[i],
+			       sensitivity * distance.x,
+			       sensitivity * distance.y);
+
+	    /////////////////////////////
+	    // Set ID to Render Camera //
+	    /////////////////////////////
+	    if(active_entities.camera[i].is_selected) { entity_id = i; }
+	}
     }
 
-    ////////////////////
-    // Camera Looking //
-    ////////////////////
-    cameraOffsetAngles(cam,
-		       cam.sensitivity * distance.x,
-		       cam.sensitivity * distance.y);
+    return entity_id;
 }
 
-void gameUpdate(SoundStream* sound_stream_p, Camera& camera, GameWindow& game_window,
-		InputManager& input_manager, ActiveEntities* active_entities_p)
+int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
+			ActiveEntities& active_entities, AssetManager& asset_manager, DirLight& dir_light,
+			FrameTexture* ftexture_p, DebugGrid* grid_p)
 {
-	// Update soundstream
-	soundStreamUpdate(sound_stream_p);
+    ////////////
+    // Update //
+    ////////////
+    
+    // Update soundstream
+    soundStreamUpdate(sound_stream_p);
 	
-	// Update camera - TODO: Move camera to component, update with entities
-        gameUpdateCamera(camera, game_window, input_manager);
+    // Update camera - TODO: Move camera to component, update with entities
+    uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
-	// Update Entities
-	//...
-}
+    // Update Lights
+    //...
 
-void gameRender(ActiveEntities& active_entities, GameWindow& game_window, FrameTexture* ftexture_p,
-                AssetManager& asset_manager, Camera& camera, DirLight& dir_light, DebugGrid* grid_p)
-{
-    // Pass 1 - Render Entities
+    ///////////////////////////////
+    // Render Pass 1 -  Entities //
+    ///////////////////////////////
+
+    // Update shader uniforms
     platformSetRenderStateDefault(game_window, *ftexture_p);
-    platformPrepShaderDefault(game_window, asset_manager, camera, dir_light);    
+    platformPrepShaderDefault(game_window,
+			      asset_manager,
+			      active_entities.camera[cam_id],
+			      active_entities.transform[cam_id].position,
+			      dir_light);
+
+    // Render renderable entities
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
 	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER | COMPONENT_TRANSFORM)) ==
@@ -184,14 +221,23 @@ void gameRender(ActiveEntities& active_entities, GameWindow& game_window, FrameT
 	    platformRenderEntity(asset_manager, active_entities.type[i], model);
 	}
     }
-    platformPrepShaderDebug(game_window, asset_manager, camera);
+
+    // Render debug elements
+    platformPrepShaderDebug(game_window,
+			    asset_manager,
+			    active_entities.camera[cam_id],
+			    active_entities.transform[cam_id].position);
     platformRenderDebug(asset_manager, grid_p);
-    
-    // Pass 2 - Post Processing
+
+    /////////////////////////////////////
+    // Render Pass 2 - Post Processing //
+    /////////////////////////////////////
     platformRenderPP(asset_manager, game_window, ftexture_p);
 
     // Swap buffers
     platformSwapBuffers(game_window);
+
+    return 1;
 }
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window)

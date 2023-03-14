@@ -6,7 +6,6 @@ cd F:\src
 cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\\build\\" -I "..\\include\\" -I "..\\include\\glad\\" -I "..\\include\\GLFW\\" -I "..\\include\\KHR\\" -c^
  game.cpp^
  asset.cpp^
- camera.cpp^
  glad.c^
  light.cpp^
  mdcla.cpp^
@@ -18,7 +17,6 @@ cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
  asset.obj^
- camera.obj^
  glad.obj^
  light.obj^
  mdcla.obj^

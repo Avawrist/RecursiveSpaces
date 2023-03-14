@@ -19,7 +19,6 @@
 #include "utility.hpp"
 #include "input.hpp"
 #include "asset.hpp"
-#include "camera.hpp"
 #include "draw.hpp"
 #include "light.hpp"
 
@@ -62,9 +61,10 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& framebuffer);
 
 void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, DirLight& dir_light);
+			       Camera& camera, Vec3F cam_pos, DirLight& dir_light);
 
-void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera);
+void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
+                             Vec3F cam_pos);
 
 void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model);
 

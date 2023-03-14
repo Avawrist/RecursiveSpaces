@@ -164,7 +164,7 @@ void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& frameb
 }
 
 void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, DirLight& dir_light)
+			       Camera& camera, Vec3F cam_pos, DirLight& dir_light)
 {
     /////////////////////////////////
     // Update Blinn-Phong Uniforms //
@@ -174,13 +174,13 @@ void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_mana
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // View Mat
-    Mat4F view = cameraGetView(camera);
+    Mat4F view = cameraGetView(camera, cam_pos);
     shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
     // Projection Mat
     Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
-    shaderAddVec3Uniform(bp_shader_p, "cam_pos", camera.pos);
+    shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
     // Single Dir Light (TODO: Make DirLight a component)
     shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dir_light.color);
     shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dir_light.dir);
@@ -219,7 +219,8 @@ void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F m
     glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
 }
 
-void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera)
+void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
+                             Vec3F cam_pos)
 {
     /////////////////////////////////
     // Update Grid Shader Uniforms //
@@ -230,7 +231,7 @@ void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manage
     Mat4F grid_model = Mat4F(1.0f);
     shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
     // View
-    Mat4F view = cameraGetView(camera);
+    Mat4F view = cameraGetView(camera, cam_pos);
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
     Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
