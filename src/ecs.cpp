@@ -1,9 +1,9 @@
 // ================================================
-// Title: component.cpp
+// Title: ecs.cpp
 // Description: The source file component structs
 // ================================================
 
-#include "component.hpp"
+#include "ecs.hpp"
 
 ////////////////////////////////
 // Struct Component Transform //
@@ -18,8 +18,8 @@ Transform::Transform()
 
 // ActiveEntities Functions
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
-			       uint type, void* sound_interface_p)
+int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint type,
+			       void* sound_interface_p)
 {
     // Returns entity ID on success, -1 on failure
     

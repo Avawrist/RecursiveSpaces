@@ -26,7 +26,7 @@
 // My libs
 #include "utility.hpp"
 #include "mdcla.hpp"
-#include "entity.hpp"
+#include "ecs.hpp"
 
 ///////////////////////////
 // Struct SoundInterface //

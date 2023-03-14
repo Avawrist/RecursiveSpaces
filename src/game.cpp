@@ -3,15 +3,13 @@
 // Description: The primary source file for an untitled game, containing the game loop.
 // ====================================================================================
 
-// Utility libs
-
 // Platform lib
 #include "platform.hpp"
 
 // Game libs
 #include "input.hpp"
 #include "asset.hpp"
-#include "component.hpp"
+#include "ecs.hpp"
 #include "draw.hpp"
 
 #include "camera.hpp" // Move camera to component
@@ -79,7 +77,7 @@ int main()
     for(int i = 0; i < 10; i++)
     {
 	Vec3F pos = Vec3F(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateEntity(*active_entities_p, asset_manager, pos, CHEST, &sound_interface);
+	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST, &sound_interface);
     }
 
     ///////////////

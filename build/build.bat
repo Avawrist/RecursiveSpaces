@@ -12,7 +12,7 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  mdcla.cpp^
  input.cpp^
  draw.cpp^
- component.cpp^
+ ecs.cpp^
  platform.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
@@ -24,7 +24,7 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  mdcla.obj^
  input.obj^
  draw.obj^
- component.obj^
+ ecs.obj^
  platform.obj^
  glfw3_mt.lib^
  gdi32.lib^

@@ -6,18 +6,25 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-// My libs
+// Utility Libs
 #include "utility.hpp"
 #include "mdcla.hpp"
-#include "camera.hpp"
-#include "light.hpp"
-#include "asset.hpp"
-#include "entity.hpp"
-#include "draw.hpp"
 
 // C++ Utility Lib
 #include <bitset>
 #include <cstring>
+
+//////////////////
+// Entity Types //
+//////////////////
+
+typedef enum EntityType
+{
+    TEST               = 0,
+    CHEST              = 1,
+    GRID               = 2,
+    TOTAL_ENTITY_TYPES = 3
+} EntityType;
 
 /////////////////////
 // Component Masks //
@@ -76,8 +83,8 @@ typedef struct ActiveEntities
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities, AssetManager& asset_manager, Vec3F origin,
-				uint type, void* sound_interface_p);
+int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint type,
+			       void* sound_interface_p);
 
 void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
 
