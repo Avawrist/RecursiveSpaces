@@ -12,8 +12,8 @@
 DirLight::DirLight()
 {
     color = Vec3F(1.0f, 1.0f, 1.0f);
-    dir   = Vec3F(0.0f, -1.0f, 0.0f);
-    ambient_strength = 0.1f;
+    dir   = Vec3F(0.0f, -1.0f, -1.0f);
+    ambient_strength = 0.25f;
 }
 
 DirLight::DirLight(Vec3F _color, Vec3F _dir, float _ambient_strength)

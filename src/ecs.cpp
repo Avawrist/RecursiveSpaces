@@ -110,6 +110,17 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
 	         0.0f,         0.0f,          0.0f,          1.0f);
 }
 
+///////////////////////////////
+// Struct Component DirLight //
+///////////////////////////////
+
+DirLight::DirLight()
+{
+    color = Vec3F(1.0f, 1.0f, 1.0f);
+    dir   = Vec3F(0.0f, -1.0f, -1.0f);
+    ambient_strength = 0.25f;
+}
+
 //////////////////////////////
 // ActiveEntities Functions //
 //////////////////////////////
@@ -155,6 +166,34 @@ int activeEntitiesCreateCamera(ActiveEntities& entities, Vec3F origin, uint type
 	{
 	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
 	    entities.mask[i] = COMPONENT_TRANSFORM | COMPONENT_CAMERA; 
+	    // Record type in entities
+	    entities.type[i] = type;
+	    // Set transform position with origin
+	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_TRANSFORM)) == COMPONENT_TRANSFORM)
+	    {
+		entities.transform[i].position = origin;
+	    }
+	    
+	    return i;
+	}
+    }
+
+    return -1;
+}
+
+int activeEntitiesCreateDirLight(ActiveEntities& entities, Vec3F origin, uint type)
+{
+    // Returns entity ID on success, -1 on failure
+    
+    _assert(type >= 0 && type < TOTAL_ENTITY_TYPES);
+
+    // Parse all entities and find next open slot in array:
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	if(entities.mask[i] == COMPONENT_NONE)
+	{
+	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
+	    entities.mask[i] = COMPONENT_DIR_LIGHT; 
 	    // Record type in entities
 	    entities.type[i] = type;
 	    // Set transform position with origin

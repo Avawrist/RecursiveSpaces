@@ -20,7 +20,6 @@
 #include "input.hpp"
 #include "asset.hpp"
 #include "draw.hpp"
-#include "light.hpp"
 
 ///////////////////////
 // Struct GameWindow //

@@ -12,10 +12,6 @@
 #include "ecs.hpp"
 #include "draw.hpp"
 
-//#include "camera.hpp" // Move camera to component
-#include "light.hpp" // Move light to component
-
-// Utility libs
 #include "utility.hpp"
 #include "mdcla.hpp"
 
@@ -31,8 +27,8 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 		       InputManager& input_manager);
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager, DirLight& dir_light,
-			FrameTexture* ftexture_p, DebugGrid* grid_p);
+			ActiveEntities& active_entities, AssetManager& asset_manager, FrameTexture* ftexture_p,
+			DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
@@ -52,18 +48,12 @@ int main()
     ActiveEntities* active_entities_p = new ActiveEntities();
     gameInit(game_window, input_manager);
 
-    ///////////////////////////////////////
-    // Temp Objects - Move to Components //
-    ///////////////////////////////////////
-
+    /////////////////
+    // Temp Assets //
+    /////////////////
+    
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
-    // Init Camera
-    //Camera camera(Vec3F(350.0f, 350.0f, 350.0f), game_window.win_ar);
-    // Initialize Lights
-    DirLight dir_light(Vec3F(1.0f, 1.0f, 1.0f),
-		       Vec3F(0.0f, -1.0f, -1.0f),
-	               0.25f);
     // Initialize Framebuffer
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
@@ -73,15 +63,21 @@ int main()
     ///////////////////
     // Temp Entities //
     ///////////////////
+
+    // Chests
     for(int i = 0; i < 10; i++)
     {
 	Vec3F pos(i * 5.0f, 0.0f, 0.0f);
 	activeEntitiesCreateChest(*active_entities_p, pos, CHEST);
     }
 
+    // Camera
     Vec3F pos(350.0f, 350.0f, 350.0f);
     uint cam_id = activeEntitiesCreateCamera(*active_entities_p, pos, CAMERA);
     active_entities_p->camera[cam_id].is_selected = true;
+
+    // DirLight
+    activeEntitiesCreateDirLight(*active_entities_p, pos, DIR_LIGHT);
     
     ///////////////
     // Game Loop //
@@ -89,7 +85,7 @@ int main()
     while(!game_window.close)
     {
 	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
-			    asset_manager, dir_light, ftexture_p, grid_p);
+			    asset_manager, ftexture_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 
 	// Close condition
@@ -126,7 +122,7 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     float speed       = 8.0f;
     float z_speed     = 20.0f;
     float sensitivity = 1.0f;
-    int   entity_id   = 0;
+    uint  entity_id   = 0;
     
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
@@ -182,9 +178,25 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     return entity_id;
 }
 
+uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_window)
+{
+    uint entity_id = 0;
+    
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_DIR_LIGHT)) ==
+	   (COMPONENT_DIR_LIGHT))
+	{
+	    entity_id = i;
+	}
+    }
+
+    return entity_id;
+}
+
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager, DirLight& dir_light,
-			FrameTexture* ftexture_p, DebugGrid* grid_p)
+			ActiveEntities& active_entities, AssetManager& asset_manager, FrameTexture* ftexture_p,
+			DebugGrid* grid_p)
 {
     ////////////
     // Update //
@@ -197,8 +209,8 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
     // Update Lights
-    //...
-
+    uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
+    
     ///////////////////////////////
     // Render Pass 1 -  Entities //
     ///////////////////////////////
@@ -209,7 +221,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 			      asset_manager,
 			      active_entities.camera[cam_id],
 			      active_entities.transform[cam_id].position,
-			      dir_light);
+			      active_entities.dir_light[dir_light_id]);
 
     // Render renderable entities
     for(uint i = 0; i < MAX_ENTITIES; i++)

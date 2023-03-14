@@ -23,8 +23,9 @@ typedef enum EntityType
     TEST               = 0,
     CHEST              = 1,
     GRID               = 2,
-    CAMERA             = 3,
-    TOTAL_ENTITY_TYPES = 4
+    CAMERA             = 3, // TODO: Remove as types are developed
+    DIR_LIGHT          = 4, // TODO: Remove as types are developed
+    TOTAL_ENTITY_TYPES = 5
 } EntityType;
 
 /////////////////////
@@ -79,6 +80,14 @@ typedef struct Camera
     Camera();
 } Camera;
 
+typedef struct DirLight
+{
+    Vec3F color;
+    Vec3F dir;
+    float ambient_strength;
+    DirLight();
+} DirLight;
+
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -92,6 +101,7 @@ typedef struct ActiveEntities
     uint                        type[MAX_ENTITIES];
     Transform                   transform[MAX_ENTITIES];
     Camera                      camera[MAX_ENTITIES];
+    DirLight                    dir_light[MAX_ENTITIES];
 } ActiveEntities;
 
 /////////////////////////
@@ -102,6 +112,8 @@ typedef struct ActiveEntities
 int activeEntitiesCreateChest(ActiveEntities& entities, Vec3F origin, uint type);
 
 int activeEntitiesCreateCamera(ActiveEntities& entities, Vec3F origin, uint type);
+
+int activeEntitiesCreateDirLight(ActiveEntities& entities, Vec3F origin, uint type);
 
 void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
 

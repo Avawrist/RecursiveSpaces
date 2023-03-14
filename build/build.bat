@@ -7,7 +7,6 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  game.cpp^
  asset.cpp^
  glad.c^
- light.cpp^
  mdcla.cpp^
  input.cpp^
  draw.cpp^
@@ -18,7 +17,6 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  game.obj^
  asset.obj^
  glad.obj^
- light.obj^
  mdcla.obj^
  input.obj^
  draw.obj^
