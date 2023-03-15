@@ -19,6 +19,10 @@ int platformInitAPIs(GameWindow& game_window)
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!platformInitOpenGL()) {return 0;}
 
+    // Load XAudio2 library & init required COM library
+    if(!platformLoadXAudio2()) {return 0;}
+    CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+    
     return 1;
 }
 
@@ -105,7 +109,7 @@ void platformSwapBuffers(GameWindow& game_window)
     double time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
 
     // While the cycle is early
-    if(time_elapsed_this_cycle_secs < game_window.target_cycle_length_secs)
+    while(time_elapsed_this_cycle_secs < game_window.target_cycle_length_secs)
     {
 	// Wait for the difference of time between the current cycle time and the target time
 	if(game_window.sleep_is_granular)
@@ -113,6 +117,10 @@ void platformSwapBuffers(GameWindow& game_window)
 	    DWORD sleep_time_ms = (DWORD)(1000.0f * (game_window.target_cycle_length_secs -
 						     time_elapsed_this_cycle_secs));
 	    Sleep(sleep_time_ms);
+	    time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
+	}
+	else // Only cycle spin if sleep granularity wasn't set. 
+	{
 	    time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
 	}
     }
@@ -314,6 +322,58 @@ int platformInitOpenGL()
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
     
     return 1;
+}
+
+int platformLoadXAudio2()
+{
+    // Returns 1 on success, 0 on failure
+    
+    // Windows 10 
+    HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9redist.dll.\n");
+	return 1;
+    }
+
+    // Windows 8
+    x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8redist.dll.\n");
+	return 1;
+    }
+
+    // DirectX SDK
+    x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7redist.dll.\n");
+	return 1;
+    }
+    
+    return 0;
 }
 
 /////////////////////

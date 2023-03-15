@@ -1,6 +1,7 @@
 // ======================================================================
 // Title: asset.hpp
 // Description: The header file for model, mesh & material objects
+//              All assets are built on platform dependent code. 
 // ======================================================================
 
 #ifndef ASSET_H
@@ -39,7 +40,6 @@ typedef struct SoundInterface
     SoundInterface();
     ~SoundInterface();
 } SoundInterface;
-int soundInterfaceLoadXAudio2();
 
 //////////////////
 // Struct Sound //

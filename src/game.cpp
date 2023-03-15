@@ -43,10 +43,10 @@ int main()
     /////////////////////////////////////////////////////////////////////
     GameWindow      game_window;
     InputManager    input_manager;
+    gameInit(game_window, input_manager);
     AssetManager    asset_manager;
     SoundInterface  sound_interface;
     ActiveEntities* active_entities_p = new ActiveEntities();
-    gameInit(game_window, input_manager);
 
     /////////////////
     // Temp Assets //
@@ -208,7 +208,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Update camera - TODO: Move camera to component, update with entities
     uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
-    // Update Lights
+    // Update Lights - TODO: Should eventually store an array of all lights
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
     
     ///////////////////////////////

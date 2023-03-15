@@ -79,6 +79,8 @@ int platformInitGLFW();
 
 int platformInitOpenGL();
 
+int platformLoadXAudio2();
+
 /////////////////////
 // Debug Functions //
 /////////////////////

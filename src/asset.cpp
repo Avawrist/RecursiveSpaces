@@ -1,6 +1,7 @@
 // ======================================================================
 // Title: asset.cpp
-// Description: The header file for model, mesh & material objects
+// Description: The source file for model, mesh & material objects
+//              All assets are built on platform dependent code.
 // ======================================================================
 
 #include "asset.hpp"
@@ -14,32 +15,22 @@ SoundInterface::SoundInterface()
     interface_p    = NULL;
     master_voice_p = NULL;
     
-    if(soundInterfaceLoadXAudio2())
+    // Init xaudio interface
+    XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
+    if(!interface_p)
     {
-	// Init COM library
-	CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
-	
-	// Init xaudio interface
-        XAudio2Create(&interface_p, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	if(!interface_p)
-	{
-	    OutputDebugStringA("Failed to initialize XAudio2 interface.\n");
-	}
-	
-	// Init sound master
-	interface_p->CreateMasteringVoice(&master_voice_p);
-	if(!master_voice_p)
-	{
-	    OutputDebugStringA("Failed to initialize XAudio2 Master Voice\n");
-	}
-
-	// Start XAudio2 engine
-	interface_p->StartEngine();
+	OutputDebugStringA("Failed to initialize XAudio2 interface.\n");
     }
-    else
+	
+    // Init sound master
+    interface_p->CreateMasteringVoice(&master_voice_p);
+    if(!master_voice_p)
     {
-	OutputDebugStringA("Failed to load XAudio2 dynamic library.\n");
-    }    
+	OutputDebugStringA("Failed to initialize XAudio2 Master Voice\n");
+    }
+
+    // Start XAudio2 engine
+    interface_p->StartEngine();
 }
 
 SoundInterface::~SoundInterface()
@@ -49,56 +40,6 @@ SoundInterface::~SoundInterface()
 
     // Stop the XAudio2 engine
     interface_p->StopEngine();
-}
-
-int soundInterfaceLoadXAudio2()
-{
-    // Windows 10 
-    HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_9.dll.\n");
-	return 1;
-    }
-
-    x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_9redist.dll.\n");
-	return 1;
-    }
-
-    // Windows 8
-    x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_8.dll.\n");
-	return 1;
-    }
-
-    x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_8redist.dll.\n");
-	return 1;
-    }
-
-    // DirectX SDK
-    x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_7.dll.\n");
-	return 1;
-    }
-
-    x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_7redist.dll.\n");
-	return 1;
-    }
-    
-    return 0;
 }
 
 //////////////////
