@@ -11,7 +11,6 @@
 #include "mdcla.hpp"
 
 // C++ Utility Lib
-#include <bitset>
 #include <cstring>
 
 //////////////////
