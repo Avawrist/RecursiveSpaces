@@ -1,10 +1,10 @@
 // =====================================================
-// Title: component.hpp
+// Title: ecs.hpp
 // Description: The header file for component structs
 // =====================================================
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef ECS_H
+#define ECS_H
 
 // Utility Libs
 #include "utility.hpp"
@@ -20,12 +20,12 @@
 
 typedef enum EntityType
 {
-    TEST               = 0,
-    CHEST              = 1,
-    GRID               = 2,
-    CAMERA             = 3, // TODO: Remove as types are developed
-    DIR_LIGHT          = 4, // TODO: Remove as types are developed
-    TOTAL_ENTITY_TYPES = 5
+    NONE = 0,
+    CHEST,
+    GRID,
+    CAMERA,     // TODO: Remove as types are developed
+    DIR_LIGHT,  // TODO: Remove as types are developed
+    TOTAL_ENTITY_TYPES
 } EntityType;
 
 /////////////////////
@@ -35,25 +35,24 @@ typedef enum EntityType
 // TODO: Account for larger than 32 bit values
 typedef enum Component
 {
-    COMPONENT_NONE      = 0,
-    COMPONENT_TRANSFORM = 1,
-    COMPONENT_RENDER    = 1 << 1,
-    COMPONENT_SFX       = 1 << 2,
-    COMPONENT_CAMERA    = 1 << 3,
-    COMPONENT_DIR_LIGHT = 1 << 4
+    COMPONENT_TRANSFORM = 0,
+    COMPONENT_RENDER,
+    COMPONENT_SFX,
+    COMPONENT_CAMERA,
+    COMPONENT_DIR_LIGHT,
+    TOTAL_COMPONENT_TYPES
 } Component;
 
 //////////////////////
 // Entity Templates //
 //////////////////////
 
-/* typedef struct EntityTemplates
+typedef struct EntityTemplates
 {
-    look up type, get component mask
-}
-loadMasksFromFile();
- */
-   
+    uint table[TOTAL_ENTITY_TYPES][TOTAL_COMPONENT_TYPES];
+    EntityTemplates();
+} EntityTemplates;
+
 ///////////////////////
 // Component Structs //
 ///////////////////////
@@ -97,11 +96,12 @@ typedef struct DirLight
   
 typedef struct ActiveEntities
 {
-    std::bitset<MAX_COMPONENTS> mask[MAX_ENTITIES];
-    uint                        type[MAX_ENTITIES];
-    Transform                   transform[MAX_ENTITIES];
-    Camera                      camera[MAX_ENTITIES];
-    DirLight                    dir_light[MAX_ENTITIES];
+    EntityTemplates entity_templates;
+    uint       type[MAX_ENTITIES];
+    Transform transform[MAX_ENTITIES];
+    Camera    camera[MAX_ENTITIES];
+    DirLight  dir_light[MAX_ENTITIES];
+    ActiveEntities();
 } ActiveEntities;
 
 /////////////////////////
@@ -109,11 +109,7 @@ typedef struct ActiveEntities
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateChest(ActiveEntities& entities, Vec3F origin, uint type);
-
-int activeEntitiesCreateCamera(ActiveEntities& entities, Vec3F origin, uint type);
-
-int activeEntitiesCreateDirLight(ActiveEntities& entities, Vec3F origin, uint type);
+int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type);
 
 void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
 

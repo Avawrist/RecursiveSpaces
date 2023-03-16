@@ -26,6 +26,103 @@ int platformInitAPIs(GameWindow& game_window)
     return 1;
 }
 
+int platformInitGLFW()
+{
+    // Init GLFW library
+    if(!glfwInit())
+    {
+	OutputDebugStringA("ERROR: Failed to initialize GLFW\n");
+	return 0;
+    }
+
+    // Set context Hints
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
+    glfwWindowHint(GLFW_SAMPLES, 0); // disable multisampling
+    
+    return 1;
+}
+
+int platformInitOpenGL()
+{
+    // Load OpenGL procedures through GLAD
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    {
+	OutputDebugStringA("ERROR: Glad failed to load the OpenGL functions/extensions\n");
+	return 0;
+    }
+
+    // Set initial OpenGL state
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(1.0f, 0.71f, 0.89f, 1.0f);
+    // Cull Faces
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
+    // Debug - TO-DO: Remove following lines for release build
+    glEnable(GL_DEBUG_OUTPUT); 
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(glDebugOutput, NULL);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    
+    return 1;
+}
+
+int platformLoadXAudio2()
+{
+    // Returns 1 on success, 0 on failure
+    
+    // Windows 10 
+    HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_9redist.dll.\n");
+	return 1;
+    }
+
+    // Windows 8
+    x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_8redist.dll.\n");
+	return 1;
+    }
+
+    // DirectX SDK
+    x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7.dll.\n");
+	return 1;
+    }
+
+    x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
+    if(x_audio_2_libs)
+    {
+	OutputDebugStringA("SUCCESS: Loaded xaudio2_7redist.dll.\n");
+	return 1;
+    }
+    
+    return 0;
+}
+
 int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name)
 {
     // Returns 1 on success, 0 on failure
@@ -275,105 +372,44 @@ void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, Fram
     glEnable(GL_DEPTH_TEST);
 }
 
-////////////////////////
-// API Init Functions //
-////////////////////////
-
-int platformInitGLFW()
-{
-    // Init GLFW library
-    if(!glfwInit())
-    {
-	OutputDebugStringA("ERROR: Failed to initialize GLFW\n");
-	return 0;
-    }
-
-    // Set context Hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 0); // disable multisampling
-    
-    return 1;
-}
-
-int platformInitOpenGL()
-{
-    // Load OpenGL procedures through GLAD
-    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
-	OutputDebugStringA("ERROR: Glad failed to load the OpenGL functions/extensions\n");
-	return 0;
-    }
-
-    // Set initial OpenGL state
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0f, 0.71f, 0.89f, 1.0f);
-    // Cull Faces
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
-    // Debug - TO-DO: Remove following lines for release build
-    glEnable(GL_DEBUG_OUTPUT); 
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(glDebugOutput, NULL);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-    
-    return 1;
-}
-
-int platformLoadXAudio2()
+int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path)
 {
     // Returns 1 on success, 0 on failure
+
+    FILE* file_p = NULL;
+    fopen_s(&file_p, path, "r");
+    if(!file_p) {return 0;}
+
+    char  next[256];
+    int   entity_type;
+    int   component_type;
     
-    // Windows 10 
-    HMODULE x_audio_2_libs = LoadLibraryA("xaudio2_9.dll");
-    if(x_audio_2_libs)
+    do
     {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_9.dll.\n");
-	return 1;
-    }
+	// Get first string
+	fscanf_s(file_p, "%s", next, 256);
+	if(next[0] != '#')
+	{
+	    // Read entity type
+	    fscanf_s(file_p, "%i", &entity_type);
+	    // Eat hyphen
+	    fscanf_s(file_p, "%s", next, 256);
+	    do
+	    {
+		// Get component type
+		fscanf_s(file_p, "%i", &component_type);
+		if(component_type != -1) {active_entities.entity_templates.table[entity_type][component_type] = 1;}
+	    } while(component_type != -1);
+	}
+	else
+	{
+	    // Eat line
+	    fgets(next, 512, file_p);
+	}
+    } while(!feof(file_p)); 
+    fclose(file_p);
 
-    x_audio_2_libs = LoadLibraryA("xaudio2_9redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_9redist.dll.\n");
-	return 1;
-    }
-
-    // Windows 8
-    x_audio_2_libs = LoadLibraryA("xaudio2_8.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_8.dll.\n");
-	return 1;
-    }
-
-    x_audio_2_libs = LoadLibraryA("xaudio2_8redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_8redist.dll.\n");
-	return 1;
-    }
-
-    // DirectX SDK
-    x_audio_2_libs = LoadLibraryA("xaudio2_7.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_7.dll.\n");
-	return 1;
-    }
-
-    x_audio_2_libs = LoadLibraryA("xaudio2_7redist.dll");
-    if(x_audio_2_libs)
-    {
-	OutputDebugStringA("SUCCESS: Loaded xaudio2_7redist.dll.\n");
-	return 1;
-    }
-    
-    return 0;
+    return 1;
 }
 
 /////////////////////

@@ -47,13 +47,14 @@ int main()
     AssetManager    asset_manager;
     SoundInterface  sound_interface;
     ActiveEntities* active_entities_p = new ActiveEntities();
+    platformLoadEntityTemplatesFromTxt(*active_entities_p, "..\\data\\templates\\entity_templates.txt");
 
     /////////////////
     // Temp Assets //
     /////////////////
     
     // Initialize BGM
-    SoundStream* test_soundStream_p = new SoundStream("..\\assets\\bgm\\elephant.wav", sound_interface);
+    SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Framebuffer
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
@@ -68,16 +69,16 @@ int main()
     for(int i = 0; i < 10; i++)
     {
 	Vec3F pos(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateChest(*active_entities_p, pos, CHEST);
+	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST);
     }
 
     // Camera
     Vec3F pos(350.0f, 350.0f, 350.0f);
-    uint cam_id = activeEntitiesCreateCamera(*active_entities_p, pos, CAMERA);
+    uint cam_id = activeEntitiesCreateEntity(*active_entities_p, pos, CAMERA);
     active_entities_p->camera[cam_id].is_selected = true;
 
     // DirLight
-    activeEntitiesCreateDirLight(*active_entities_p, pos, DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, pos, DIR_LIGHT);
     
     ///////////////
     // Game Loop //
@@ -126,8 +127,8 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
-	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_CAMERA | COMPONENT_TRANSFORM)) ==
-	   (COMPONENT_CAMERA | COMPONENT_TRANSFORM))
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM] &&
+	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_CAMERA])
 	{
 	    Mat4F V          = cameraGetView(active_entities.camera[i],
 		                             active_entities.transform[i].position);
@@ -184,8 +185,7 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
     
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
-	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_DIR_LIGHT)) ==
-	   (COMPONENT_DIR_LIGHT))
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_DIR_LIGHT])
 	{
 	    entity_id = i;
 	}
@@ -226,8 +226,8 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Render renderable entities
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
-	if((active_entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_RENDER | COMPONENT_TRANSFORM)) ==
-	   (COMPONENT_RENDER | COMPONENT_TRANSFORM))
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
 	{
 	    Mat4F model = transformGetModel(active_entities.transform[i]);
 	    platformRenderEntity(asset_manager, active_entities.type[i], model);

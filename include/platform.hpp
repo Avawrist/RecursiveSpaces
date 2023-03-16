@@ -49,6 +49,12 @@ typedef struct GameWindow
 
 int platformInitAPIs(GameWindow& game_window);
 
+int platformInitGLFW();
+
+int platformInitOpenGL();
+
+int platformLoadXAudio2();
+
 int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name);
 
 void platformFreeWindow(GameWindow& game_window);
@@ -71,15 +77,7 @@ void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p);
 
 void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p);
 
-////////////////////
-// Init Functions //
-////////////////////
-
-int platformInitGLFW();
-
-int platformInitOpenGL();
-
-int platformLoadXAudio2();
+int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path);
 
 /////////////////////
 // Debug Functions //

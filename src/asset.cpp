@@ -957,29 +957,20 @@ AssetTableID::AssetTableID()
 
 AssetTableDir::AssetTableDir()
 {
-    // Test Object
-    table[TEST][TEXTURE_D] = "..\\assets\\textures\\brickwall.bmp";
-    table[TEST][TEXTURE_N] = "..\\assets\\textures\\brickwall_normal.bmp";
-    table[TEST][TEXTURE_S] = NULL;
-    table[TEST][MESH01]    = "..\\assets\\meshes\\cube.obj";
-    table[TEST][SOUND01]   = "..\\assets\\sfx\\taunt.wav";
-    table[TEST][SOUND02]   = NULL;
-    table[TEST][SOUND03]   = NULL;
-   
-    // Chest Object
-    table[CHEST][TEXTURE_D] = "..\\assets\\textures\\chest.bmp";
-    table[CHEST][TEXTURE_N] = "..\\assets\\textures\\brickwall_normal.bmp";
+    // Chest Entity
+    table[CHEST][TEXTURE_D] = "..\\data\\assets\\textures\\chest.bmp";
+    table[CHEST][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[CHEST][TEXTURE_S] = NULL;
-    table[CHEST][MESH01]    = "..\\assets\\meshes\\chest.obj";
-    table[CHEST][SOUND01]   = "..\\assets\\sfx\\taunt.wav";;
+    table[CHEST][MESH01]    = "..\\data\\assets\\meshes\\chest.obj";
+    table[CHEST][SOUND01]   = "..\\data\\assets\\sfx\\taunt.wav";;
     table[CHEST][SOUND02]   = NULL;
     table[CHEST][SOUND03]   = NULL;
 
-    // Line Object
+    // Grid Entity
     table[GRID][TEXTURE_D] = NULL;
     table[GRID][TEXTURE_N] = NULL;
     table[GRID][TEXTURE_S] = NULL;
-    table[GRID][MESH01]    = "..\\assets\\meshes\\grid.obj";
+    table[GRID][MESH01]    = "..\\data\\assets\\meshes\\grid.obj";
     table[GRID][SOUND01]   = NULL;
     table[GRID][SOUND02]   = NULL;
     table[GRID][SOUND03]   = NULL;
@@ -1299,16 +1290,16 @@ ShaderTableID::ShaderTableID()
 ShaderTableDir::ShaderTableDir()
 {
     // Blinn-Phong Shader Program
-    table[BLINNPHONG][VERTEX]   = "..\\assets\\shaders\\blinn_phong.vert";
-    table[BLINNPHONG][FRAGMENT] = "..\\assets\\shaders\\blinn_phong.frag";
+    table[BLINNPHONG][VERTEX]   = "..\\data\\assets\\shaders\\blinn_phong.vert";
+    table[BLINNPHONG][FRAGMENT] = "..\\data\\assets\\shaders\\blinn_phong.frag";
 
     // Post-Processing Shader Program
-    table[POSTPROCESS][VERTEX]   = "..\\assets\\shaders\\pp.vert";
-    table[POSTPROCESS][FRAGMENT] = "..\\assets\\shaders\\pp.frag";
+    table[POSTPROCESS][VERTEX]   = "..\\data\\assets\\shaders\\pp.vert";
+    table[POSTPROCESS][FRAGMENT] = "..\\data\\assets\\shaders\\pp.frag";
 
     // Grid Shader Program
-    table[GRID][VERTEX]   = "..\\assets\\shaders\\db_grid.vert";
-    table[GRID][FRAGMENT] = "..\\assets\\shaders\\db_grid.frag";
+    table[GRID][VERTEX]   = "..\\data\\assets\\shaders\\db_grid.vert";
+    table[GRID][FRAGMENT] = "..\\data\\assets\\shaders\\db_grid.frag";
 }
 
 //////////////////////////

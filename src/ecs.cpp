@@ -31,7 +31,7 @@ Mat4F transformGetModel(Transform& transform)
 
 Camera::Camera()
 {
-    is_selected = false;
+    is_selected = true;
     pitch       = -37.0f;
     yaw         = 45.0f;
     n           = 0.8f;
@@ -121,87 +121,43 @@ DirLight::DirLight()
     ambient_strength = 0.25f;
 }
 
+////////////////////////////
+// Struct EntityTemplates //
+////////////////////////////
+
+EntityTemplates::EntityTemplates()
+{
+    // Initialize all template components to 0
+    memset(table, 0, TOTAL_ENTITY_TYPES * TOTAL_COMPONENT_TYPES * sizeof(uint));
+}
+
 //////////////////////////////
 // ActiveEntities Functions //
 //////////////////////////////
 
-int activeEntitiesCreateChest(ActiveEntities& entities, Vec3F origin, uint type)
+ActiveEntities::ActiveEntities()
 {
-    // Returns entity ID on success, -1 on failure
-    
-    _assert(type >= 0 && type < TOTAL_ENTITY_TYPES);
-
-    // Parse all entities and find next open slot in array:
-    for(uint i = 0; i < MAX_ENTITIES; i++)
-    {
-	if(entities.mask[i] == COMPONENT_NONE)
-	{
-	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
-	    entities.mask[i] = (COMPONENT_TRANSFORM | COMPONENT_RENDER | COMPONENT_SFX); 
-	    // Record type in entities
-	    entities.type[i] = type;
-	    // Set transform position with origin
-	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_TRANSFORM)) == COMPONENT_TRANSFORM)
-	    {
-		entities.transform[i].position = origin;
-	    }
-	    
-	    return i;
-	}
-    }
-
-    return -1;
+    // Initialize all types to 0 (meaning no type, vacancy)
+    memset(type, NONE, MAX_ENTITIES * sizeof(uint));
 }
 
-int activeEntitiesCreateCamera(ActiveEntities& entities, Vec3F origin, uint type)
+int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type)
 {
     // Returns entity ID on success, -1 on failure
     
-    _assert(type >= 0 && type < TOTAL_ENTITY_TYPES);
+    _assert(entity_type >= 0 && entity_type < TOTAL_ENTITY_TYPES);
 
-    // Parse all entities and find next open slot in array:
     for(uint i = 0; i < MAX_ENTITIES; i++)
     {
-	if(entities.mask[i] == COMPONENT_NONE)
+	if(entities.type[i] == NONE)
 	{
-	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
-	    entities.mask[i] = COMPONENT_TRANSFORM | COMPONENT_CAMERA; 
-	    // Record type in entities
-	    entities.type[i] = type;
+	    entities.type[i] = entity_type;
 	    // Set transform position with origin
-	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_TRANSFORM)) == COMPONENT_TRANSFORM)
+	    if(entities.entity_templates.table[entity_type][COMPONENT_TRANSFORM])
 	    {
-		entities.transform[i].position = origin;
+		entities.transform[i].position = origin; 
 	    }
-	    
-	    return i;
-	}
-    }
 
-    return -1;
-}
-
-int activeEntitiesCreateDirLight(ActiveEntities& entities, Vec3F origin, uint type)
-{
-    // Returns entity ID on success, -1 on failure
-    
-    _assert(type >= 0 && type < TOTAL_ENTITY_TYPES);
-
-    // Parse all entities and find next open slot in array:
-    for(uint i = 0; i < MAX_ENTITIES; i++)
-    {
-	if(entities.mask[i] == COMPONENT_NONE)
-	{
-	    // TODO: Get entity mask using type, record mask in entities (line below is temp)
-	    entities.mask[i] = COMPONENT_DIR_LIGHT; 
-	    // Record type in entities
-	    entities.type[i] = type;
-	    // Set transform position with origin
-	    if((entities.mask[i] & std::bitset<MAX_COMPONENTS>(COMPONENT_TRANSFORM)) == COMPONENT_TRANSFORM)
-	    {
-		entities.transform[i].position = origin;
-	    }
-	    
 	    return i;
 	}
     }
@@ -213,8 +169,8 @@ void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID)
 {
     _assert(entity_ID >= 0 && entity_ID < MAX_ENTITIES);
     
-    // Remove components from entity, system knows the entity is free to reassign/overwrite
-    entities.mask[entity_ID] = COMPONENT_NONE;
+    // Sets type to -1 , system knows the entity is free to reassign/overwrite
+    entities.type[entity_ID] = NONE;
 }
 
 
