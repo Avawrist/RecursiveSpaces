@@ -57,7 +57,7 @@ int platformInitOpenGL()
     // Set initial OpenGL state
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0f, 0.71f, 0.89f, 1.0f);
+    glClearColor(0.15f, 0.19f, 0.45f, 1.0f);
     // Cull Faces
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -348,7 +348,7 @@ void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p)
     Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
     glUseProgram(grid_shader_p->program_id);
     
-    debugGridDraw(grid_p, grid_shader_p, Vec3F(0.0f, 0.0f, 1.0f), 1.0f);
+    debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
 }
 
 void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p)
