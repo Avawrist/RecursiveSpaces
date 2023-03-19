@@ -10,6 +10,9 @@
 #include "utility.hpp"
 #include "mdcla.hpp"
 
+// Win libs
+#include <windows.h>
+
 // C++ Utility Lib
 #include <cstring>
 

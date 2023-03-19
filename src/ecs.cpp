@@ -162,6 +162,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
 	}
     }
 
+    OutputDebugStringA("ERROR - Failed to create entity.\n");
     return -1;
 }
 

@@ -6,6 +6,9 @@
 // Platform lib
 #include "platform.hpp"
 
+// C Libs
+#include "cstdlib"
+
 // Game libs
 #include "input.hpp"
 #include "asset.hpp"
@@ -65,10 +68,14 @@ int main()
     // Temp Entities //
     ///////////////////
 
-    // Chests
-    for(int i = 0; i < 10; i++)
+    // 10,000 Chests
+    for(int i = 0; i < MAX_ENTITIES - 2; i++)
     {
-	Vec3F pos(i * 5.0f, 0.0f, 0.0f);
+	float x = (float)(rand() % 10) * 5.0f;
+	float y = (float)(rand() % 10) * 5.0f;
+	float z = (float)(rand() % 10) * 5.0f;
+	Vec3F pos(x, y, z);
+	//Vec3F pos(i * 5.0f, 0.0f, 0.0f);
 	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST);
     }
 
