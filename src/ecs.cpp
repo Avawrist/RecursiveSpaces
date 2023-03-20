@@ -166,12 +166,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
 	entities.transform[entities.count] = Vec3F(origin);
 	return entities.count;
     }
-<<<<<<< HEAD
-
-    OutputDebugStringA("ERROR - Failed to create entity.\n");
-=======
-    
->>>>>>> 032023dt
+    OutputDebugStringA("ERROR - Failed to create entity - Max entities reached.\n");
     return -1;
 }
 
