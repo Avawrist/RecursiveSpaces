@@ -132,7 +132,7 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     float sensitivity = 1.0f;
     uint  entity_id   = 0;
     
-    for(uint i = 0; i < MAX_ENTITIES; i++)
+    for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM] &&
 	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_CAMERA])
@@ -190,7 +190,7 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 {
     uint entity_id = 0;
     
-    for(uint i = 0; i < MAX_ENTITIES; i++)
+    for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_DIR_LIGHT])
 	{
@@ -202,8 +202,8 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 }
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager, FrameTexture* ftexture_p,
-			DebugGrid* grid_p)
+			ActiveEntities& active_entities, AssetManager& asset_manager,
+			FrameTexture* ftexture_p, DebugGrid* grid_p)
 {
     ////////////
     // Update //
@@ -212,11 +212,14 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Update soundstream
     soundStreamUpdate(sound_stream_p);
 	
-    // Update camera - TODO: Move camera to component, update with entities
+    // Update Cameras
     uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
     // Update Lights - TODO: Should eventually store an array of all lights
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
+
+    // Remove Inactive Entities - Must be run after all other entity updates
+    activeEntitiesRemoveInactives(active_entities);
     
     ///////////////////////////////
     // Render Pass 1 -  Entities //
@@ -231,7 +234,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 			      active_entities.dir_light[dir_light_id]);
 
     // Render renderable entities
-    for(uint i = 0; i < MAX_ENTITIES; i++)
+    for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
 	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])

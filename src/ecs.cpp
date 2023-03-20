@@ -11,6 +11,15 @@
 
 Transform::Transform()
 {
+    position = Vec3F(0.0f, 0.0f, 0.0f);
+    x_scale = 1.0f;
+    y_scale = 1.0f;
+    z_scale = 1.0f;
+}
+
+Transform::Transform(Vec3F _position)
+{
+    position = _position;
     x_scale = 1.0f;
     y_scale = 1.0f;
     z_scale = 1.0f;
@@ -139,6 +148,8 @@ ActiveEntities::ActiveEntities()
 {
     // Initialize all types to 0 (meaning no type, vacancy)
     memset(type, NONE, MAX_ENTITIES * sizeof(uint));
+
+    count = 0;
 }
 
 int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type)
@@ -147,31 +158,54 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
     
     _assert(entity_type >= 0 && entity_type < TOTAL_ENTITY_TYPES);
 
-    for(uint i = 0; i < MAX_ENTITIES; i++)
+    if (entities.count < MAX_ENTITIES)
     {
-	if(entities.type[i] == NONE)
-	{
-	    entities.type[i] = entity_type;
-	    // Set transform position with origin
-	    if(entities.entity_templates.table[entity_type][COMPONENT_TRANSFORM])
-	    {
-		entities.transform[i].position = origin; 
-	    }
-
-	    return i;
-	}
+	entities.type[entities.count] = entity_type;
+	entities.count++;
+	// sets transform even if never used
+	entities.transform[entities.count] = Vec3F(origin);
+	return entities.count;
     }
+<<<<<<< HEAD
 
     OutputDebugStringA("ERROR - Failed to create entity.\n");
+=======
+    
+>>>>>>> 032023dt
     return -1;
 }
 
-void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID)
+void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
 {
-    _assert(entity_ID >= 0 && entity_ID < MAX_ENTITIES);
+    _assert(entity_ID >= 0 && entity_ID < entities.count);
     
-    // Sets type to -1 , system knows the entity is free to reassign/overwrite
+    // Sets type to -1, system knows the entity is free to overwrite
     entities.type[entity_ID] = NONE;
+}
+
+void activeEntitiesRemoveInactives(ActiveEntities& entities)
+{
+    // Should be run after all other entity updates. Searches for inactive entities,
+    // if found, overwrites the inactive with the active entity on the end of the arrays,
+    // then decreases active_count by 1.
+    // Repeats until the type array is completely searched.
+
+    for(int i = entities.count - 1; i >= 0; i--)
+    {
+	if(entities.type[i] == NONE)
+	{
+	    // Copy data from last active entity and fill inactive slot 
+	    entities.type[i]      = entities.type[entities.count - 1];
+	    entities.transform[i] = entities.transform[entities.count - 1];
+	    entities.camera[i]    = entities.camera[entities.count - 1];
+	    entities.dir_light[i] = entities.dir_light[entities.count - 1];
+	    // Set last active entity type to NONE for memory readability
+	    entities.type[entities.count - 1] = NONE;
+	    // Decrease entity count by one, effectively removing the inactive entity
+	    // while preserving the entity on the end of the arrays. 
+	    entities.count--;
+	}
+    }
 }
 
 

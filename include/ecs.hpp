@@ -62,11 +62,11 @@ typedef struct EntityTemplates
 typedef struct Transform
 {
     Vec3F position;
-    Vec3F rotation;
     float x_scale;
     float y_scale;
     float z_scale;
     Transform();
+    Transform(Vec3F _position);
 } Transform;
 
 typedef struct Camera
@@ -99,10 +99,11 @@ typedef struct DirLight
 typedef struct ActiveEntities
 {
     EntityTemplates entity_templates;
-    uint       type[MAX_ENTITIES];
+    uint      type[MAX_ENTITIES];
     Transform transform[MAX_ENTITIES];
     Camera    camera[MAX_ENTITIES];
     DirLight  dir_light[MAX_ENTITIES];
+    uint      count;
     ActiveEntities();
 } ActiveEntities;
 
@@ -113,7 +114,9 @@ typedef struct ActiveEntities
 // ActiveEntities Function Prototypes
 int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type);
 
-void activeEntitiesRemoveEntity(ActiveEntities& entities, int entity_ID);
+void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
+
+void activeEntitiesRemoveInactives(ActiveEntities& entities);
 
 // Transform Function Prototypes
 Mat4F transformGetModel(Transform& transform);
