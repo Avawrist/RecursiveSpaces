@@ -161,10 +161,10 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
     if (entities.count < MAX_ENTITIES)
     {
 	entities.type[entities.count] = entity_type;
-	entities.count++;
 	// sets transform even if never used
-	entities.transform[entities.count] = Vec3F(origin);
-	return entities.count;
+	entities.transform[entities.count] = Transform(origin);
+	entities.count++;
+	return entities.count - 1;
     }
     OutputDebugStringA("ERROR - Failed to create entity - Max entities reached.\n");
     return -1;

@@ -82,7 +82,6 @@ int main()
     // Camera
     Vec3F pos(350.0f, 350.0f, 350.0f);
     uint cam_id = activeEntitiesCreateEntity(*active_entities_p, pos, CAMERA);
-    active_entities_p->camera[cam_id].is_selected = true;
 
     // DirLight
     activeEntitiesCreateEntity(*active_entities_p, pos, DIR_LIGHT);
