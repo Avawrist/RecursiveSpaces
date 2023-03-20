@@ -68,8 +68,8 @@ int main()
     // Temp Entities //
     ///////////////////
 
-    // 10,000 Chests
-    for(int i = 0; i < MAX_ENTITIES - 2; i++)
+    // 20 Chests
+    for(int i = 0; i < 20; i++)
     {
 	float x = (float)(rand() % 10) * 5.0f;
 	float y = (float)(rand() % 10) * 5.0f;
