@@ -14,6 +14,7 @@
 #include "asset.hpp"
 #include "ecs.hpp"
 #include "draw.hpp"
+#include "level.hpp"
 
 #include "utility.hpp"
 #include "mdcla.hpp"
@@ -65,20 +66,12 @@ int main()
     DebugGrid* grid_p = new DebugGrid(5.0f, 10, 10, Vec3F(0.0f, 0.0f, 0.0f));
 
     ///////////////////
-    // Temp Entities //
+    // Test Entities //
     ///////////////////
 
-    // 
-    for(int i = 0; i < MAX_ENTITIES - 2; i++)
-    {
-	float x = (float)(rand() % 10) * 5.0f;
-	float y = (float)(rand() % 10) * 5.0f;
-	float z = (float)(rand() % 10) * 5.0f;
-	Vec3F pos(x, y, z);
-	//Vec3F pos(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST);
-    }
-
+    // Entity Grid
+    LevelGrid* level_grid_p = new LevelGrid();
+    
     // Camera
     Vec3F pos(350.0f, 350.0f, 350.0f);
     uint cam_id = activeEntitiesCreateEntity(*active_entities_p, pos, CAMERA);
@@ -105,6 +98,7 @@ int main()
     platformFreeWindow(game_window);
     
     // Delete pointers to structs on the heap
+    delete level_grid_p;
     delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
