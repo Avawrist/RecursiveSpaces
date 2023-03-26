@@ -42,6 +42,8 @@ typedef enum Component
     COMPONENT_SFX,
     COMPONENT_CAMERA,
     COMPONENT_DIR_LIGHT,
+    COMPONENT_GRID_POSITION,
+    COMPONENT_STATE,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -55,9 +57,9 @@ typedef struct EntityTemplates
     EntityTemplates();
 } EntityTemplates;
 
-///////////////////////
-// Component Structs //
-///////////////////////
+/////////////////////////
+// Component Transform //
+/////////////////////////
 
 typedef struct Transform
 {
@@ -68,6 +70,10 @@ typedef struct Transform
     Transform();
     Transform(Vec3F _position);
 } Transform;
+
+//////////////////////
+// Component Camera //
+//////////////////////
 
 typedef struct Camera
 {
@@ -81,6 +87,10 @@ typedef struct Camera
     Camera();
 } Camera;
 
+////////////////////////
+// Component DirLight //
+////////////////////////
+
 typedef struct DirLight
 {
     Vec3F color;
@@ -88,6 +98,31 @@ typedef struct DirLight
     float ambient_strength;
     DirLight();
 } DirLight;
+
+////////////////////////////
+// Component GridPosition //
+////////////////////////////
+
+typedef struct GridPosition
+{
+    Vec3F position;
+    GridPosition();
+    GridPosition(Vec3F _position);
+} GridPosition;
+
+/////////////////////
+// Component State //
+/////////////////////
+
+typedef enum StateMeta
+{
+    INPUT_COOLDOWN_DUR = 10
+} StateMeta;
+
+typedef struct State
+{
+    int input_cooldown = 0;
+} State;
 
 ////////////////////////////////
 // Struct of Component Arrays //
@@ -99,13 +134,33 @@ typedef struct DirLight
 typedef struct ActiveEntities
 {
     EntityTemplates entity_templates;
-    uint      type[MAX_ENTITIES];
-    Transform transform[MAX_ENTITIES];
-    Camera    camera[MAX_ENTITIES];
-    DirLight  dir_light[MAX_ENTITIES];
+    uint         type[MAX_ENTITIES];
+    Transform    transform[MAX_ENTITIES];
+    Camera       camera[MAX_ENTITIES];
+    DirLight     dir_light[MAX_ENTITIES];
+    GridPosition grid_position[MAX_ENTITIES];
+    State        state[MAX_ENTITIES];
     uint      count;
     ActiveEntities();
 } ActiveEntities;
+
+//////////////////////
+// Struct LevelGrid //
+//////////////////////
+
+typedef enum GridMeasurements
+{
+    MAX_WIDTH  = 50,
+    MAX_LENGTH = 50,
+    MAX_HEIGHT = 4
+} GridMeasurements;
+
+typedef struct LevelGrid
+{
+    int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
+    float dimensions = 2.5f;
+    LevelGrid();
+} LevelGrid;
 
 /////////////////////////
 // Function Prototypes //
@@ -129,5 +184,10 @@ Mat4F cameraGetView(const Camera& cam, Vec3F cam_pos);
 Mat4F cameraGetPerspective(const Camera& cam, float ar);
 
 Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
+
+// LevelGrid Function Prototypes
+void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID);
+
+void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
 
 #endif

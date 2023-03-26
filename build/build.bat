@@ -11,8 +11,7 @@ cl -DASSERTIONS=1 -nologo -MT -GR- -Oi -WX -W4 -wd4100 -wd4189 -Z7 -EHsc -Fo"..\
  input.cpp^
  draw.cpp^
  ecs.cpp^
- platform.cpp^
- level.cpp
+ platform.cpp
 cd ..\build
 link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\libs\\"^
  game.obj^
@@ -23,7 +22,6 @@ link -nologo -NODEFAULTLIB:"msvcrtd.lib" -MACHINE:X64 -DEBUG:FULL -LIBPATH:"..\\
  draw.obj^
  ecs.obj^
  platform.obj^
- level.obj^
  glfw3_mt.lib^
  gdi32.lib^
  user32.lib^

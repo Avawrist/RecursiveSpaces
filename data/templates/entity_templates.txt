@@ -1,10 +1,12 @@
-# TRANSFORM 0
-# RENDER    1
-# SFX       2
-# CAMERA    3
-# DIR_LIGHT 4
+# TRANSFORM     0
+# RENDER        1
+# SFX           2
+# CAMERA        3
+# DIR_LIGHT     4
+# GRID_POSITION 5
+# STATE         6
 NONE 0      - -1
-CHEST 1     - 0 1 2 -1 
+CHEST 1     - 0 1 2 5 6 -1 
 GRID 2      - -1
-CAMERA 3    - 0 3 -1
+CAMERA 3    - 0 3 6 -1
 DIR_LIGHT 4 - 4 -1
