@@ -167,7 +167,8 @@ typedef struct LevelGrid
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type);
+int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
+			       Vec3F origin, uint entity_type);
 
 void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
 

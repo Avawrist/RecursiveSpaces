@@ -175,7 +175,8 @@ ActiveEntities::ActiveEntities()
     count = 0;
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint entity_type)
+int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
+			       Vec3F origin, uint entity_type)
 {
     // Returns entity ID on success, -1 on failure
     
@@ -186,6 +187,12 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
 	entities.type[entities.count] = entity_type;
 	// sets transform even if never used
 	entities.transform[entities.count] = Transform(origin);
+	// if entity has a grid_position component, add to grid and set grid position
+	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
+	{
+	    levelGridSetEntity(level_grid, entities, origin, entities.count);
+	    entities.grid_position[entities.count].position = origin;
+	}
 	entities.count++;
 	return entities.count - 1;
     }

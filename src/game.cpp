@@ -81,19 +81,16 @@ int main()
     ///////////////////
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
 
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
 
     // Chests
-    int chest_id = activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), CHEST);
-    // Add new chest entity to level grid
-    levelGridSetEntity(*level_grid_p, *active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), chest_id);
-
-    int chest_id_2 = activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), CHEST);
-    // Add new chest entity to level grid
-    levelGridSetEntity(*level_grid_p, *active_entities_p, Vec3F(1.0f, 0.0f, 0.0f), chest_id_2);    
+    for(int i = 0; i < MAX_WIDTH; i++)
+    {
+	activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F((float)i, 0.0f, 0.0f), CHEST);
+    }
     
     ///////////////
     // Game Loop //
