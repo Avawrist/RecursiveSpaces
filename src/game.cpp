@@ -26,12 +26,18 @@ using namespace std;
 
 void gameInit(GameWindow& game_window, InputManager& input_manager);
 
+void gameUpdateStates(ActiveEntities& entities);
+
+void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager);
+
+void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
+
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 		       InputManager& input_manager);
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager, FrameTexture* ftexture_p,
-			DebugGrid* grid_p);
+			ActiveEntities& active_entities, AssetManager& asset_manager,
+			FrameTexture* ftexture_p, LevelGrid& level_grid, DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
@@ -52,6 +58,11 @@ int main()
     ActiveEntities* active_entities_p = new ActiveEntities();
     platformLoadEntityTemplatesFromTxt(*active_entities_p, "..\\data\\templates\\entity_templates.txt");
 
+    ////////////////
+    // Level Grid //
+    ////////////////
+    LevelGrid* level_grid_p = new LevelGrid();
+    
     /////////////////
     // Temp Assets //
     /////////////////
@@ -61,31 +72,24 @@ int main()
     // Initialize Framebuffer
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
-    // Create Grid Object
-    DebugGrid* grid_p = new DebugGrid(5.0f, 10, 10, Vec3F(0.0f, 0.0f, 0.0f));
+    // Create Debug Grid Object
+    DebugGrid* grid_p = new DebugGrid(level_grid_p->dimensions * 2.0f, MAX_WIDTH + 1, MAX_LENGTH + 1,
+				      Vec3F(-2.5f, 0.0f, -2.5f));
 
     ///////////////////
-    // Temp Entities //
+    // Test Entities //
     ///////////////////
-
-    // 20 Chests
-    for(int i = 0; i < 20; i++)
-    {
-	float x = (float)(rand() % 10) * 5.0f;
-	float y = (float)(rand() % 10) * 5.0f;
-	float z = (float)(rand() % 10) * 5.0f;
-	Vec3F pos(x, y, z);
-	//Vec3F pos(i * 5.0f, 0.0f, 0.0f);
-	activeEntitiesCreateEntity(*active_entities_p, pos, CHEST);
-    }
-
+    
     // Camera
-    Vec3F pos(350.0f, 350.0f, 350.0f);
-    uint cam_id = activeEntitiesCreateEntity(*active_entities_p, pos, CAMERA);
-    active_entities_p->camera[cam_id].is_selected = true;
+    activeEntitiesCreateEntity(*active_entities_p, Vec3F(1400.0f, 1400.0f, 1400.0f), CAMERA);
 
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, pos, DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
+
+    // Chests
+    int chest_id = activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), CHEST);
+    // Add new chest entity to level grid
+    levelGridSetEntity(*level_grid_p, *active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), chest_id);
     
     ///////////////
     // Game Loop //
@@ -93,7 +97,7 @@ int main()
     while(!game_window.close)
     {
 	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
-			    asset_manager, ftexture_p, grid_p);
+			    asset_manager, ftexture_p, *level_grid_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 
 	// Close condition
@@ -106,6 +110,7 @@ int main()
     platformFreeWindow(game_window);
     
     // Delete pointers to structs on the heap
+    delete level_grid_p;
     delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
@@ -122,6 +127,83 @@ void gameInit(GameWindow& game_window, InputManager& input_manager)
 {
     platformInitAPIs(game_window);
     gameUpdateInputs(input_manager, game_window);
+}
+
+void gameUpdateStates(ActiveEntities& entities)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_STATE])
+	{
+	    entities.state[i].input_cooldown -= 1;
+	    entities.state[i].input_cooldown = (int)clamp((float)entities.state[i].input_cooldown,
+						           0, INPUT_COOLDOWN_DUR);
+	}
+    }
+}
+
+void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	{
+	    Vec3F cur_grid_pos = entities.grid_position[i].position;
+	    Vec3F new_grid_pos = cur_grid_pos;
+
+	    if(entities.state[i].input_cooldown == 0)
+	    {
+		// Down
+		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
+		{
+		    new_grid_pos = Vec3F(cur_grid_pos.x,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z + 1);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		}
+		// Up
+		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
+		{
+		    new_grid_pos = Vec3F(cur_grid_pos.x,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z - 1);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		}
+		// Left
+		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
+		{
+		    new_grid_pos = Vec3F(cur_grid_pos.x - 1,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		}
+		// Right
+		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
+		{
+		    new_grid_pos = Vec3F(cur_grid_pos.x + 1,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		}
+	    }
+	    levelGridRemoveEntity(grid, cur_grid_pos);
+	    levelGridSetEntity(grid, entities, new_grid_pos, i);
+	    entities.grid_position[i].position = new_grid_pos;
+	}
+    }
+}
+    
+void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	{
+	    entities.transform[i].position.x = entities.grid_position[i].position.x * grid.dimensions * 2;
+	    entities.transform[i].position.y = entities.grid_position[i].position.y * grid.dimensions * 2;
+	    entities.transform[i].position.z = entities.grid_position[i].position.z * grid.dimensions * 2;
+	}
+    }
 }
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -203,21 +285,30 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* ftexture_p, DebugGrid* grid_p)
+			FrameTexture* ftexture_p, LevelGrid& level_grid, DebugGrid* grid_p)
 {
     ////////////
     // Update //
     ////////////
+
+    // Update States
+    gameUpdateStates(active_entities);
+    
+    // Update Grid Positions
+    gameUpdateGridPositions(active_entities, level_grid, input_manager);
+    
+    // Update Transforms
+    gameUpdateTransforms(active_entities, level_grid);
     
     // Update soundstream
     soundStreamUpdate(sound_stream_p);
-	
+    
     // Update Cameras
     uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
     // Update Lights - TODO: Should eventually store an array of all lights
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
-
+    
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities);
     

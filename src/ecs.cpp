@@ -130,6 +130,20 @@ DirLight::DirLight()
     ambient_strength = 0.25f;
 }
 
+///////////////////////////////////
+// Struct Component GridPosition //
+///////////////////////////////////
+
+GridPosition::GridPosition()
+{
+    position = Vec3F(0.0f, 0.0f, 0.0f);
+}
+
+GridPosition::GridPosition(Vec3F _position)
+{
+    position = _position; 
+}
+
 ////////////////////////////
 // Struct EntityTemplates //
 ////////////////////////////
@@ -138,6 +152,15 @@ EntityTemplates::EntityTemplates()
 {
     // Initialize all template components to 0
     memset(table, 0, TOTAL_ENTITY_TYPES * TOTAL_COMPONENT_TYPES * sizeof(uint));
+}
+
+//////////////////////
+// Struct LevelGrid //
+//////////////////////
+
+LevelGrid::LevelGrid()
+{
+    memset(grid, -1, MAX_WIDTH * MAX_HEIGHT * MAX_LENGTH * sizeof(int));
 }
 
 //////////////////////////////
@@ -161,10 +184,10 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
     if (entities.count < MAX_ENTITIES)
     {
 	entities.type[entities.count] = entity_type;
-	entities.count++;
 	// sets transform even if never used
-	entities.transform[entities.count] = Vec3F(origin);
-	return entities.count;
+	entities.transform[entities.count] = Transform(origin);
+	entities.count++;
+	return entities.count - 1;
     }
     OutputDebugStringA("ERROR - Failed to create entity - Max entities reached.\n");
     return -1;
@@ -203,5 +226,24 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities)
     }
 }
 
+/////////////////////////
+// LevelGrid Functions //
+/////////////////////////
 
+void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID)
+{
+    _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
+    
+    level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
+}
 
+void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos)
+{
+    _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
+    
+    level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
+}
