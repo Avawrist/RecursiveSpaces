@@ -201,7 +201,7 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
     entities.type[entity_ID] = NONE;
 }
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities)
+void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid)
 {
     // Should be run after all other entity updates. Searches for inactive entities,
     // if found, overwrites the inactive with the active entity on the end of the arrays,
@@ -217,6 +217,20 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities)
 	    entities.transform[i] = entities.transform[entities.count - 1];
 	    entities.camera[i]    = entities.camera[entities.count - 1];
 	    entities.dir_light[i] = entities.dir_light[entities.count - 1];
+	    // If inactive entity is on the grid, set ID of removed entity
+	    // back to -1 in the level grid:
+	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	    {
+		Vec3F inactive_grid_position = entities.grid_position[i].position;
+		levelGridRemoveEntity(level_grid, inactive_grid_position);
+	    }
+	    // If replacement entity is on the grid, update ID of last active
+	    // entity in the grid, since it has changed
+	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	    {
+		Vec3F active_grid_position = entities.grid_position[entities.count - 1].position;
+		levelGridSetEntity(level_grid, entities, active_grid_position, i);
+	    }
 	    // Set last active entity type to NONE for memory readability
 	    entities.type[entities.count - 1] = NONE;
 	    // Decrease entity count by one, effectively removing the inactive entity

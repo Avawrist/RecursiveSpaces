@@ -150,8 +150,8 @@ typedef struct ActiveEntities
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 50,
-    MAX_LENGTH = 50,
+    MAX_WIDTH  = 25,
+    MAX_LENGTH = 25,
     MAX_HEIGHT = 4
 } GridMeasurements;
 
@@ -171,7 +171,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, Vec3F origin, uint enti
 
 void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities);
+void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid);
 
 // Transform Function Prototypes
 Mat4F transformGetModel(Transform& transform);

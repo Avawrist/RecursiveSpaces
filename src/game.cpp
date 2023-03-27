@@ -81,7 +81,7 @@ int main()
     ///////////////////
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, Vec3F(1400.0f, 1400.0f, 1400.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
 
     // DirLight
     activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
@@ -90,6 +90,10 @@ int main()
     int chest_id = activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), CHEST);
     // Add new chest entity to level grid
     levelGridSetEntity(*level_grid_p, *active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), chest_id);
+
+    int chest_id_2 = activeEntitiesCreateEntity(*active_entities_p, Vec3F(0.0f, 0.0f, 0.0f), CHEST);
+    // Add new chest entity to level grid
+    levelGridSetEntity(*level_grid_p, *active_entities_p, Vec3F(1.0f, 0.0f, 0.0f), chest_id_2);    
     
     ///////////////
     // Game Loop //
@@ -156,34 +160,46 @@ void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputMan
 		// Down
 		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
 		{
-		    new_grid_pos = Vec3F(cur_grid_pos.x,
-					 cur_grid_pos.y,
-					 cur_grid_pos.z + 1);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    if(cur_grid_pos.z + 1 >= 0.0f && cur_grid_pos.z + 1 < MAX_LENGTH)
+		    {
+			new_grid_pos = Vec3F(cur_grid_pos.x,
+					     cur_grid_pos.y,
+					     cur_grid_pos.z + 1);
+			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    }
 		}
 		// Up
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
 		{
-		    new_grid_pos = Vec3F(cur_grid_pos.x,
-					 cur_grid_pos.y,
-					 cur_grid_pos.z - 1);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    if(cur_grid_pos.z - 1 >= 0.0f && cur_grid_pos.z - 1 < MAX_LENGTH)
+		    {
+			new_grid_pos = Vec3F(cur_grid_pos.x,
+					     cur_grid_pos.y,
+					     cur_grid_pos.z - 1);
+			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    }
 		}
 		// Left
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
 		{
-		    new_grid_pos = Vec3F(cur_grid_pos.x - 1,
-					 cur_grid_pos.y,
-					 cur_grid_pos.z);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    if(cur_grid_pos.x - 1 >= 0.0f && cur_grid_pos.x - 1 < MAX_WIDTH)
+		    {
+			new_grid_pos = Vec3F(cur_grid_pos.x - 1,
+					     cur_grid_pos.y,
+					     cur_grid_pos.z);
+			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    }
 		}
 		// Right
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
 		{
-		    new_grid_pos = Vec3F(cur_grid_pos.x + 1,
-					 cur_grid_pos.y,
-					 cur_grid_pos.z);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    if(cur_grid_pos.x + 1 >= 0.0f && cur_grid_pos.x + 1 < MAX_WIDTH)
+		    {
+			new_grid_pos = Vec3F(cur_grid_pos.x + 1,
+					     cur_grid_pos.y,
+					     cur_grid_pos.z);
+			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    }
 		}
 	    }
 	    levelGridRemoveEntity(grid, cur_grid_pos);
@@ -308,9 +324,15 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 
     // Update Lights - TODO: Should eventually store an array of all lights
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
+
+    // Test deletion code
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
+    {
+	activeEntitiesMarkInactive(active_entities, 0);
+    }
     
     // Remove Inactive Entities - Must be run after all other entity updates
-    activeEntitiesRemoveInactives(active_entities);
+    activeEntitiesRemoveInactives(active_entities, level_grid);
     
     ///////////////////////////////
     // Render Pass 1 -  Entities //
