@@ -1,5 +1,6 @@
 *.exe
 *.ilk
+*.ini
 *.pdb
 *.rdbg
 *.cpp~
