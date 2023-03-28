@@ -145,6 +145,16 @@ GridPosition::GridPosition(Vec3F _position)
 }
 
 ////////////////////////////
+// Struct Component State //
+////////////////////////////
+
+State::State()
+{
+    inactive = true;
+    input_cooldown = 0;
+}
+
+////////////////////////////
 // Struct EntityTemplates //
 ////////////////////////////
 
@@ -184,6 +194,9 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
 
     if (entities.count < MAX_ENTITIES)
     {
+	// Activate entity
+	entities.state[entities.count].inactive = false; 
+	// Set new type
 	entities.type[entities.count] = entity_type;
 	// sets transform even if never used
 	entities.transform[entities.count] = Transform(origin);
@@ -193,7 +206,9 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
 	    levelGridSetEntity(level_grid, entities, origin, entities.count);
 	    entities.grid_position[entities.count].position = origin;
 	}
+	// Increase entity count
 	entities.count++;
+	// Return new entity ID
 	return entities.count - 1;
     }
     OutputDebugStringA("ERROR - Failed to create entity - Max entities reached.\n");
@@ -204,8 +219,8 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
 {
     _assert(entity_ID >= 0 && entity_ID < entities.count);
     
-    // Sets type to -1, system knows the entity is free to overwrite
-    entities.type[entity_ID] = NONE;
+    // Sets state to inactive, system knows the entity is free to overwrite
+    entities.state[entity_ID].inactive = true;
 }
 
 void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid)
@@ -217,13 +232,8 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 
     for(int i = entities.count - 1; i >= 0; i--)
     {
-	if(entities.type[i] == NONE)
+	if(entities.state[i].inactive)
 	{
-	    // Copy data from last active entity and fill inactive slot 
-	    entities.type[i]      = entities.type[entities.count - 1];
-	    entities.transform[i] = entities.transform[entities.count - 1];
-	    entities.camera[i]    = entities.camera[entities.count - 1];
-	    entities.dir_light[i] = entities.dir_light[entities.count - 1];
 	    // If inactive entity is on the grid, set ID of removed entity
 	    // back to -1 in the level grid:
 	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
@@ -233,11 +243,20 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 	    }
 	    // If replacement entity is on the grid, update ID of last active
 	    // entity in the grid, since it has changed
-	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	    if(entities.entity_templates.table[entities.type[entities.count - 1]][COMPONENT_GRID_POSITION])
 	    {
 		Vec3F active_grid_position = entities.grid_position[entities.count - 1].position;
 		levelGridSetEntity(level_grid, entities, active_grid_position, i);
 	    }
+	    // Safe to copy grid position component now 
+	    entities.grid_position[i] = entities.grid_position[entities.count - 1];
+	    // Copy remaining component data from last active entity and fill inactive slot 
+	    entities.transform[i]     = entities.transform[entities.count - 1];
+	    entities.camera[i]        = entities.camera[entities.count - 1];
+	    entities.dir_light[i]     = entities.dir_light[entities.count - 1];
+	    entities.state[i]         = entities.state[entities.count - 1];
+	    // Copy replacement entity's type last
+	    entities.type[i] = entities.type[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability
 	    entities.type[entities.count - 1] = NONE;
 	    // Decrease entity count by one, effectively removing the inactive entity

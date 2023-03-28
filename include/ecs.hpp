@@ -121,7 +121,9 @@ typedef enum StateMeta
 
 typedef struct State
 {
-    int input_cooldown = 0;
+    bool inactive; 
+    int input_cooldown;
+    State();
 } State;
 
 ////////////////////////////////
@@ -140,7 +142,7 @@ typedef struct ActiveEntities
     DirLight     dir_light[MAX_ENTITIES];
     GridPosition grid_position[MAX_ENTITIES];
     State        state[MAX_ENTITIES];
-    uint      count;
+    uint         count;
     ActiveEntities();
 } ActiveEntities;
 

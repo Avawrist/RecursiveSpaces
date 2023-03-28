@@ -79,28 +79,30 @@ int main()
     ///////////////////
     // Test Entities //
     ///////////////////
+
+    // Map
     
-    // Camera
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
-
-    // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
-
     // Chests
     for(int i = 0; i < MAX_WIDTH; i++)
     {
 	activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F((float)i, 0.0f, 0.0f), CHEST);
     }
+
+    // DirLight
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
     
+    // Camera
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
+
     ///////////////
     // Game Loop //
     ///////////////
     while(!game_window.close)
-    {
+    {	
 	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
 			    asset_manager, ftexture_p, *level_grid_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
-
+	
 	// Close condition
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC] == KEY_DOWN) { game_window.close = true;}
     }
@@ -321,13 +323,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 
     // Update Lights - TODO: Should eventually store an array of all lights
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
-
-    // Test deletion code
-    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
-    {
-	activeEntitiesMarkInactive(active_entities, 0);
-    }
-    
+   
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level_grid);
     

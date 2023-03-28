@@ -5,8 +5,8 @@
 # DIR_LIGHT     4
 # GRID_POSITION 5
 # STATE         6
-NONE 0      - -1
+NONE 0      - 6 -1
 CHEST 1     - 0 1 2 5 6 -1 
-GRID 2      - -1
+GRID 2      - 6 -1
 CAMERA 3    - 0 3 6 -1
-DIR_LIGHT 4 - 4 -1
+DIR_LIGHT 4 - 4 6 -1
