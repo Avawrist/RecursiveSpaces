@@ -126,8 +126,8 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
 DirLight::DirLight()
 {
     color = Vec3F(1.0f, 1.0f, 1.0f);
-    dir   = Vec3F(0.0f, -1.0f, -1.0f);
-    ambient_strength = 0.25f;
+    dir   = Vec3F(1.0f, -1.0f, 1.0f);
+    ambient_strength = 0.5f;
 }
 
 ///////////////////////////////////

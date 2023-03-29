@@ -27,14 +27,16 @@ typedef enum EntityType
     GRID,
     CAMERA,     // TODO: Remove as types are developed
     DIR_LIGHT,  // TODO: Remove as types are developed
+    PLAYER,
+    BLOCK,
+    SPECIAL_BLOCK,
     TOTAL_ENTITY_TYPES
 } EntityType;
 
 /////////////////////
-// Component Masks //
+// Component Types //
 /////////////////////
 
-// TODO: Account for larger than 32 bit values
 typedef enum Component
 {
     COMPONENT_TRANSFORM = 0,
@@ -44,6 +46,7 @@ typedef enum Component
     COMPONENT_DIR_LIGHT,
     COMPONENT_GRID_POSITION,
     COMPONENT_STATE,
+    COMPONENT_PLAYER,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -152,15 +155,15 @@ typedef struct ActiveEntities
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 25,
-    MAX_LENGTH = 25,
+    MAX_WIDTH  = 20,
+    MAX_LENGTH = 20,
     MAX_HEIGHT = 4
 } GridMeasurements;
 
 typedef struct LevelGrid
 {
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
-    float dimensions = 2.5f;
+    float dimensions = 0.5f;
     LevelGrid();
 } LevelGrid;
 

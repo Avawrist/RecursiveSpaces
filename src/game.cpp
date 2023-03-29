@@ -73,26 +73,28 @@ int main()
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     // Create Debug Grid Object
-    DebugGrid* grid_p = new DebugGrid(level_grid_p->dimensions * 2.0f, MAX_WIDTH + 1, MAX_LENGTH + 1,
-				      Vec3F(-2.5f, 0.0f, -2.5f));
+    DebugGrid* grid_p = new DebugGrid(level_grid_p->dimensions, MAX_WIDTH + 1, MAX_LENGTH + 1,
+				      Vec3F(-level_grid_p->dimensions * 0.5f, 0.0f, -level_grid_p->dimensions * 0.5f));
 
     ///////////////////
     // Test Entities //
     ///////////////////
-
-    // Map
     
-    // Chests
-    for(int i = 0; i < MAX_WIDTH; i++)
+    // Blocks
+    for(int x = 0; x < MAX_WIDTH; x++)
     {
-	activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F((float)i, 0.0f, 0.0f), CHEST);
+	for(int z = 0; z < MAX_LENGTH; z++)
+	{
+	    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
+				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
+	}
     }
-
+    
     // DirLight
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(900.0f, 900.0f, 900.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(60.0f, 60.0f, 60.0f), CAMERA);
 
     ///////////////
     // Game Loop //
@@ -214,9 +216,9 @@ void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
     {
 	if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
 	{
-	    entities.transform[i].position.x = entities.grid_position[i].position.x * grid.dimensions * 2;
-	    entities.transform[i].position.y = entities.grid_position[i].position.y * grid.dimensions * 2;
-	    entities.transform[i].position.z = entities.grid_position[i].position.z * grid.dimensions * 2;
+	    entities.transform[i].position.x = entities.grid_position[i].position.x * grid.dimensions;
+	    entities.transform[i].position.y = entities.grid_position[i].position.y * grid.dimensions;
+	    entities.transform[i].position.z = entities.grid_position[i].position.z * grid.dimensions;
 	}
     }
 }
