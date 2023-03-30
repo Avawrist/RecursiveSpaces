@@ -6,11 +6,12 @@
 # GRID_POSITION 5
 # STATE         6
 # PLAYER        7
+# COLLISION     8
 NONE 0          - 6 -1
-CHEST 1         - 0 1 2 5 6 -1 
+CHEST 1         - 0 1 2 5 6 8 -1 
 GRID 2          - 6 -1
 CAMERA 3        - 0 3 6 -1
 DIR_LIGHT 4     - 4 6 -1
 PLAYER 5        - 0 1 5 6 7 -1
-BLOCK 6         - 0 1 5 6 -1
+BLOCK 6         - 0 1 5 6 8 -1
 SPECIAL_BLOCK 7 - 0 1 5 6 -1

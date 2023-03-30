@@ -28,8 +28,8 @@ void gameInit(GameWindow& game_window, InputManager& input_manager);
 
 void gameUpdateStates(ActiveEntities& entities);
 
-void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager);
-
+void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager);
+    
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -87,8 +87,19 @@ int main()
 	{
 	    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
 				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
+	    if(x == 0 || x == MAX_WIDTH - 1 || z == 0 || z == MAX_LENGTH - 1)
+	    {
+		activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
+				       Vec3F((float)x, 1.0f, (float)z), BLOCK);
+	    }
 	}
     }
+    
+    // Special Blocks
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
+    
+    // Player
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
     
     // DirLight
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
@@ -134,25 +145,13 @@ void gameInit(GameWindow& game_window, InputManager& input_manager)
     gameUpdateInputs(input_manager, game_window);
 }
 
-void gameUpdateStates(ActiveEntities& entities)
+void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager)
 {
     for(uint i = 0; i < entities.count; i++)
     {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_STATE])
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_PLAYER])
 	{
-	    entities.state[i].input_cooldown -= 1;
-	    entities.state[i].input_cooldown = (int)clamp((float)entities.state[i].input_cooldown,
-						           0, INPUT_COOLDOWN_DUR);
-	}
-    }
-}
-
-void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager)
-{
-    for(uint i = 0; i < entities.count; i++)
-    {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
-	{
+	    // Update grid position
 	    Vec3F cur_grid_pos = entities.grid_position[i].position;
 	    Vec3F new_grid_pos = cur_grid_pos;
 
@@ -203,9 +202,35 @@ void gameUpdateGridPositions(ActiveEntities& entities, LevelGrid& grid, InputMan
 		    }
 		}
 	    }
+
+	    // Check neighbor and set player destination accordingly
+	    int neighbor_id = grid.grid[(int)new_grid_pos.x][(int)new_grid_pos.y][(int)new_grid_pos.z];
+	    if(neighbor_id > -1 && !entities.state[neighbor_id].inactive) // will early out if ID is invalid
+	    {
+		uint neighbor_type = entities.type[neighbor_id];
+		if(entities.entity_templates.table[neighbor_type][COMPONENT_COLLISION])
+		{
+		    new_grid_pos = cur_grid_pos;
+		}
+	    }
+
+	    // Move player
 	    levelGridRemoveEntity(grid, cur_grid_pos);
 	    levelGridSetEntity(grid, entities, new_grid_pos, i);
 	    entities.grid_position[i].position = new_grid_pos;
+	}
+    }
+}
+
+void gameUpdateStates(ActiveEntities& entities)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_STATE])
+	{
+	    entities.state[i].input_cooldown -= 1;
+	    entities.state[i].input_cooldown = (int)clamp((float)entities.state[i].input_cooldown,
+						           0, INPUT_COOLDOWN_DUR);
 	}
     }
 }
@@ -311,8 +336,8 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Update States
     gameUpdateStates(active_entities);
     
-    // Update Grid Positions
-    gameUpdateGridPositions(active_entities, level_grid, input_manager);
+    // Update Player
+    gameUpdatePlayer(active_entities, level_grid, input_manager);
     
     // Update Transforms
     gameUpdateTransforms(active_entities, level_grid);
