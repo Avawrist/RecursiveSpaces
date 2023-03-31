@@ -41,6 +41,9 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
+int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities,
+			   Vec3F cur_grid_position, Vec3F new_grid_position);
+
 //////////
 // Main //
 //////////
@@ -87,6 +90,7 @@ int main()
 	{
 	    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
 				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
+	    
 	    if(x == 0 || x == MAX_WIDTH - 1 || z == 0 || z == MAX_LENGTH - 1)
 	    {
 		activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
@@ -97,6 +101,8 @@ int main()
     
     // Special Blocks
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(4.0f, 1.0f, 4.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(8.0f, 1.0f, 8.0f), SPECIAL_BLOCK);
     
     // Player
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
@@ -151,73 +157,49 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
     {
 	if(entities.entity_templates.table[entities.type[i]][COMPONENT_PLAYER])
 	{
-	    // Update grid position
+	    // Current and target positions
 	    Vec3F cur_grid_pos = entities.grid_position[i].position;
 	    Vec3F new_grid_pos = cur_grid_pos;
 
+	    // Set target position based on input
 	    if(entities.state[i].input_cooldown == 0)
 	    {
 		// Down
 		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
 		{
-		    if(cur_grid_pos.z + 1 >= 0.0f && cur_grid_pos.z + 1 < MAX_LENGTH)
-		    {
-			new_grid_pos = Vec3F(cur_grid_pos.x,
-					     cur_grid_pos.y,
-					     cur_grid_pos.z + 1);
-			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    }
+		    new_grid_pos = Vec3F(cur_grid_pos.x,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z + 1);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Up
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
 		{
-		    if(cur_grid_pos.z - 1 >= 0.0f && cur_grid_pos.z - 1 < MAX_LENGTH)
-		    {
-			new_grid_pos = Vec3F(cur_grid_pos.x,
-					     cur_grid_pos.y,
-					     cur_grid_pos.z - 1);
-			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    }
+		    new_grid_pos = Vec3F(cur_grid_pos.x,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z - 1);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Left
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
 		{
-		    if(cur_grid_pos.x - 1 >= 0.0f && cur_grid_pos.x - 1 < MAX_WIDTH)
-		    {
-			new_grid_pos = Vec3F(cur_grid_pos.x - 1,
-					     cur_grid_pos.y,
-					     cur_grid_pos.z);
-			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    }
+		    new_grid_pos = Vec3F(cur_grid_pos.x - 1,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Right
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
 		{
-		    if(cur_grid_pos.x + 1 >= 0.0f && cur_grid_pos.x + 1 < MAX_WIDTH)
-		    {
-			new_grid_pos = Vec3F(cur_grid_pos.x + 1,
-					     cur_grid_pos.y,
-					     cur_grid_pos.z);
-			entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    }
+		    new_grid_pos = Vec3F(cur_grid_pos.x + 1,
+					 cur_grid_pos.y,
+					 cur_grid_pos.z);
+		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 	    }
 
-	    // Check neighbor and set player destination accordingly
-	    int neighbor_id = grid.grid[(int)new_grid_pos.x][(int)new_grid_pos.y][(int)new_grid_pos.z];
-	    if(neighbor_id > -1 && !entities.state[neighbor_id].inactive) // will early out if ID is invalid
-	    {
-		uint neighbor_type = entities.type[neighbor_id];
-		if(entities.entity_templates.table[neighbor_type][COMPONENT_COLLISION])
-		{
-		    new_grid_pos = cur_grid_pos;
-		}
-	    }
-
-	    // Move player
-	    levelGridRemoveEntity(grid, cur_grid_pos);
-	    levelGridSetEntity(grid, entities, new_grid_pos, i);
-	    entities.grid_position[i].position = new_grid_pos;
+	    // Attempt to move player and subsequent entities based on target
+	    gameMoveEntitiesOnGrid(grid, entities, cur_grid_pos, new_grid_pos);
 	}
     }
 }
@@ -409,4 +391,54 @@ void gameUpdateInputs(InputManager& im, GameWindow& game_window)
     
     // Get inputs received this frame
     platformGetInputsThisFrame(im, game_window);
+}
+
+//////////////////////
+// Helper functions //
+//////////////////////
+
+int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_grid_pos, Vec3F new_grid_pos)
+{
+    // Recursive function
+    // Returns 1 on success, 0 on failure
+
+    // Check that target position is valid (within the grid)
+    if(new_grid_pos.x < 0.0f || new_grid_pos.x >= MAX_WIDTH ||
+       new_grid_pos.y < 0.0f || new_grid_pos.y >= MAX_HEIGHT ||
+       new_grid_pos.z < 0.0f || new_grid_pos.z >= MAX_LENGTH)
+    {
+	return 0;
+    }
+    
+    // Get entity ID for moving later. If -1, this call is invalid and should fail. 
+    int entity_id = grid.grid[(int)cur_grid_pos.x][(int)cur_grid_pos.y][(int)cur_grid_pos.z];
+    if(entity_id <= -1) {return 0;}
+    
+    // Check neighbor and set entity destination accordingly
+    int neighbor_id = grid.grid[(int)new_grid_pos.x][(int)new_grid_pos.y][(int)new_grid_pos.z];
+    if(neighbor_id > -1 && !entities.state[neighbor_id].inactive) // will early out if ID is invalid
+    {
+	// If target destination contains entity with collision, move fails
+	uint neighbor_type = entities.type[neighbor_id];
+	if(entities.entity_templates.table[neighbor_type][COMPONENT_COLLISION])
+	{
+	    return 0;
+	}
+
+	// If target destination contains a pushable entity, try to push it.
+	// If push fails, move fails. 
+	if(entities.entity_templates.table[neighbor_type][COMPONENT_PUSHABLE])
+	{
+	    Vec3F move_dir       = new_grid_pos - cur_grid_pos;
+	    Vec3F n_cur_grid_pos = entities.grid_position[neighbor_id].position;
+	    Vec3F n_new_grid_pos = n_cur_grid_pos + move_dir;
+	    if(!gameMoveEntitiesOnGrid(grid, entities, n_cur_grid_pos, n_new_grid_pos)) {return 0;}
+	}
+    }
+
+    // If none of the fail conditions were met, safe to move the entity
+    levelGridRemoveEntity(grid, cur_grid_pos);
+    levelGridSetEntity(grid, entities, new_grid_pos, entity_id);
+    entities.grid_position[entity_id].position = new_grid_pos;
+    return 1;
 }
