@@ -223,12 +223,25 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
     {
 	if(entities.entity_templates.table[entities.type[i]][COMPONENT_AI])
 	{
-	    int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
-	    int new_z = ((rand() % 3) - 1) * (new_x == 0);
-	    Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
-	    Vec3F cur_pos = entities.grid_position[i].position;
+	    if(entities.ai[i].next_move == MOVE_WALK)
+	    {
+		int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
+		int new_z = ((rand() % 3) - 1) * (new_x == 0);
+		Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
+		Vec3F cur_pos = entities.grid_position[i].position;
 	    
-	    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+		gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+	    }
+
+	    else if(entities.ai[i].next_move == MOVE_SPECIAL)
+	    {
+		Vec3F move_dir = Vec3F(0.0f, 1.0f, 0.0f);
+		Vec3F cur_pos = entities.grid_position[i].position;
+
+		gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+	    }
+
+	    entities.ai[i].next_move = rand() % 2;
 	}
     }
     level.turn = TURN_PLAYER;

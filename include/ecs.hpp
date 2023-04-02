@@ -133,6 +133,23 @@ typedef struct State
     State();
 } State;
 
+//////////////////
+// Component AI //
+//////////////////
+
+typedef enum Moves
+{
+    MOVE_WALK = 0,
+    MOVE_SPECIAL
+} Moves;
+
+typedef struct AI
+{
+    Vec3F face_dir;
+    uint  next_move;
+    AI();
+} AI;
+
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -149,6 +166,7 @@ typedef struct ActiveEntities
     DirLight     dir_light[MAX_ENTITIES];
     GridPosition grid_position[MAX_ENTITIES];
     State        state[MAX_ENTITIES];
+    AI           ai[MAX_ENTITIES];
     uint         count;
     ActiveEntities();
 } ActiveEntities;

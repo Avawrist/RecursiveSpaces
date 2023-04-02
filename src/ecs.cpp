@@ -154,6 +154,16 @@ State::State()
     input_cooldown = 0;
 }
 
+///////////////
+// Struct AI //
+///////////////
+
+AI::AI()
+{
+    face_dir  = Vec3F(0.0f, 0.0f, 1.0f);
+    next_move = MOVE_WALK;
+}
+
 ////////////////////////////
 // Struct EntityTemplates //
 ////////////////////////////
@@ -264,6 +274,7 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 	    entities.camera[i]        = entities.camera[entities.count - 1];
 	    entities.dir_light[i]     = entities.dir_light[entities.count - 1];
 	    entities.state[i]         = entities.state[entities.count - 1];
+	    entities.ai[i]            = entities.ai[entities.count - 1];
 	    // Copy replacement entity's type last
 	    entities.type[i] = entities.type[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability
