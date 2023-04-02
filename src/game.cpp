@@ -29,7 +29,9 @@ void gameInit(GameWindow& game_window, InputManager& input_manager);
 void gameUpdateStates(ActiveEntities& entities);
 
 void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager);
-    
+
+void gameUpdateAI(ActiveEntities& entities, LevelGrid& grid);
+
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -91,7 +93,7 @@ int main()
 	    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
 				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
 	    
-	    if(x == 0 || x == MAX_WIDTH - 1 || z == 0 || z == MAX_LENGTH - 1)
+	    if(x == 0)
 	    {
 		activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
 				       Vec3F((float)x, 1.0f, (float)z), BLOCK);
@@ -103,6 +105,10 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(4.0f, 1.0f, 4.0f), SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(8.0f, 1.0f, 8.0f), SPECIAL_BLOCK);
+
+    // Dogs
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(2.0f, 1.0f, 2.0f), DOG);
+    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(17.0f, 1.0f, 17.0f), DOG);
     
     // Player
     activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
@@ -200,6 +206,22 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
 
 	    // Attempt to move player and subsequent entities based on target
 	    gameMoveEntitiesOnGrid(grid, entities, cur_grid_pos, new_grid_pos);
+	}
+    }
+}
+
+void gameUpdateAI(ActiveEntities& entities, LevelGrid& grid)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_AI])
+	{
+	    int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
+	    int new_z = ((rand() % 3) - 1) * (new_x == 0);
+	    Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
+	    Vec3F cur_pos = entities.grid_position[i].position;
+	    
+	    gameMoveEntitiesOnGrid(grid, entities, cur_pos, cur_pos + move_dir);
 	}
     }
 }
@@ -320,6 +342,9 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     
     // Update Player
     gameUpdatePlayer(active_entities, level_grid, input_manager);
+
+    // Update AI
+    gameUpdateAI(active_entities, level_grid);
     
     // Update Transforms
     gameUpdateTransforms(active_entities, level_grid);
@@ -402,6 +427,12 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
     // Recursive function
     // Returns 1 on success, 0 on failure
 
+    // Check that target position is not current position
+    if(new_grid_pos == cur_grid_pos)
+    {
+	return 0;
+    }
+    
     // Check that target position is valid (within the grid)
     if(new_grid_pos.x < 0.0f || new_grid_pos.x >= MAX_WIDTH ||
        new_grid_pos.y < 0.0f || new_grid_pos.y >= MAX_HEIGHT ||

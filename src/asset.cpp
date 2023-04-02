@@ -1001,6 +1001,15 @@ AssetTableDir::AssetTableDir()
     table[SPECIAL_BLOCK][SOUND01]   = NULL;
     table[SPECIAL_BLOCK][SOUND02]   = NULL;
     table[SPECIAL_BLOCK][SOUND03]   = NULL;
+
+    // Dog Entity
+    table[DOG][TEXTURE_D] = "..\\data\\assets\\textures\\hearts.bmp";;
+    table[DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
+    table[DOG][TEXTURE_S] = NULL;
+    table[DOG][MESH01]    = "..\\data\\assets\\meshes\\sphere.obj";
+    table[DOG][SOUND01]   = NULL;
+    table[DOG][SOUND02]   = NULL;
+    table[DOG][SOUND03]   = NULL;
 }
 
 ///////////////////////////

@@ -30,6 +30,7 @@ typedef enum EntityType
     PLAYER,
     BLOCK,
     SPECIAL_BLOCK,
+    DOG,
     TOTAL_ENTITY_TYPES
 } EntityType;
 
@@ -49,6 +50,7 @@ typedef enum Component
     COMPONENT_PLAYER,
     COMPONENT_COLLISION,
     COMPONENT_PUSHABLE,
+    COMPONENT_AI,
     TOTAL_COMPONENT_TYPES
 } Component;
 
