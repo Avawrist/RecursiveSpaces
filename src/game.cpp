@@ -28,9 +28,9 @@ void gameInit(GameWindow& game_window, InputManager& input_manager);
 
 void gameUpdateStates(ActiveEntities& entities);
 
-void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager);
+void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& input_manager);
 
-void gameUpdateAI(ActiveEntities& entities, LevelGrid& grid);
+void gameUpdateAI(ActiveEntities& entities, Level& level);
 
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
@@ -39,7 +39,7 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* ftexture_p, LevelGrid& level_grid, DebugGrid* grid_p);
+			FrameTexture* ftexture_p, Level& level, DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
@@ -66,7 +66,7 @@ int main()
     ////////////////
     // Level Grid //
     ////////////////
-    LevelGrid* level_grid_p = new LevelGrid();
+    Level* level_p = new Level();
     
     /////////////////
     // Temp Assets //
@@ -78,8 +78,11 @@ int main()
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     // Create Debug Grid Object
-    DebugGrid* grid_p = new DebugGrid(level_grid_p->dimensions, MAX_WIDTH + 1, MAX_LENGTH + 1,
-				      Vec3F(-level_grid_p->dimensions * 0.5f, 0.0f, -level_grid_p->dimensions * 0.5f));
+    DebugGrid* grid_p = new DebugGrid(level_p->grid.dimensions,
+				      MAX_WIDTH + 1,
+				      MAX_LENGTH + 1,
+				      Vec3F(-level_p->grid.dimensions * 0.5f, 0.0f,
+					    -level_p->grid.dimensions * 0.5f));
 
     ///////////////////
     // Test Entities //
@@ -90,34 +93,34 @@ int main()
     {
 	for(int z = 0; z < MAX_LENGTH; z++)
 	{
-	    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
+	    activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
 				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
 	    
 	    if(x == 0)
 	    {
-		activeEntitiesCreateEntity(*active_entities_p, *level_grid_p,
+		activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
 				       Vec3F((float)x, 1.0f, (float)z), BLOCK);
 	    }
 	}
     }
     
     // Special Blocks
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(4.0f, 1.0f, 4.0f), SPECIAL_BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(8.0f, 1.0f, 8.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 4.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(8.0f, 1.0f, 8.0f), SPECIAL_BLOCK);
 
     // Dogs
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(2.0f, 1.0f, 2.0f), DOG);
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(17.0f, 1.0f, 17.0f), DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(2.0f, 1.0f, 2.0f), DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(17.0f, 1.0f, 17.0f), DOG);
     
     // Player
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
     
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, *level_grid_p, Vec3F(60.0f, 60.0f, 60.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(60.0f, 60.0f, 60.0f), CAMERA);
 
     ///////////////
     // Game Loop //
@@ -125,7 +128,7 @@ int main()
     while(!game_window.close)
     {	
 	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
-			    asset_manager, ftexture_p, *level_grid_p, grid_p);
+			    asset_manager, ftexture_p, *level_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 	
 	// Close condition
@@ -138,7 +141,7 @@ int main()
     platformFreeWindow(game_window);
     
     // Delete pointers to structs on the heap
-    delete level_grid_p;
+    delete level_p;
     delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
@@ -157,7 +160,7 @@ void gameInit(GameWindow& game_window, InputManager& input_manager)
     gameUpdateInputs(input_manager, game_window);
 }
 
-void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& input_manager)
+void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& input_manager)
 {
     for(uint i = 0; i < entities.count; i++)
     {
@@ -177,6 +180,7 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
 					 cur_grid_pos.y,
 					 cur_grid_pos.z + 1);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    level.turn = TURN_AI;
 		}
 		// Up
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
@@ -185,6 +189,7 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
 					 cur_grid_pos.y,
 					 cur_grid_pos.z - 1);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    level.turn = TURN_AI;
 		}
 		// Left
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
@@ -193,6 +198,7 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    level.turn = TURN_AI;
 		}
 		// Right
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
@@ -201,16 +207,17 @@ void gameUpdatePlayer(ActiveEntities& entities, LevelGrid& grid, InputManager& i
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    level.turn = TURN_AI;
 		}
 	    }
 
 	    // Attempt to move player and subsequent entities based on target
-	    gameMoveEntitiesOnGrid(grid, entities, cur_grid_pos, new_grid_pos);
+	    gameMoveEntitiesOnGrid(level.grid, entities, cur_grid_pos, new_grid_pos);
 	}
     }
 }
 
-void gameUpdateAI(ActiveEntities& entities, LevelGrid& grid)
+void gameUpdateAI(ActiveEntities& entities, Level& level)
 {
     for(uint i = 0; i < entities.count; i++)
     {
@@ -221,9 +228,10 @@ void gameUpdateAI(ActiveEntities& entities, LevelGrid& grid)
 	    Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
 	    Vec3F cur_pos = entities.grid_position[i].position;
 	    
-	    gameMoveEntitiesOnGrid(grid, entities, cur_pos, cur_pos + move_dir);
+	    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
 	}
     }
+    level.turn = TURN_PLAYER;
 }
 
 void gameUpdateStates(ActiveEntities& entities)
@@ -331,7 +339,7 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* ftexture_p, LevelGrid& level_grid, DebugGrid* grid_p)
+			FrameTexture* ftexture_p, Level& level, DebugGrid* grid_p)
 {
     ////////////
     // Update //
@@ -341,13 +349,13 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     gameUpdateStates(active_entities);
     
     // Update Player
-    gameUpdatePlayer(active_entities, level_grid, input_manager);
+    if(level.turn == TURN_PLAYER) {gameUpdatePlayer(active_entities, level, input_manager);}
 
     // Update AI
-    gameUpdateAI(active_entities, level_grid);
+    else if (level.turn == TURN_AI) {gameUpdateAI(active_entities, level);}
     
     // Update Transforms
-    gameUpdateTransforms(active_entities, level_grid);
+    gameUpdateTransforms(active_entities, level.grid);
     
     // Update soundstream
     soundStreamUpdate(sound_stream_p);
@@ -359,7 +367,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
    
     // Remove Inactive Entities - Must be run after all other entity updates
-    activeEntitiesRemoveInactives(active_entities, level_grid);
+    activeEntitiesRemoveInactives(active_entities, level.grid);
     
     ///////////////////////////////
     // Render Pass 1 -  Entities //

@@ -171,6 +171,23 @@ typedef struct LevelGrid
     LevelGrid();
 } LevelGrid;
 
+//////////////////
+// Struct Level //
+//////////////////
+
+typedef enum Turns
+{
+    TURN_PLAYER = 0,
+    TURN_AI
+} Turns;
+
+typedef struct Level
+{
+    LevelGrid grid;
+    uint      turn;
+    Level();
+} Level;
+
 /////////////////////////
 // Function Prototypes //
 /////////////////////////

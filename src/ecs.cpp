@@ -173,6 +173,15 @@ LevelGrid::LevelGrid()
     memset(grid, -1, MAX_WIDTH * MAX_HEIGHT * MAX_LENGTH * sizeof(int));
 }
 
+//////////////////
+// Struct Level //
+//////////////////
+
+Level::Level()
+{
+    turn = TURN_PLAYER;
+}
+
 //////////////////////////////
 // ActiveEntities Functions //
 //////////////////////////////
