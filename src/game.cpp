@@ -31,7 +31,7 @@ void gameUpdateStates(ActiveEntities& entities);
 void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& input_manager);
 
 void gameUpdateAI(ActiveEntities& entities, Level& level);
-
+    
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -94,24 +94,24 @@ int main()
 	for(int z = 0; z < MAX_LENGTH; z++)
 	{
 	    activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
-				       Vec3F((float)x, 0.0f, (float)z), BLOCK);
-	    
-	    if(x == 0)
-	    {
-		activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
-				       Vec3F((float)x, 1.0f, (float)z), BLOCK);
-	    }
+				       Vec3F((float)x, 0.0f, (float)z), BLOCK);	    
 	}
     }
     
-    // Special Blocks
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 1.0f, 5.0f), SPECIAL_BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 4.0f), SPECIAL_BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(8.0f, 1.0f, 8.0f), SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 1.0f, 1.0f),  BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(6.0f, 1.0f, 11.0f), BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(12.0f, 1.0f, 8.0f), BLOCK);
 
-    // Dogs
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(2.0f, 1.0f, 2.0f), DOG);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(17.0f, 1.0f, 17.0f), DOG);
+    // Small Dogs
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(2.0f, 1.0f, 2.0f),   SMALL_DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 13.0f), SMALL_DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(3.0f, 1.0f, 13.0f), SMALL_DOG);
+    
+    // Medium Dog
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(12.0f, 1.0f, 2.0f), MEDIUM_DOG);
+    
+    // Large Dog
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(7.0f, 1.0f, 8.0f), LARGE_DOG);
     
     // Player
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(10.0f, 1.0f, 10.0f), PLAYER);
@@ -223,6 +223,7 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
     {
 	if(entities.entity_templates.table[entities.type[i]][COMPONENT_AI])
 	{
+	    // If walk, then walk
 	    if(entities.ai[i].next_move == MOVE_WALK)
 	    {
 		int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
@@ -233,18 +234,36 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 		gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
 	    }
 
+	    // If special move, use special move based on additional AI type
 	    else if(entities.ai[i].next_move == MOVE_SPECIAL)
 	    {
-		Vec3F move_dir = Vec3F(0.0f, 1.0f, 0.0f);
-		Vec3F cur_pos = entities.grid_position[i].position;
+		if(entities.entity_templates.table[entities.type[i]][COMPONENT_SMALL_AI])
+		{
+		    OutputDebugStringA("Performing small special move.\n");
+		}
 
-		gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+		else if(entities.entity_templates.table[entities.type[i]][COMPONENT_MEDIUM_AI])
+		{
+		    OutputDebugStringA("Performing medium special move.\n");
+		}
+
+		else if(entities.entity_templates.table[entities.type[i]][COMPONENT_LARGE_AI])
+		{
+		    OutputDebugStringA("Performing large special move.\n");
+		}
 	    }
 
-	    entities.ai[i].next_move = rand() % 2;
+	    // Set next move
+	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_LARGE_AI])
+	    {
+		entities.ai[i].next_move = MOVE_SPECIAL;
+	    }
+	    else
+	    {
+		entities.ai[i].next_move = rand() % 2;
+	    }
 	}
     }
-    level.turn = TURN_PLAYER;
 }
 
 void gameUpdateStates(ActiveEntities& entities)
@@ -362,10 +381,17 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     gameUpdateStates(active_entities);
     
     // Update Player
-    if(level.turn == TURN_PLAYER) {gameUpdatePlayer(active_entities, level, input_manager);}
+    if(level.turn == TURN_PLAYER)
+    {
+	gameUpdatePlayer(active_entities, level, input_manager);
+    }
 
     // Update AI
-    else if (level.turn == TURN_AI) {gameUpdateAI(active_entities, level);}
+    if (level.turn == TURN_AI)
+    {
+	gameUpdateAI(active_entities, level);
+	level.turn = TURN_PLAYER;
+    }
     
     // Update Transforms
     gameUpdateTransforms(active_entities, level.grid);

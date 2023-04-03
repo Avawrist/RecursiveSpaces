@@ -30,7 +30,9 @@ typedef enum EntityType
     PLAYER,
     BLOCK,
     SPECIAL_BLOCK,
-    DOG,
+    SMALL_DOG,
+    MEDIUM_DOG,
+    LARGE_DOG,
     TOTAL_ENTITY_TYPES
 } EntityType;
 
@@ -51,6 +53,9 @@ typedef enum Component
     COMPONENT_COLLISION,
     COMPONENT_PUSHABLE,
     COMPONENT_AI,
+    COMPONENT_SMALL_AI,
+    COMPONENT_MEDIUM_AI,
+    COMPONENT_LARGE_AI,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -177,8 +182,8 @@ typedef struct ActiveEntities
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 20,
-    MAX_LENGTH = 20,
+    MAX_WIDTH  = 15,
+    MAX_LENGTH = 15,
     MAX_HEIGHT = 4
 } GridMeasurements;
 
