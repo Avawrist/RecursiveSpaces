@@ -9,17 +9,15 @@
 # COLLISION     8
 # PUSHABLE      9
 # AI            10
-# SMALL_AI      11
-# MEDIUM_AI     12
-# LARGE_AI      13
+# DOG_STATE     11
 NONE 0          - 6 -1
 CHEST 1         - 0 1 2 5 6 8 -1 
 GRID 2          - 6 -1
 CAMERA 3        - 0 3 6 -1
 DIR_LIGHT 4     - 4 6 -1
-PLAYER 5        - 0 1 5 6 7 8 -1
+PLAYER 5        - 0 1 5 6 7 8 11 -1
 BLOCK 6         - 0 1 5 6 8 -1
 SPECIAL_BLOCK 7 - 0 1 5 6 9 -1
 SMALL_DOG 8     - 0 1 5 6 9 10 11 -1
-MEDIUM_DOG 9    - 0 1 5 6 9 10 12 -1
-LARGE_DOG 10    - 0 1 5 6 9 10 13 -1
+MEDIUM_DOG 9    - 0 1 5 6 9 10 11 -1
+LARGE_DOG 10    - 0 1 5 6 9 10 11 -1

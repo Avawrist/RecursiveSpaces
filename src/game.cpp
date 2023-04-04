@@ -31,7 +31,9 @@ void gameUpdateStates(ActiveEntities& entities);
 void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& input_manager);
 
 void gameUpdateAI(ActiveEntities& entities, Level& level);
-    
+
+void gameUpdateDogStates(ActiveEntities& entities);
+
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -237,24 +239,34 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 	    // If special move, use special move based on additional AI type
 	    else if(entities.ai[i].next_move == MOVE_SPECIAL)
 	    {
-		if(entities.entity_templates.table[entities.type[i]][COMPONENT_SMALL_AI])
+		if(entities.type[i] == SMALL_DOG)
 		{
 		    OutputDebugStringA("Performing small special move.\n");
 		}
 
-		else if(entities.entity_templates.table[entities.type[i]][COMPONENT_MEDIUM_AI])
+		else if(entities.type[i] == MEDIUM_DOG)
 		{
 		    OutputDebugStringA("Performing medium special move.\n");
 		}
 
-		else if(entities.entity_templates.table[entities.type[i]][COMPONENT_LARGE_AI])
+		else if(entities.type[i] == LARGE_DOG)
 		{
-		    OutputDebugStringA("Performing large special move.\n");
+		    // Perform dig special move
+		    Vec3F pos_to_dirty = entities.grid_position[i].position - entities.ai[i].face_dir;
+		    int neighbor_id = levelGridGetEntity(level.grid, pos_to_dirty);
+		    if(neighbor_id > -1)
+		    {
+			uint type = entities.type[neighbor_id];
+			if(entities.entity_templates.table[type][COMPONENT_DOG_STATE])
+			{
+			    entities.dog_state[neighbor_id].filth_level = FILTHY;
+			}
+		    }
 		}
 	    }
 
 	    // Set next move
-	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_LARGE_AI])
+	    if(entities.type[i] == LARGE_DOG)
 	    {
 		entities.ai[i].next_move = MOVE_SPECIAL;
 	    }
@@ -278,7 +290,31 @@ void gameUpdateStates(ActiveEntities& entities)
 	}
     }
 }
-    
+
+void gameUpdateDogStates(ActiveEntities& entities)
+{
+    for(uint i = 0; i < entities.count; i++)
+    {
+	if(entities.entity_templates.table[entities.type[i]][COMPONENT_DOG_STATE])
+	{
+	    // TODO: load this off of a template eventually
+	    if(entities.dog_state[i].first)
+	    {
+		if(entities.type[i] == SMALL_DOG) {entities.dog_state[i].speed_level = 3;}
+		else if(entities.type[i] == MEDIUM_DOG) {entities.dog_state[i].speed_level = 2;}
+		else if(entities.type[i] == LARGE_DOG) {entities.dog_state[i].speed_level = 1;}
+		entities.dog_state[i].first = 0;
+	    }
+
+	    // If dirty, remove from floor
+	    if(entities.dog_state[i].filth_level == FILTHY && entities.type[i] != PLAYER)
+	    {
+		activeEntitiesMarkInactive(entities, i);
+	    }
+	}
+    }
+}
+
 void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
 {
     for(uint i = 0; i < entities.count; i++)
@@ -379,6 +415,9 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 
     // Update States
     gameUpdateStates(active_entities);
+
+    // Update Dog States
+    gameUpdateDogStates(active_entities);
     
     // Update Player
     if(level.turn == TURN_PLAYER)

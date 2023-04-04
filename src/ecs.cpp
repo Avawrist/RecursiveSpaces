@@ -164,6 +164,17 @@ AI::AI()
     next_move = MOVE_WALK;
 }
 
+/////////////////////
+// Struct DogState //
+/////////////////////
+
+DogState::DogState()
+{
+    first       = 1;
+    filth_level = 0;
+    speed_level = 0;
+}
+
 ////////////////////////////
 // Struct EntityTemplates //
 ////////////////////////////
@@ -275,6 +286,7 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 	    entities.dir_light[i]     = entities.dir_light[entities.count - 1];
 	    entities.state[i]         = entities.state[entities.count - 1];
 	    entities.ai[i]            = entities.ai[entities.count - 1];
+	    entities.dog_state[i]     = entities.dog_state[entities.count - 1];
 	    // Copy replacement entity's type last
 	    entities.type[i] = entities.type[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability
@@ -289,6 +301,19 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 /////////////////////////
 // LevelGrid Functions //
 /////////////////////////
+
+int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos)
+{
+    // Check that target position is valid (within the grid)
+    if(pos.x < 0.0f || pos.x >= MAX_WIDTH ||
+       pos.y < 0.0f || pos.y >= MAX_HEIGHT ||
+       pos.z < 0.0f || pos.z >= MAX_LENGTH)
+    {
+	return -1;
+    }
+
+    return level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z];
+}
 
 void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID)
 {

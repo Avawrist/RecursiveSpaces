@@ -53,9 +53,7 @@ typedef enum Component
     COMPONENT_COLLISION,
     COMPONENT_PUSHABLE,
     COMPONENT_AI,
-    COMPONENT_SMALL_AI,
-    COMPONENT_MEDIUM_AI,
-    COMPONENT_LARGE_AI,
+    COMPONENT_DOG_STATE,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -155,6 +153,24 @@ typedef struct AI
     AI();
 } AI;
 
+/////////////////////////
+// Component Dog State //
+/////////////////////////
+
+typedef enum FilthLevels
+{
+    CLEAN = 0,
+    FILTHY
+} FilthLevels;
+
+typedef struct DogState
+{
+    uint first;
+    uint filth_level;
+    uint speed_level;
+    DogState();
+} DogState;
+
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -172,6 +188,7 @@ typedef struct ActiveEntities
     GridPosition grid_position[MAX_ENTITIES];
     State        state[MAX_ENTITIES];
     AI           ai[MAX_ENTITIES];
+    DogState     dog_state[MAX_ENTITIES];
     uint         count;
     ActiveEntities();
 } ActiveEntities;
@@ -236,6 +253,8 @@ Mat4F cameraGetPerspective(const Camera& cam, float ar);
 Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
 
 // LevelGrid Function Prototypes
+int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos);
+
 void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID);
 
 void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
