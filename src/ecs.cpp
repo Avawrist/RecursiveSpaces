@@ -332,3 +332,41 @@ void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos)
     
     level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
 }
+
+Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
+			       Vec3F cur_pos, uint target_type)
+{
+    // Parses all entities on the grid, and returns the grid position of
+    // the nearest sought type. If not found, returns Vec3F(-1.0f).
+
+    Vec3F target_pos(MAX_WIDTH * 2, MAX_HEIGHT * 2, MAX_LENGTH * 2);
+    Vec3F cur_best_distance = cur_pos - target_pos;
+    
+    for(uint x = 0; x < MAX_WIDTH; x++)
+    {
+	for(uint y = 0; y < MAX_HEIGHT; y++)
+	{
+	    for(uint z = 0; z < MAX_LENGTH; z++)
+	    {
+		int id = level_grid.grid[x][y][z];
+		if(id > -1)
+		{
+		    uint type = entities.type[id]; 
+		    if(type == target_type)
+		    {
+			Vec3F pot_new_target = Vec3F((float)x, (float)y, (float)z);
+			Vec3F new_distance = cur_pos - pot_new_target;
+			if(!(pot_new_target == cur_pos) &&
+			   magnitude(new_distance) < magnitude(cur_best_distance))
+			{
+			    target_pos        = pot_new_target;
+			    cur_best_distance = cur_pos - target_pos;
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+    return target_pos;
+}

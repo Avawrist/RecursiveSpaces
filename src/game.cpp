@@ -48,6 +48,8 @@ void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities,
 			   Vec3F cur_grid_position, Vec3F new_grid_position);
 
+Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
+
 //////////
 // Main //
 //////////
@@ -241,7 +243,11 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 	    {
 		if(entities.type[i] == SMALL_DOG)
 		{
-		    OutputDebugStringA("Performing small special move.\n");
+		    // Determine target position
+		    Vec3F cur_pos    = entities.grid_position[i].position;
+		    Vec3F target_pos = levelGridFindNearestType(level.grid, entities, cur_pos, SMALL_DOG);
+		    //Vec3F move_dir   = aStarFindPath(level.grid, cur_pos, target_pos);
+		    //gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
 		}
 
 		else if(entities.type[i] == MEDIUM_DOG)
@@ -252,21 +258,28 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 		else if(entities.type[i] == LARGE_DOG)
 		{
 		    // Perform dig special move
-		    Vec3F pos_to_dirty = entities.grid_position[i].position - entities.ai[i].face_dir;
-		    int neighbor_id = levelGridGetEntity(level.grid, pos_to_dirty);
-		    if(neighbor_id > -1)
+		    Vec3F center_pos_to_dirty = entities.grid_position[i].position - (entities.ai[i].face_dir * 2.0f);
+		    for(int x = -1; x < 2; x++)
 		    {
-			uint type = entities.type[neighbor_id];
-			if(entities.entity_templates.table[type][COMPONENT_DOG_STATE])
+			for(int z = -1; z < 2; z++)
 			{
-			    entities.dog_state[neighbor_id].filth_level = FILTHY;
+			    Vec3F pos_to_dirty = center_pos_to_dirty + Vec3F((float)x, 0.0f, (float)z);
+			    int neighbor_id = levelGridGetEntity(level.grid, pos_to_dirty);
+			    if(neighbor_id > -1)
+			    {
+				uint type = entities.type[neighbor_id];
+				if(entities.entity_templates.table[type][COMPONENT_DOG_STATE])
+				{
+				    entities.dog_state[neighbor_id].filth_level = FILTHY;
+				}
+			    }
 			}
 		    }
 		}
 	    }
 
 	    // Set next move
-	    if(entities.type[i] == LARGE_DOG)
+	    if(entities.type[i] == LARGE_DOG || entities.type[i] == SMALL_DOG)
 	    {
 		entities.ai[i].next_move = MOVE_SPECIAL;
 	    }
@@ -558,4 +571,10 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
     levelGridSetEntity(grid, entities, new_grid_pos, entity_id);
     entities.grid_position[entity_id].position = new_grid_pos;
     return 1;
+}
+
+Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
+{
+    Vec3F return_vec(1.0f, 1.0f, 1.0f);
+    return return_vec;
 }

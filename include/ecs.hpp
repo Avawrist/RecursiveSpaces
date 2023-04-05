@@ -259,4 +259,7 @@ void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F p
 
 void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
 
+Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
+			       Vec3F cur_pos, uint target_type);
+
 #endif
