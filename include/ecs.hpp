@@ -13,8 +13,10 @@
 // Win libs
 #include <windows.h>
 
-// C++ Utility Lib
+// C/C++ Utility Lib
+#include <stdlib.h>
 #include <cstring>
+#include <vector>
 
 //////////////////
 // Entity Types //
@@ -146,6 +148,15 @@ typedef enum Moves
     MOVE_SPECIAL
 } Moves;
 
+typedef struct Node
+{
+    Vec3F grid_pos;
+    uint g_cost;
+    uint h_cost;
+    uint f_cost;
+    Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos);
+} Node;
+
 typedef struct AI
 {
     Vec3F face_dir;
@@ -261,5 +272,8 @@ void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
 
 Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type);
+
+// AI Function Prototypes
+Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
 
 #endif

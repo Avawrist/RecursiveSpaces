@@ -246,8 +246,8 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 		    // Determine target position
 		    Vec3F cur_pos    = entities.grid_position[i].position;
 		    Vec3F target_pos = levelGridFindNearestType(level.grid, entities, cur_pos, SMALL_DOG);
-		    //Vec3F move_dir   = aStarFindPath(level.grid, cur_pos, target_pos);
-		    //gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+		    Vec3F move_dir   = aStarFindPath(level.grid, cur_pos, target_pos);
+		    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
 		}
 
 		else if(entities.type[i] == MEDIUM_DOG)
@@ -571,10 +571,4 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
     levelGridSetEntity(grid, entities, new_grid_pos, entity_id);
     entities.grid_position[entity_id].position = new_grid_pos;
     return 1;
-}
-
-Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
-{
-    Vec3F return_vec(1.0f, 1.0f, 1.0f);
-    return return_vec;
 }

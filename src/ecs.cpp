@@ -158,6 +158,18 @@ State::State()
 // Struct AI //
 ///////////////
 
+Node::Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos)
+{
+    grid_pos = _grid_pos;
+    Vec2F dist_from_start  = Vec2F((float)abs((int)start_pos.x - (int)grid_pos.x),
+	                           (float)abs((int)start_pos.z - (int)grid_pos.z));
+    Vec2F dist_from_target = Vec2F((float)abs((int)target_pos.x - (int)grid_pos.x),
+	                           (float)abs((int)target_pos.z - (int)grid_pos.z));
+    g_cost = (uint)(dist_from_start.x + dist_from_start.y);
+    h_cost = (uint)(dist_from_target.x + dist_from_target.y);
+    f_cost = g_cost + h_cost;
+}
+
 AI::AI()
 {
     face_dir  = Vec3F(0.0f, 0.0f, 1.0f);
@@ -369,4 +381,44 @@ Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
     }
 
     return target_pos;
+}
+
+// AI Functions
+Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
+{
+    _assert(target_grid_pos.x >= 0 && target_grid_pos.x < MAX_WIDTH);
+    _assert(target_grid_pos.y >= 0 && target_grid_pos.y < MAX_HEIGHT);
+    _assert(target_grid_pos.z >= 0 && target_grid_pos.z < MAX_LENGTH);
+
+    std::vector<Node> nodes;
+    // Put inside of a loop, while destination has not been found
+    for(int x = -1; x < 2; x++)
+    {
+	for(int z = -1; z < 2; z++)
+	{
+	    Vec3F neighbor_offset((float)x, 0.0f, (float)z);
+	    if(!(neighbor_offset == Vec3F(0.0f, 0.0f, 0.0f)))
+	    {
+		Node neighbor_node(cur_grid_pos, cur_grid_pos + neighbor_offset, target_grid_pos);
+		nodes.push_back(neighbor_node);
+	    }
+	}
+    }
+
+    // Placeholder code until full algorithm is implemented
+    Node cur_cheapest_node(Vec3F(0.0f, 0.0f, 0.0f),
+			   Vec3F(0.0f, 0.0f, 0.0f),
+			   Vec3F((float)(MAX_WIDTH * 3), (float)(MAX_HEIGHT * 3), (float)(MAX_LENGTH * 3)));
+    for(uint i = 0; i < nodes.size(); i++)
+    {
+	Node node = nodes[i];
+	if(node.f_cost < cur_cheapest_node.f_cost)
+	{
+	    cur_cheapest_node = node;
+	}
+    }
+
+    Vec3F destination = cur_cheapest_node.grid_pos - cur_grid_pos;
+    
+    return destination;
 }

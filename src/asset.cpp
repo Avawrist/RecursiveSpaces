@@ -985,7 +985,7 @@ AssetTableDir::AssetTableDir()
     table[PLAYER][SOUND03]   = NULL;
     
     // Block Entity
-    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\orange.bmp";;
+    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";;
     table[BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[BLOCK][TEXTURE_S] = NULL;
     table[BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";;
@@ -1003,7 +1003,7 @@ AssetTableDir::AssetTableDir()
     table[SPECIAL_BLOCK][SOUND03]   = NULL;
 
     // Small Dog Entity
-    table[SMALL_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";;
+    table[SMALL_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\orange.bmp";;
     table[SMALL_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[SMALL_DOG][TEXTURE_S] = NULL;
     table[SMALL_DOG][MESH01]    = "..\\data\\assets\\meshes\\small_dog.obj";
