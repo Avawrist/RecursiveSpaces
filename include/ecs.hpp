@@ -154,6 +154,8 @@ typedef struct Node
     uint g_cost;
     uint h_cost;
     uint f_cost;
+    uint closed;
+    Node();
     Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos);
 } Node;
 
@@ -214,6 +216,12 @@ typedef enum GridMeasurements
     MAX_LENGTH = 15,
     MAX_HEIGHT = 4
 } GridMeasurements;
+
+typedef enum EntityCodes
+{
+    NO_ENTITY     = -1,
+    INVALID_RANGE = -2
+}
 
 typedef struct LevelGrid
 {
