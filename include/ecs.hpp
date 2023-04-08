@@ -154,9 +154,9 @@ typedef struct Node
     uint g_cost;
     uint h_cost;
     uint f_cost;
-    uint closed;
+    Node* parent_p;
     Node();
-    Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos);
+    Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos, Node* _parent_p);
 } Node;
 
 typedef struct AI
@@ -221,7 +221,7 @@ typedef enum EntityCodes
 {
     NO_ENTITY     = -1,
     INVALID_RANGE = -2
-}
+} EntityCodes;
 
 typedef struct LevelGrid
 {

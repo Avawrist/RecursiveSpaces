@@ -164,10 +164,10 @@ Node::Node()
     g_cost = MAX_WIDTH * MAX_LENGTH * 3;
     h_cost = MAX_WIDTH * MAX_LENGTH * 3;
     f_cost = g_cost + h_cost;
-    closed = 0;
+    parent_p = NULL;
 }
 
-Node::Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos)
+Node::Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos, Node* _parent_p)
 {
     grid_pos = _grid_pos;
     Vec2F dist_from_start  = Vec2F((float)abs((int)start_pos.x - (int)grid_pos.x),
@@ -177,7 +177,7 @@ Node::Node(Vec3F start_pos, Vec3F _grid_pos, Vec3F target_pos)
     g_cost = (uint)(dist_from_start.x + dist_from_start.y);
     h_cost = (uint)(dist_from_target.x + dist_from_target.y);
     f_cost = g_cost + h_cost;
-    closed = 0;
+    parent_p = _parent_p;
 }
 
 AI::AI()
@@ -398,62 +398,95 @@ Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
 // AI Functions
 Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
 {
+    // TODO: Add exception handling if target is unreachable
+
+    // TODO: Level_grid and vector positions I'm using are not aligned - entities on 0 height,
+    // but I am searching at height 1
+    
     _assert(target_grid_pos.x >= 0 && target_grid_pos.x < MAX_WIDTH);
     _assert(target_grid_pos.y >= 0 && target_grid_pos.y < MAX_HEIGHT);
     _assert(target_grid_pos.z >= 0 && target_grid_pos.z < MAX_LENGTH);
 
-    Node node_grid[MAX_WIDTH][MAX_LENGTH];
-    Node cur_cheapest_node;
+    Node open[MAX_WIDTH * MAX_LENGTH];
+    uint open_size = 0;
+    Node closed[MAX_WIDTH * MAX_LENGTH];
+    uint closed_size = 0;
+    Node cur_cheapest_node(cur_grid_pos, cur_grid_pos, target_grid_pos, NULL);
     
-    do
+    while(!(cur_cheapest_node.grid_pos == target_grid_pos))
     {
+	// Add the starting or current cheapest node to closed
+	closed[closed_size] = cur_cheapest_node;
+	closed_size++;
+	
         // Get open, walkable neighbors and update the node grid
         for(int x = -1; x < 2; x += 2)
         {
 	    for(int z = -1; z < 2; z += 2)
 	    {
 	        Vec3F neighbor_offset((float)x, 0.0f, (float)z);
-		Vec3F node_pos = cur_grid_pos + neighbor_offset;
+		Vec3F node_pos = cur_cheapest_node.grid_pos + neighbor_offset;
+		Node  neighbor_node(cur_cheapest_node.grid_pos,
+				    node_pos,
+				    target_grid_pos,
+				    closed + closed_size - 1);
 		// If there is no entity occupying the node, add it to the node grid
 		// as a candidate
-		if(levelGridGetEntity(level_grid, node_pos) == NO_ENTITY &&
-		   !node_grid[(int)node_pos.x][(int)node_pos.z].closed)
+		if(levelGridGetEntity(level_grid, node_pos) == NO_ENTITY)
 		{
-		    Node neighbor_node(cur_grid_pos,
-				       node_pos,
-				       target_grid_pos);
-		    node_grid[(int)node_pos.x][(int)node_pos.z] = neighbor_node;
+		    // If the node pos is found in closed, don't add the node to open
+		    uint found = 0;
+		    for(uint i = 0; i < closed_size; i++)
+		    {
+			if(closed[i].grid_pos == node_pos)
+			{
+			    found = 1;
+			    break;
+			}
+		    }
+
+		    if(!found)
+		    {
+			// If the node pos is found in open, and the new node is evaluated with a lower f cost
+			// then overwrite the entry
+			for(uint i = 0; i < open_size; i++)
+			{
+			    if(open[i].grid_pos == neighbor_node.grid_pos &&
+			       neighbor_node.f_cost < open[i].f_cost)
+			    {
+				open[i] = neighbor_node;
+				found = 1;
+			    }
+			}
+
+			// Otherwise, add it as a new open node
+			if(!found)
+			{
+			    open[open_size] = neighbor_node;
+			    open_size++;
+			}
+		    }
 		}
 	    }
         }
 
 	// Find the next cheapest node to investigate
-	for(uint x = 0; x < MAX_WIDTH; x++)
+	for(uint i = 0; i < open_size; i++)
 	{
-	    for(uint z = 0; z < MAX_LENGTH; z++)
+	    if(open[i].f_cost < cur_cheapest_node.f_cost ||
+	       ((open[i].f_cost == cur_cheapest_node.f_cost) &&
+		(open[i].h_cost < open[i].h_cost)))
 	    {
-		if(!node_grid[x][z].closed)
-		{
-		    if(node_grid[x][z].f_cost < cur_cheapest_node.f_cost ||
-		       ((node_grid[x][z].f_cost == cur_cheapest_node.f_cost) &&
-			(node_grid[x][z].h_cost < cur_cheapest_node.h_cost)))
-		    {
-			cur_cheapest_node = node_grid[x][z];
-		    }
-		}
+		cur_cheapest_node = open[i];
 	    }
-	}
-	// Next cheapest node is found, so mark it as closed and update our current grid position
-	// so we can check its neighbors
-	node_grid[(int)cur_cheapest_node.grid_pos.x][(int)cur_cheapest_node.grid_pos.z].closed = 1;
-	cur_grid_pos = cur_cheapest_node.grid_pos;
-	
-    } while(cur_grid_pos != target_grid_pos);
+	}	
+    }
 
-    // TODO: Add exception handling if target is unreachable
-
-    // TODO: Now that there is a trail of closed nodes leading to the target, return the first correct
-    //       node position on that path
-
-    //return destination;
+    // Walk back to the first node in the final path
+    while(cur_cheapest_node.parent_p->parent_p != NULL)
+    {
+	cur_cheapest_node = *(cur_cheapest_node.parent_p->parent_p);
+    }
+    Vec3F first_move = cur_cheapest_node.grid_pos;
+    return first_move - cur_grid_pos;
 }
