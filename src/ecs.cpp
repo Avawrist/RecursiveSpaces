@@ -407,63 +407,63 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
     _assert(target_grid_pos.y >= 0 && target_grid_pos.y < MAX_HEIGHT);
     _assert(target_grid_pos.z >= 0 && target_grid_pos.z < MAX_LENGTH);
 
-    Node open[MAX_WIDTH * MAX_LENGTH];
-    uint open_size = 0;
-    Node closed[MAX_WIDTH * MAX_LENGTH];
-    uint closed_size = 0;
+    std::vector<Node> open;
+    std::vector<Node> closed;
     Node cur_cheapest_node(cur_grid_pos, cur_grid_pos, target_grid_pos, NULL);
     
     while(!(cur_cheapest_node.grid_pos == target_grid_pos))
     {
 	// Add the starting or current cheapest node to closed
-	closed[closed_size] = cur_cheapest_node;
-	closed_size++;
+	closed.push_back(cur_cheapest_node);
 	
         // Get open, walkable neighbors and update the node grid
-        for(int x = -1; x < 2; x += 2)
+        for(int x = -1; x < 2; x++)
         {
-	    for(int z = -1; z < 2; z += 2)
+	    for(int z = -1; z < 2; z++)
 	    {
-	        Vec3F neighbor_offset((float)x, 0.0f, (float)z);
-		Vec3F node_pos = cur_cheapest_node.grid_pos + neighbor_offset;
-		Node  neighbor_node(cur_cheapest_node.grid_pos,
-				    node_pos,
-				    target_grid_pos,
-				    closed + closed_size - 1);
-		// If there is no entity occupying the node, add it to the node grid
-		// as a candidate
-		if(levelGridGetEntity(level_grid, node_pos) == NO_ENTITY)
+		if((x == 0 && abs(z) == 1) || z == 0 && abs(x) == 1)
 		{
-		    // If the node pos is found in closed, don't add the node to open
-		    uint found = 0;
-		    for(uint i = 0; i < closed_size; i++)
+		    Vec3F neighbor_offset((float)x, 0.0f, (float)z);
+		    Vec3F node_pos = closed[closed.size() - 1].grid_pos + neighbor_offset;
+		    Node  neighbor_node(cur_grid_pos,
+					node_pos,
+					target_grid_pos,
+					&closed[closed.size() - 1]);
+		    // If there is no entity occupying the node, add it to the node grid
+		    // as a candidate
+		    int entity_id = levelGridGetEntity(level_grid, node_pos);
+		    if(entity_id == NO_ENTITY || node_pos == target_grid_pos)
 		    {
-			if(closed[i].grid_pos == node_pos)
+			// If the node pos is found in closed, don't add the node to open
+			uint found = 0;
+			for(uint i = 0; i < closed.size(); i++)
 			{
-			    found = 1;
-			    break;
-			}
-		    }
-
-		    if(!found)
-		    {
-			// If the node pos is found in open, and the new node is evaluated with a lower f cost
-			// then overwrite the entry
-			for(uint i = 0; i < open_size; i++)
-			{
-			    if(open[i].grid_pos == neighbor_node.grid_pos &&
-			       neighbor_node.f_cost < open[i].f_cost)
+			    if(closed[i].grid_pos == node_pos)
 			    {
-				open[i] = neighbor_node;
 				found = 1;
+				break;
 			    }
 			}
 
-			// Otherwise, add it as a new open node
 			if(!found)
 			{
-			    open[open_size] = neighbor_node;
-			    open_size++;
+			    // If the node pos is found in open, and the new node is evaluated
+			    // with a lower f cost then overwrite the entry's f cost
+			    for(uint i = 0; i < open.size(); i++)
+			    {
+				if(open[i].grid_pos == neighbor_node.grid_pos &&
+				   neighbor_node.f_cost < open[i].f_cost)
+				{
+				    open[i] = neighbor_node;
+				    found = 1;
+				}
+			    }
+
+			    // Otherwise, add it as a new open node
+			    if(!found)
+			    {
+				open.push_back(neighbor_node);
+			    }
 			}
 		    }
 		}
@@ -471,21 +471,28 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
         }
 
 	// Find the next cheapest node to investigate
-	for(uint i = 0; i < open_size; i++)
+	// Reset the cheapest node for new search
+	cur_cheapest_node = Node();
+	uint cheap_found = 0;
+	uint cheapest_index = 0;
+	for(uint i = 0; i < open.size(); i++)
 	{
 	    if(open[i].f_cost < cur_cheapest_node.f_cost ||
 	       ((open[i].f_cost == cur_cheapest_node.f_cost) &&
-		(open[i].h_cost < open[i].h_cost)))
+		(open[i].h_cost < cur_cheapest_node.h_cost)))
 	    {
 		cur_cheapest_node = open[i];
+		cheapest_index = i;
+		cheap_found = 1;
 	    }
-	}	
+	}
+	if(cheap_found) {open.erase(open.begin() + cheapest_index);}
     }
 
     // Walk back to the first node in the final path
     while(cur_cheapest_node.parent_p->parent_p != NULL)
     {
-	cur_cheapest_node = *(cur_cheapest_node.parent_p->parent_p);
+	cur_cheapest_node = *(cur_cheapest_node.parent_p);
     }
     Vec3F first_move = cur_cheapest_node.grid_pos;
     return first_move - cur_grid_pos;
