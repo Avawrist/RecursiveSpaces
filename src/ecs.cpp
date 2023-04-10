@@ -407,8 +407,8 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
     _assert(target_grid_pos.y >= 0 && target_grid_pos.y < MAX_HEIGHT);
     _assert(target_grid_pos.z >= 0 && target_grid_pos.z < MAX_LENGTH);
 
-    std::vector<Node> open;
-    std::vector<Node> closed;
+    std::vector<Node> open(MAX_WIDTH * MAX_HEIGHT);
+    std::vector<Node> closed(MAX_WIDTH * MAX_HEIGHT);
     Node cur_cheapest_node(cur_grid_pos, cur_grid_pos, target_grid_pos, NULL);
     
     while(!(cur_cheapest_node.grid_pos == target_grid_pos))
@@ -431,8 +431,7 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
 					&closed[closed.size() - 1]);
 		    // If there is no entity occupying the node, add it to the node grid
 		    // as a candidate
-		    int entity_id = levelGridGetEntity(level_grid, node_pos);
-		    if(entity_id == NO_ENTITY || node_pos == target_grid_pos)
+		    if(levelGridGetEntity(level_grid, node_pos) == NO_ENTITY || node_pos == target_grid_pos)
 		    {
 			// If the node pos is found in closed, don't add the node to open
 			uint found = 0;
@@ -451,11 +450,13 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
 			    // with a lower f cost then overwrite the entry's f cost
 			    for(uint i = 0; i < open.size(); i++)
 			    {
-				if(open[i].grid_pos == neighbor_node.grid_pos &&
-				   neighbor_node.f_cost < open[i].f_cost)
+				if(open[i].grid_pos == neighbor_node.grid_pos)
 				{
-				    open[i] = neighbor_node;
 				    found = 1;
+				    if(neighbor_node.f_cost < open[i].f_cost)
+				    {
+					open[i] = neighbor_node;
+				    }
 				}
 			    }
 
@@ -473,7 +474,6 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
 	// Find the next cheapest node to investigate
 	// Reset the cheapest node for new search
 	cur_cheapest_node = Node();
-	uint cheap_found = 0;
 	uint cheapest_index = 0;
 	for(uint i = 0; i < open.size(); i++)
 	{
@@ -483,10 +483,18 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
 	    {
 		cur_cheapest_node = open[i];
 		cheapest_index = i;
-		cheap_found = 1;
 	    }
+	    print(open[i].grid_pos);
+	    std::cout << "\n";
 	}
-	if(cheap_found) {open.erase(open.begin() + cheapest_index);}
+	std::cout<< "========= ^ Pre Removal ^ =============\n";
+	open.erase(open.begin() + cheapest_index);
+	for(uint i = 0; i < open.size(); i++)
+	{
+	    print(open[i].grid_pos);
+	    std::cout << "\n";
+	}
+	std::cout<< "========== ^ Post Removal ^ ============\n";
     }
 
     // Walk back to the first node in the final path

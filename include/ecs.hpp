@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 //////////////////
 // Entity Types //
