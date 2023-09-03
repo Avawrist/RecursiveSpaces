@@ -40,7 +40,7 @@ int platformInitGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 0); // disable multisampling
+    glfwWindowHint(GLFW_SAMPLES, 4); // multisampling with 4 subsamples per screen coordinate
     
     return 1;
 }

@@ -101,10 +101,6 @@ int main()
     }
 
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 4.0f),  BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 1.0f, 5.0f),  BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(6.0f, 1.0f, 6.0f),  BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(7.0f, 1.0f, 7.0f),  BLOCK);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(8.0f, 1.0f, 8.0f),  BLOCK);
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(9.0f, 1.0f, 9.0f),  BLOCK);
 
     // Special Block
@@ -116,7 +112,7 @@ int main()
     //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(3.0f, 1.0f, 13.0f), SMALL_DOG);
     
     // Medium Dog
-    //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(12.0f, 1.0f, 2.0f), MEDIUM_DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(12.0f, 1.0f, 2.0f), MEDIUM_DOG);
     
     // Large Dog
     //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(7.0f, 1.0f, 8.0f), LARGE_DOG);
@@ -247,11 +243,13 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 	    {
 		if(entities.type[i] == SMALL_DOG)
 		{
+		    OutputDebugStringA("Performing small special move.\n");
 		    // Determine target position
+                    /*
 		    Vec3F cur_pos    = entities.grid_position[i].position;
 		    Vec3F target_pos = levelGridFindNearestType(level.grid, entities, cur_pos, SPECIAL_BLOCK);
 		    Vec3F move_dir   = aStarFindPath(level.grid, cur_pos, target_pos);
-		    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
+		    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir); */
 		}
 
 		else if(entities.type[i] == MEDIUM_DOG)
