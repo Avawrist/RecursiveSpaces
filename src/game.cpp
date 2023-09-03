@@ -111,7 +111,7 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 2.0f), SPECIAL_BLOCK);
     
     // Small Dogs
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 14.0f),   SMALL_DOG);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 14.0f), SMALL_DOG);
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 13.0f), SMALL_DOG);
     //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(3.0f, 1.0f, 13.0f), SMALL_DOG);
     
