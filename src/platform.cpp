@@ -318,6 +318,8 @@ void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F m
     // Bind Normal Texture
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
+    // Bind Specular Texture
+    // 
     // Bind Mesh
     glBindVertexArray(mesh_01_p->vao);
     // Draw

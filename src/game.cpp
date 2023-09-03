@@ -76,7 +76,7 @@ int main()
     
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
-    // Initialize Framebuffer
+    // Initialize Pre-Process Framebuffer
     FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
     frameTextureDataToGPU(ftexture_p);
     // Create Debug Grid Object
@@ -105,17 +105,6 @@ int main()
 
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 2.0f), SPECIAL_BLOCK);
-    
-    // Small Dogs
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 14.0f), SMALL_DOG);
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(14.0f, 1.0f, 13.0f), SMALL_DOG);
-    //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(3.0f, 1.0f, 13.0f), SMALL_DOG);
-    
-    // Medium Dog
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(12.0f, 1.0f, 2.0f), MEDIUM_DOG);
-    
-    // Large Dog
-    //activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(7.0f, 1.0f, 8.0f), LARGE_DOG);
     
     // Player
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
@@ -461,6 +450,33 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
    
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level.grid);
+
+    ///////////////////////////////
+    // Render Pass 0 - Depth Map //
+    ///////////////////////////////
+
+    // -> Move everything into platformSetRenderStateShadowMap(),
+    //    platformPrepShaderShadowMap(),
+    //    platformRenderShadowMap()
+
+    // platformSetRenderStateShadowMap
+    /*
+    glViewport(0, 0, ftexture_p->SHADOW_WIDTH, ftexture_p->SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    */
+
+    // platformPrepShaderShdowMap()
+    // get shadowmap shader pointer
+    // set shader
+    // get view mat from light source
+    // get orthographic matrix from light
+    // add shader uniforms to shadowmap shader
+
+    // platformRenderShadowMap()
+    // review platformRenderEntity() -> do we need to render all entities twice?
     
     ///////////////////////////////
     // Render Pass 1 -  Entities //

@@ -911,10 +911,10 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
 			   GL_TEXTURE_2D,
 			   ftexture_p->depth_stencil_text_id,
 			   0);
-    			   
+    
     // Unbind
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    
     /////////////////////////
     // Configure VBO & VAO //
     /////////////////////////
@@ -962,7 +962,7 @@ AssetTableDir::AssetTableDir()
     table[CHEST][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[CHEST][TEXTURE_S] = NULL;
     table[CHEST][MESH01]    = "..\\data\\assets\\meshes\\chest.obj";
-    table[CHEST][SOUND01]   = "..\\data\\assets\\sfx\\taunt.wav";;
+    table[CHEST][SOUND01]   = "..\\data\\assets\\sfx\\taunt.wav";
     table[CHEST][SOUND02]   = NULL;
     table[CHEST][SOUND03]   = NULL;
 
@@ -976,7 +976,7 @@ AssetTableDir::AssetTableDir()
     table[GRID][SOUND03]   = NULL;
 
     // Player Entity
-    table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\green.bmp";;
+    table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\green.bmp";
     table[PLAYER][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[PLAYER][TEXTURE_S] = NULL;
     table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
@@ -985,16 +985,16 @@ AssetTableDir::AssetTableDir()
     table[PLAYER][SOUND03]   = NULL;
     
     // Block Entity
-    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";;
+    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[BLOCK][TEXTURE_S] = NULL;
-    table[BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";;
+    table[BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
     table[BLOCK][SOUND01]   = NULL;
     table[BLOCK][SOUND02]   = NULL;
     table[BLOCK][SOUND03]   = NULL;
     
     // Special Block Entity
-    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\chest.bmp";;
+    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\chest.bmp";
     table[SPECIAL_BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[SPECIAL_BLOCK][TEXTURE_S] = NULL;
     table[SPECIAL_BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
@@ -1003,7 +1003,7 @@ AssetTableDir::AssetTableDir()
     table[SPECIAL_BLOCK][SOUND03]   = NULL;
 
     // Small Dog Entity
-    table[SMALL_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\orange.bmp";;
+    table[SMALL_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\orange.bmp";
     table[SMALL_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[SMALL_DOG][TEXTURE_S] = NULL;
     table[SMALL_DOG][MESH01]    = "..\\data\\assets\\meshes\\small_dog.obj";
@@ -1012,7 +1012,7 @@ AssetTableDir::AssetTableDir()
     table[SMALL_DOG][SOUND03]   = NULL;
 
     // Medium Dog Entity
-    table[MEDIUM_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\black.bmp";;
+    table[MEDIUM_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\black.bmp";
     table[MEDIUM_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[MEDIUM_DOG][TEXTURE_S] = NULL;
     table[MEDIUM_DOG][MESH01]    = "..\\data\\assets\\meshes\\medium_dog.obj";
@@ -1021,7 +1021,7 @@ AssetTableDir::AssetTableDir()
     table[MEDIUM_DOG][SOUND03]   = NULL;
 
     // Large Dog Entity
-    table[LARGE_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\yellow.bmp";;
+    table[LARGE_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\yellow.bmp";
     table[LARGE_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[LARGE_DOG][TEXTURE_S] = NULL;
     table[LARGE_DOG][MESH01]    = "..\\data\\assets\\meshes\\large_dog.obj";
