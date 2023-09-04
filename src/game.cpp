@@ -41,7 +41,8 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* ftexture_p, Level& level, DebugGrid* grid_p);
+			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_p, Level& level,
+			DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
 
@@ -77,8 +78,10 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Pre-Process Framebuffer
-    FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height);
-    frameTextureDataToGPU(ftexture_p);
+    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true);
+    frameTextureDataToGPU(depth_ftexture_p, true);
+    FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height, false);
+    frameTextureDataToGPU(ftexture_p, false);
     // Create Debug Grid Object
     DebugGrid* grid_p = new DebugGrid(level_p->grid.dimensions,
 				      MAX_WIDTH + 1,
@@ -121,7 +124,7 @@ int main()
     while(!game_window.close)
     {	
 	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
-			    asset_manager, ftexture_p, *level_p, grid_p);
+			    asset_manager, depth_ftexture_p, ftexture_p, *level_p, grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 	
 	// Close condition
@@ -411,7 +414,8 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* ftexture_p, Level& level, DebugGrid* grid_p)
+			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_p, Level& level,
+			DebugGrid* grid_p)
 {
     ////////////
     // Update //
@@ -459,29 +463,56 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     //    platformPrepShaderShadowMap(),
     //    platformRenderShadowMap()
 
-    // platformSetRenderStateShadowMap
-    /*
-    glViewport(0, 0, ftexture_p->SHADOW_WIDTH, ftexture_p->SHADOW_HEIGHT);
-    glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo);
+    // platformSetRenderStateShadowMap()
+    glViewport(0, 0, depth_ftexture_p->width, depth_ftexture_p->height);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_ftexture_p->fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
+
+    // platformPrepShaderShadowMap()
+    Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
+    glUseProgram(shadowmap_shader_p->program_id);
+    Mat4F view       = dirLightGetView(active_entities.dir_light[dir_light_id]);
+    Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
+					     game_window.win_width,
+					     game_window.win_height); 
+    shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
+    shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
+
+
+    // Render renderable entities
+    for(uint i = 0; i < active_entities.count; i++)
+    {
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
+	{
+	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    // platformFillShadowMap()
+	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
+	    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.type[i],
+							    MESH01, 0);
+	    glBindVertexArray(mesh_01_p->vao);
+	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
+	}
+    }
+
+    // PlatformRenderShadowMap()
+    Shader* sm_debug_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SMDEBUG);
+    glViewport(0, 0, game_window.win_width, game_window.win_height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    */
-
-    // platformPrepShaderShdowMap()
-    // get shadowmap shader pointer
-    // set shader
-    // get view mat from light source
-    // get orthographic matrix from light
-    // add shader uniforms to shadowmap shader
-
-    // platformRenderShadowMap()
-    // review platformRenderEntity() -> do we need to render all entities twice?
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glUseProgram(sm_debug_shader_p->program_id);
+    shaderAddIntUniform(sm_debug_shader_p, "depth_map", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depth_ftexture_p->depth_text_id);
+    glBindVertexArray(depth_ftexture_p->quad_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);    
     
     ///////////////////////////////
     // Render Pass 1 -  Entities //
     ///////////////////////////////
-
+    /*
     // Update shader uniforms
     platformSetRenderStateDefault(game_window, *ftexture_p);
     platformPrepShaderDefault(game_window,
@@ -507,12 +538,12 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 			    active_entities.camera[cam_id],
 			    active_entities.transform[cam_id].position);
     platformRenderDebug(asset_manager, grid_p);
-
+    
     /////////////////////////////////////
     // Render Pass 2 - Post Processing //
     /////////////////////////////////////
     platformRenderPP(asset_manager, game_window, ftexture_p);
-
+    */
     // Swap buffers
     platformSwapBuffers(game_window);
 

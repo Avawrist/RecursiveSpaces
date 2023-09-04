@@ -147,6 +147,7 @@ typedef struct FrameTexture
     GLuint fbo;
     GLuint color_text_id;
     GLuint depth_stencil_text_id;
+    GLuint depth_text_id;
     int    width;
     int    height;
     GLuint quad_vbo;
@@ -160,10 +161,10 @@ typedef struct FrameTexture
 	 1.0f, -1.0f, 1.0f, 0.0f,
 	 1.0f,  1.0f, 1.0f, 1.0f
     };
-    FrameTexture(int _width, int _height);
+    FrameTexture(int _width, int _height, bool is_depth_map);
     ~FrameTexture();
 } FrameTexture;
-void frameTextureDataToGPU(FrameTexture* ftexture_p);
+void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map);
 
 /////////////////////////
 // Struct AssetTableID //
@@ -239,10 +240,12 @@ typedef struct ActiveSounds
 
 typedef enum ShaderProgram
 {
-    BLINNPHONG            = 0,
-    POSTPROCESS           = 1,
-    DEBUG                 = 2,
-    TOTAL_SHADER_PROGRAMS = 3
+    SHADOWMAP             = 0,
+    SMDEBUG               = 1,
+    BLINNPHONG            = 2,
+    POSTPROCESS           = 3,
+    DEBUG                 = 4,
+    TOTAL_SHADER_PROGRAMS = 5
 } ShaderProgram;
 
 typedef enum ShaderType

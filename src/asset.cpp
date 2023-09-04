@@ -810,7 +810,7 @@ void textureDataToGPU(Texture* texture_p)
 // Struct FrameTexture //
 /////////////////////////
 
-FrameTexture::FrameTexture(int _width, int _height)
+FrameTexture::FrameTexture(int _width, int _height, bool is_depth_map)
 {
     //////////////////////////////
     // Initialize FBO & Texture //
@@ -818,13 +818,22 @@ FrameTexture::FrameTexture(int _width, int _height)
 
     // FBO:
     glGenFramebuffers(1, &fbo);
-    
+
     // Texture:
-    glGenTextures(1, &color_text_id);
-    glGenTextures(1, &depth_stencil_text_id);
+    if(is_depth_map)
+    {
+	glGenTextures(1, &depth_text_id);
+    }
+    else
+    {
+	glGenTextures(1, &color_text_id);
+	glGenTextures(1, &depth_stencil_text_id);
+    }
+
+    // Dimensions
     width  = _width;
     height = _height;
-    
+
     ////////////////////
     // Initalize Quad //
     ////////////////////
@@ -844,6 +853,7 @@ FrameTexture::~FrameTexture()
     // Delete texture
     glDeleteTextures(1, &color_text_id);
     glDeleteTextures(1, &depth_stencil_text_id);
+    glDeleteTextures(1, &depth_text_id);
     
     // Delete quad VAO
     glDeleteVertexArrays(1, &quad_vao);
@@ -852,7 +862,7 @@ FrameTexture::~FrameTexture()
     glDeleteBuffers(1, &quad_vbo);
 }
 
-void frameTextureDataToGPU(FrameTexture* ftexture_p)
+void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map)
 {
     //////////////////////////////////////
     // Config Framebuffer with Textures //
@@ -860,57 +870,91 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
     
     glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo);
 
-    ///////////////////
-    // Color Texture //
-    ///////////////////
+    if(is_depth_map)
+    {
+	///////////////////
+	// Depth Texture //
+	///////////////////
+
+	glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_text_id);
+	glTexImage2D(GL_TEXTURE_2D,
+		     0,
+		     GL_DEPTH_COMPONENT,
+		     ftexture_p->width,
+		     ftexture_p->height,
+		     0,
+		     GL_DEPTH_COMPONENT,
+		     GL_FLOAT,
+		     NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER,
+			       GL_DEPTH_ATTACHMENT,
+			       GL_TEXTURE_2D,
+			       ftexture_p->depth_text_id,
+			       0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+    }
+    else
+    {
+	///////////////////
+	// Color Texture //
+	///////////////////
     
-    // Allocate memory for color texture on GPU
-    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id);
-    glTexImage2D(GL_TEXTURE_2D,
-		 0,
-		 GL_RGB,
-		 ftexture_p->width,
-		 ftexture_p->height,
-		 0,
-		 GL_RGB,
-		 GL_UNSIGNED_BYTE,
-		 NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	// Allocate memory for color texture on GPU
+	glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id);
+	glTexImage2D(GL_TEXTURE_2D,
+		     0,
+		     GL_RGB,
+		     ftexture_p->width,
+		     ftexture_p->height,
+		     0,
+		     GL_RGB,
+		     GL_UNSIGNED_BYTE,
+		     NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Attach texture to FBO
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-			   GL_COLOR_ATTACHMENT0,
-			   GL_TEXTURE_2D,
-			   ftexture_p->color_text_id,
-			   0);
+	// Attach texture to FBO
+	glFramebufferTexture2D(GL_FRAMEBUFFER,
+			       GL_COLOR_ATTACHMENT0,
+			       GL_TEXTURE_2D,
+			       ftexture_p->color_text_id,
+			       0);
 
-    ///////////////////////////
-    // Depth/Stencil Texture //
-    ///////////////////////////
+	///////////////////////////
+	// Depth/Stencil Texture //
+	///////////////////////////
     
-    // Allocate memory for depth texture on GPU
-    glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_stencil_text_id);
-    glTexImage2D(GL_TEXTURE_2D,
-		 0,
-		 GL_DEPTH24_STENCIL8,
-		 ftexture_p->width,
-		 ftexture_p->height,
-		 0,
-		 GL_DEPTH_STENCIL,
-		 GL_UNSIGNED_INT_24_8,
-		 NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	// Allocate memory for depth texture on GPU
+	glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_stencil_text_id);
+	glTexImage2D(GL_TEXTURE_2D,
+		     0,
+		     GL_DEPTH24_STENCIL8,
+		     ftexture_p->width,
+		     ftexture_p->height,
+		     0,
+		     GL_DEPTH_STENCIL,
+		     GL_UNSIGNED_INT_24_8,
+		     NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-    // Attach texture to FBO
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-			   GL_DEPTH_STENCIL_ATTACHMENT,
-			   GL_TEXTURE_2D,
-			   ftexture_p->depth_stencil_text_id,
-			   0);
+	// Attach texture to FBO
+	glFramebufferTexture2D(GL_FRAMEBUFFER,
+			       GL_DEPTH_STENCIL_ATTACHMENT,
+			       GL_TEXTURE_2D,
+			       ftexture_p->depth_stencil_text_id,
+			       0);
+    
+    }
     
     // Unbind
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -922,7 +966,7 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
     // Bind VAO first
     glBindVertexArray(ftexture_p->quad_vao);
 
-    // Move quad data to QPU
+    // Move quad data to GPU
     glBindBuffer(GL_ARRAY_BUFFER, ftexture_p->quad_vbo);
     glBufferData(GL_ARRAY_BUFFER,
 		 sizeof(ftexture_p->quad_data),
@@ -1343,6 +1387,14 @@ ShaderTableID::ShaderTableID()
 
 ShaderTableDir::ShaderTableDir()
 {
+    // Shadow Map Shader Program
+    table[SHADOWMAP][VERTEX]   = "..\\data\\assets\\shaders\\shadowmap.vert";
+    table[SHADOWMAP][FRAGMENT] = "..\\data\\assets\\shaders\\shadowmap.frag";
+
+    // Shadow Map Debug Shader Program
+    table[SMDEBUG][VERTEX]   = "..\\data\\assets\\shaders\\shadowmap_db.vert";
+    table[SMDEBUG][FRAGMENT] = "..\\data\\assets\\shaders\\shadowmap_db.frag";
+    
     // Blinn-Phong Shader Program
     table[BLINNPHONG][VERTEX]   = "..\\data\\assets\\shaders\\blinn_phong.vert";
     table[BLINNPHONG][FRAGMENT] = "..\\data\\assets\\shaders\\blinn_phong.frag";
