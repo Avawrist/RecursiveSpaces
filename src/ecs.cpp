@@ -76,10 +76,16 @@ Mat4F cameraGetView(const Camera& cam, Vec3F cam_pos)
     Vec3F y_axis(sin_yaw * sin_pitch, cos_pitch, cos_yaw * sin_pitch);
     Vec3F z_axis(sin_yaw * cos_pitch, -sin_pitch, cos_pitch * cos_yaw);
 
+    /*
     return Mat4F(x_axis.x,   y_axis.x,   z_axis.x,   0.0f,
 		 x_axis.y,   y_axis.y,   z_axis.y,   0.0f,
 		 x_axis.z,   y_axis.z,   z_axis.z,   0.0f,
 		 -dot(x_axis, cam_pos), -dot(y_axis, cam_pos), -dot(z_axis, cam_pos), 1.0f);
+    */
+    return Mat4F(1.0f, 0.0f, 0.0f, 0.0f,
+	         0.0f, 1.0f, 0.0f, 0.0f,
+	         0.0f, 0.0f, 1.0f, 0.0f,
+	         0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Mat4F cameraGetPerspective(const Camera& cam, float ar)
@@ -110,8 +116,8 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
     float l = -scaled_w / 2.0f;
     float t = scaled_h / 2.0f;
     float b = -scaled_h / 2.0f;
-    float n = 0.0f;
-    float f = 100.0f;
+    float n = 1.0f;
+    float f = 10.0f;
     /*
     return Mat4F(2.0f/(r - l), 0.0f,         0.0f,          -(r + l)/(r - l),
 	         0.0f,         2.0f/(t - b), 0.0f,          -(t + b)/(t - b),
@@ -140,6 +146,8 @@ Mat4F dirLightGetView(const DirLight& dirlight)
     // Assumes RH coordinate system
     // Assume Column major
 
+    // Need to use actual dirlight position NOT origin?
+    
     Vec3F f = dirlight.dir;
     f = Vec3F(-f.x, -f.y, -f.z);
     f = normalize(f);
