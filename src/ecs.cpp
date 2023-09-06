@@ -102,8 +102,8 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
     // Assumes RH coordinate system
     // Assumes Column major
 
-    float scaled_w = win_width / 10000.0f;
-    float scaled_h = win_height / 10000.0f;
+    float scaled_w = win_width / 10000.0f; // 10000
+    float scaled_h = win_height / 10000.0f; // 10000
     
     // needs to match window aspect ratio
     float r = scaled_w / 2.0f;
@@ -111,12 +111,17 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height)
     float t = scaled_h / 2.0f;
     float b = -scaled_h / 2.0f;
     float n = 0.0f;
-    float f = 10.0f;
-
+    float f = 100.0f;
+    /*
     return Mat4F(2.0f/(r - l), 0.0f,         0.0f,          -(r + l)/(r - l),
 	         0.0f,         2.0f/(t - b), 0.0f,          -(t + b)/(t - b),
 	         0.0f,         0.0f,         -2.0f/(f - n), -(f + n)/(f - n),
 	         0.0f,         0.0f,          0.0f,          1.0f);
+    */
+    return Mat4F(1.0f/r, 0.0f,   0.0f,        0.0f,
+	         0.0f,   1.0f/t, 0.0f,        0.0f,
+	         0.0f,   0.0f,  -1.0f/25.0f, -1.0f,
+	         0.0f,   0.0f,   0.0f,        1.0f);
 }
 
 ///////////////////////////////

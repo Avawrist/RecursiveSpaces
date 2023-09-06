@@ -116,7 +116,8 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(60.0f, 60.0f, 60.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
+			       Vec3F(60.0f, 60.0f, 60.0f), CAMERA);
 
     ///////////////
     // Game Loop //
@@ -472,7 +473,9 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // platformPrepShaderShadowMap()
     Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
     glUseProgram(shadowmap_shader_p->program_id);
-    Mat4F view       = dirLightGetView(active_entities.dir_light[dir_light_id]);
+    //Mat4F view       = dirLightGetView(active_entities.dir_light[dir_light_id]);
+    Mat4F view       = cameraGetView(active_entities.camera[cam_id],
+				     active_entities.transform[cam_id].position);
     Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
 					     game_window.win_width,
 					     game_window.win_height); 
