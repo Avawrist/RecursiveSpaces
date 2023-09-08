@@ -214,4 +214,6 @@ float degToRads(float d);
 
 Vec3F rotate(const Vec3F& v, const Quaternion& q);
 
+Mat4F lookAt(const Vec3F& eye, const Vec3F& at, const Vec3F& up);
+
 #endif

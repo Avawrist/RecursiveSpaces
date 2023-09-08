@@ -272,9 +272,6 @@ Mat4F cameraGetPerspective(const Camera& cam, float ar);
 
 Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
 
-// DirLight Function Prototypes
-Mat4F dirLightGetView(const DirLight& dirlight);
-
 // LevelGrid Function Prototypes
 int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos);
 

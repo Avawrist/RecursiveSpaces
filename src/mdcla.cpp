@@ -917,3 +917,20 @@ Vec3F rotate(const Vec3F& v, const Quaternion& q)
 	         pMult * v.y + vMult * q.y + crossMult * (q.z * v.x - q.x * v.z),
 	         pMult * v.z + vMult * q.z + crossMult * (q.x * v.y - q.y * v.x));
 }
+
+Mat4F lookAt(const Vec3F& eye, const Vec3F& at, const Vec3F& up)
+{
+    // Assumes RH coordinate system
+    // Assume Column major
+    
+    Vec3F zaxis = normalize(at - eye);
+    Vec3F xaxis = normalize(cross(zaxis, up));
+    Vec3F yaxis = cross(xaxis, zaxis);
+
+    zaxis *= -1;
+
+    return Mat4F(xaxis.x, yaxis.x, zaxis.x, 0.0f,
+	         xaxis.y, yaxis.y, zaxis.y, 0.0f,
+	         xaxis.z, yaxis.z, zaxis.z, 0.0f,
+	         -dot(xaxis, eye), -dot(yaxis, eye), -dot(zaxis, eye), 1.0f);
+}

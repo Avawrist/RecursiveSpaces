@@ -141,27 +141,6 @@ DirLight::DirLight()
     ambient_strength = 0.5f;
 }
 
-Mat4F dirLightGetView(const DirLight& dirlight)
-{
-    // Assumes RH coordinate system
-    // Assume Column major
-
-    // Need to use actual dirlight position NOT origin?
-    
-    Vec3F f = dirlight.dir;
-    f = Vec3F(-f.x, -f.y, -f.z);
-    f = normalize(f);
-    Vec3F up = normalize(Vec3F(0.0f, 1.0f, 0.0f));
-    Vec3F s  = cross(f, up);
-    s = normalize(s);
-    Vec3F u  = cross(s, f);
-
-    return Mat4F(s.x, s.y, s.z, 0.0f,
-	         u.x, u.y, u.z, 0.0f,
-	         -f.x, -f.y, -f.z, 0.0f,
-	         0.0f, 0.0f, 0.0f, 1.0f);
-}
-
 ///////////////////////////////////
 // Struct Component GridPosition //
 ///////////////////////////////////

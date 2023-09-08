@@ -118,7 +118,7 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
     
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 0.0f, 0.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 5.0f, 5.0f), DIR_LIGHT);
     
     // Camera
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
@@ -478,17 +478,14 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // platformPrepShaderShadowMap()
     Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
     glUseProgram(shadowmap_shader_p->program_id);
-    //Mat4F view       = dirLightGetView(active_entities.dir_light[dir_light_id]);
-    //Mat4F view       = cameraGetView(active_entities.camera[cam_id],
-    //			     active_entities.transform[cam_id].position);
+    Mat4F view = lookAt(active_entities.transform[dir_light_id].position,
+			Vec3F(0.0f, 0.0f, 0.0f),
+			Vec3F(0.0, 1.0f, 0.0f));
     //Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
     //					     game_window.win_width,
     //					     game_window.win_height);
-    glm::mat4 view = glm::lookAt(glm::vec3(5.0f, 5.0f, 5.0f),
-				 glm::vec3(0.0f, 0.0f, 0.0f),
-				 glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
-    shaderAddMat4Uniform(shadowmap_shader_p, "view", glm::value_ptr(view));
+    shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
 
 
