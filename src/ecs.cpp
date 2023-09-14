@@ -27,6 +27,7 @@ Transform::Transform(Vec3F _position)
 
 Mat4F transformGetModel(Transform& transform)
 {
+    // Column Major
     Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, 0.0f,
 	                0.0f, transform.y_scale, 0.0f, 0.0f,
 	                0.0f, 0.0f, transform.z_scale, 0.0f,

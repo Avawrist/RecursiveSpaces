@@ -124,6 +124,21 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
 			       Vec3F(20.0f, 20.0f, 20.0f), CAMERA);
 
+    // Matrix test
+
+    Mat4F m1 = Mat4F(0.0f, 1.0f, 3.0f, 5.0f,
+		     11.0f, 4.0f, -3.0f, 10.0f,
+		     7.0f, 8.0f, -9.0f, 50.0f,
+		     2.0f, -1.0f, 103.0f, 6.0f);
+    
+    Mat4F m2 = Mat4F(1.0f, 4.0f, 2.0f, 0.0f,
+	             2.0f, 5.0, 11.0f, 10.0f,
+	             13.0f, 12.0f, 5.0f, 4.0f,
+	             1.0f, 2.0f, 7.0f, 20.0f);
+
+    m1 -= m2;
+    print(m1);
+
     ///////////////
     // Game Loop //
     ///////////////
