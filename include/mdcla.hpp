@@ -123,8 +123,6 @@ public:
     void         operator *=(float s);
     void         operator +=(const Mat3F& m);
     void         operator -=(const Mat3F& m);
-    Vec3F        operator [](int j);
-    const Vec3F  operator [](int j) const;
     float&       operator ()(int i, int j);
     c_float&     operator ()(int i, int j) const;
     c_float* getPointer();
@@ -157,8 +155,6 @@ public:
     void         operator *=(float s);
     void         operator +=(const Mat4F& m);
     void         operator -=(const Mat4F& m);
-    Vec4F        operator [](int j);
-    const Vec4F  operator [](int j) const;
     float&       operator ()(int i, int j);
     c_float& operator ()(int i, int j) const;
     c_float* getPointer();

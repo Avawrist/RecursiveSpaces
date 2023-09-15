@@ -28,10 +28,10 @@ Transform::Transform(Vec3F _position)
 Mat4F transformGetModel(Transform& transform)
 {
     // Column Major
-    Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, 0.0f,
-	                0.0f, transform.y_scale, 0.0f, 0.0f,
-	                0.0f, 0.0f, transform.z_scale, 0.0f,
-	                transform.position.x, transform.position.y, transform.position.z, 1.0f);
+    Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, transform.position.x,
+	                0.0f, transform.y_scale, 0.0f, transform.position.y,
+	                0.0f, 0.0f, transform.z_scale, transform.position.z,
+	                0.0f, 0.0f, 0.0f, 1.0f);
     return model;
 }
 

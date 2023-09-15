@@ -118,27 +118,12 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
     
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(5.0f, 5.0f, 5.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(6.0f, 6.0f, 6.0f), DIR_LIGHT);
     
     // Camera
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
 			       Vec3F(20.0f, 20.0f, 20.0f), CAMERA);
-
-    // Matrix test
-
-    Mat4F m1 = Mat4F(0.0f, 1.0f, 3.0f, 5.0f,
-		     11.0f, 4.0f, -3.0f, 10.0f,
-		     7.0f, 8.0f, -9.0f, 50.0f,
-		     2.0f, -1.0f, 103.0f, 6.0f);
     
-    Mat4F m2 = Mat4F(1.0f, 4.0f, 2.0f, 0.0f,
-	             2.0f, 5.0, 11.0f, 10.0f,
-	             13.0f, 12.0f, 5.0f, 4.0f,
-	             1.0f, 2.0f, 7.0f, 20.0f);
-
-    m1 -= m2;
-    print(m1);
-
     ///////////////
     // Game Loop //
     ///////////////
@@ -499,7 +484,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     //Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
     //					     game_window.win_width,
     //					     game_window.win_height);
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 10.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
 
@@ -532,7 +517,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     glBindTexture(GL_TEXTURE_2D, depth_ftexture_p->depth_text_id);
     glBindVertexArray(depth_ftexture_p->quad_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);    
-    
+  
     ///////////////////////////////
     // Render Pass 1 -  Entities //
     ///////////////////////////////

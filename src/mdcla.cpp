@@ -447,7 +447,7 @@ Mat3F::Mat3F(const Vec3F& a, const Vec3F& b, const Vec3F& c)
 
 Mat3F::Mat3F(const Mat3F& m)
 {
-    // TODO: Update for Column Major
+    // Column Major
     n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2);
     n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2);
     n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2);
@@ -455,7 +455,6 @@ Mat3F::Mat3F(const Mat3F& m)
 
 void Mat3F::operator *=(float s)
 {
-    // TODO: Update for Column Major
     n[0][0] *= s; n[0][1] *= s; n[0][2] *= s;
     n[1][0] *= s; n[1][1] *= s; n[1][2] *= s;
     n[2][0] *= s; n[2][1] *= s; n[2][2] *= s;
@@ -463,7 +462,6 @@ void Mat3F::operator *=(float s)
 
 void Mat3F::operator +=(const Mat3F& m)
 {
-    // TODO: Update for Column Major
     n[0][0] += m(0, 0); n[0][1] += m(0, 1); n[0][2] += m(0, 2);
     n[1][0] += m(1, 0); n[1][1] += m(1, 1); n[1][2] += m(1, 2);
     n[2][0] += m(2, 0); n[2][1] += m(2, 1); n[2][2] += m(2, 2);
@@ -471,34 +469,21 @@ void Mat3F::operator +=(const Mat3F& m)
 
 void Mat3F::operator -=(const Mat3F& m)
 {
-    // TODO: Update for Column Major
     n[0][0] -= m(0, 0); n[0][1] -= m(0, 1); n[0][2] -= m(0, 2);
     n[1][0] -= m(1, 0); n[1][1] -= m(1, 1); n[1][2] -= m(1, 2);
     n[2][0] -= m(2, 0); n[2][1] -= m(2, 1); n[2][2] -= m(2, 2);
 }
 
-Vec3F Mat3F::operator [](int j)
-{
-    // TODO: Review for Column Major
-    return Vec3F(n[0][j], n[1][j], n[2][j]);
-}
-
-const Vec3F Mat3F::operator [](int j) const
-{
-    // TODO: Review for Column Major
-    return Vec3F(n[0][j], n[1][j], n[2][j]);
-}
-
 float& Mat3F::operator ()(int i, int j)
 {
     // Column Major
-    return n[j][i];
+    return n[i][j];
 }
 
 c_float& Mat3F::operator ()(int i, int j) const
 {
     // Column Major
-    return n[j][i];
+    return n[i][j];
 }
 
 c_float* Mat3F::getPointer()
@@ -510,34 +495,37 @@ c_float* Mat3F::getPointer()
 
 Mat3F operator +(const Mat3F& a, const Mat3F& b)
 {
-    return Mat3F(a(0, 0) + b(0, 0), a(0, 1) + b(0, 1), a(0, 2) + b(0, 2),
-	         a(1, 0) + b(1, 0), a(1, 1) + b(1, 1), a(1, 2) + b(1, 2),
-	         a(2, 0) + b(2, 0), a(2, 1) + b(2, 1), a(2, 2) + b(2, 2));
+    // Column Major
+    return Mat3F(a(0, 0) + b(0, 0), a(1, 0) + b(1, 0), a(2, 0) + b(2, 0),
+	         a(0, 1) + b(0, 1), a(1, 1) + b(1, 1), a(2, 1) + b(2, 1),
+	         a(0, 2) + b(0, 2), a(1, 2) + b(1, 2), a(2, 2) + b(2, 2));
 }
 
 Mat3F operator -(const Mat3F& a, const Mat3F& b)
 {
-    return Mat3F(a(0, 0) - b(0, 0), a(0, 1) - b(0, 1), a(0, 2) - b(0, 2),
-	         a(1, 0) - b(1, 0), a(1, 1) - b(1, 1), a(1, 2) - b(1, 2),
-	         a(2, 0) - b(2, 0), a(2, 1) - b(2, 1), a(2, 2) - b(2, 2));
+    // Column Major
+    return Mat3F(a(0, 0) - b(0, 0), a(1, 0) - b(1, 0), a(2, 0) - b(2, 0),
+	         a(0, 1) - b(0, 1), a(1, 1) - b(1, 1), a(2, 1) - b(2, 1),
+	         a(0, 2) - b(0, 2), a(1, 2) - b(1, 2), a(2, 2) - b(2, 2));
 }
 
 Mat3F operator *(const Mat3F& a, const Mat3F& b)
 {
-    return Mat3F(a(0, 0) * b(0, 0) + a(0, 1) * b(1, 0) + a(0, 2) * b(2, 0),
-	         a(0, 0) * b(0, 1) + a(0, 1) * b(1, 1) + a(0, 2) * b(2, 1),
-	         a(0, 0) * b(0, 2) + a(0, 1) * b(1, 2) + a(0, 2) * b(2, 2),
-	         a(1, 0) * b(0, 0) + a(1, 1) * b(1, 0) + a(1, 2) * b(2, 0),
-		 a(1, 0) * b(0, 1) + a(1, 1) * b(1, 1) + a(1, 2) * b(2, 1),
-		 a(1, 0) * b(0, 2) + a(1, 1) * b(1, 2) + a(1, 2) * b(2, 2),
-		 a(2, 0) * b(0, 0) + a(2, 1) * b(1, 0) + a(2, 2) * b(2, 0),
-		 a(2, 0) * b(0, 1) + a(2, 1) * b(1, 1) + a(2, 2) * b(2, 1),
-		 a(2, 0) * b(0, 2) + a(2, 1) * b(1, 2) + a(2, 2) * b(2, 2));
+    // Column Major
+    return Mat3F(a(0, 0) * b(0, 0) + a(1, 0) * b(0, 1) + a(2, 0) * b(0, 2),
+	         a(0, 0) * b(1, 0) + a(1, 0) * b(1, 1) + a(2, 0) * b(1, 2),
+	         a(0, 0) * b(2, 0) + a(1, 0) * b(2, 1) + a(2, 0) * b(2, 2),
+	         a(0, 1) * b(0, 0) + a(1, 1) * b(0, 1) + a(2, 1) * b(0, 2),
+		 a(0, 1) * b(1, 0) + a(1, 1) * b(1, 1) + a(2, 1) * b(1, 2),
+		 a(0, 1) * b(2, 0) + a(1, 1) * b(2, 1) + a(2, 1) * b(2, 2),
+		 a(0, 2) * b(0, 0) + a(1, 2) * b(0, 1) + a(2, 2) * b(0, 2),
+		 a(0, 2) * b(1, 0) + a(1, 2) * b(1, 1) + a(2, 2) * b(1, 2),
+		 a(0, 2) * b(2, 0) + a(1, 2) * b(2, 1) + a(2, 2) * b(2, 2));
 }
 
 Vec3F operator *(const Mat3F& m, const Vec3F& v)
 {
-    // TODO: Review for Column Major
+    // Column Major
     return Vec3F(m(0, 0) * v.x + m(0, 1) * v.y + m(0, 2) * v.z,
 		 m(1, 0) * v.x + m(1, 1) * v.y + m(1, 2) * v.z,
 		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z);
@@ -546,9 +534,9 @@ Vec3F operator *(const Mat3F& m, const Vec3F& v)
 Mat3F transpose(const Mat3F& m)
 {
     // Column Major
-    return Mat3F(m(0, 0), m(1, 0), m(2, 0),
-		 m(0, 1), m(1, 1), m(2, 1),
-		 m(0, 2), m(1, 2), m(2, 2));
+    return Mat3F(m(0, 0), m(0, 1), m(0, 2),
+		 m(1, 0), m(1, 1), m(1, 2),
+		 m(2, 0), m(2, 1), m(2, 2));
 }
 
 void print(const Mat3F& m)
@@ -558,7 +546,7 @@ void print(const Mat3F& m)
     {
 	printf("\n");
 	for(int y = 0; y < 3; y++)
-	    printf("%f, ", m(x, y));
+	    printf("%f, ", m(y, x));
     }
     printf("\n");
 }
@@ -606,7 +594,7 @@ Mat4F::Mat4F(const Vec4F& a, const Vec4F& b, const Vec4F& c, const Vec4F& d)
 
 Mat4F::Mat4F(const Mat4F& m)
 {
-    // TODO: Update for Column Major
+    // Column Major
     n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2); n[0][3] = m(0, 3);
     n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2); n[1][3] = m(1, 3);
     n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2); n[2][3] = m(2, 3);
@@ -615,7 +603,7 @@ Mat4F::Mat4F(const Mat4F& m)
 
 Mat4F::Mat4F(const Mat3F& m)
 {
-    // TODO: Update for Column Major
+    // Column Major
     n[0][0] = m(0, 0); n[0][1] = m(0, 1); n[0][2] = m(0, 2); n[0][3] = 0.0f;
     n[1][0] = m(1, 0); n[1][1] = m(1, 1); n[1][2] = m(1, 2); n[1][3] = 0.0f;
     n[2][0] = m(2, 0); n[2][1] = m(2, 1); n[2][2] = m(2, 2); n[2][3] = 0.0f;
@@ -624,7 +612,7 @@ Mat4F::Mat4F(const Mat3F& m)
 
 void Mat4F::operator *=(float s)
 {
-    // TODO: Update for Column Major
+    // Column Major
     n[0][0] *= s; n[0][1] *= s; n[0][2] *= s; n[0][3] *= s;
     n[1][0] *= s; n[1][1] *= s; n[1][2] *= s; n[1][3] *= s;
     n[2][0] *= s; n[2][1] *= s; n[2][2] *= s; n[2][3] *= s;
@@ -633,7 +621,6 @@ void Mat4F::operator *=(float s)
 
 void Mat4F::operator +=(const Mat4F& m)
 {
-    // TODO: Update for Column Major
     n[0][0] += m(0, 0); n[0][1] += m(0, 1); n[0][2] += m(0, 2); n[0][3] += m(0, 3);
     n[1][0] += m(1, 0); n[1][1] += m(1, 1); n[1][2] += m(1, 2); n[1][3] += m(1, 3);
     n[2][0] += m(2, 0); n[2][1] += m(2, 1); n[2][2] += m(2, 2); n[2][3] += m(2, 3);
@@ -642,35 +629,20 @@ void Mat4F::operator +=(const Mat4F& m)
 
 void Mat4F::operator -=(const Mat4F& m)
 {
-    // TODO: Update for Column Major
     n[0][0] -= m(0, 0); n[0][1] -= m(0, 1); n[0][2] -= m(0, 2); n[0][3] -= m(0, 3);
     n[1][0] -= m(1, 0); n[1][1] -= m(1, 1); n[1][2] -= m(1, 2); n[1][3] -= m(1, 3);
     n[2][0] -= m(2, 0); n[2][1] -= m(2, 1); n[2][2] -= m(2, 2); n[2][3] -= m(2, 3);
     n[3][0] -= m(3, 0); n[3][1] -= m(3, 1); n[3][2] -= m(3, 2); n[3][3] -= m(3, 3);
 }
 
-Vec4F Mat4F::operator [](int j)
-{
-    // TODO: Review for Column Major
-    return Vec4F(n[0][j], n[1][j], n[2][j], n[3][j]);
-}
-
-const Vec4F Mat4F::operator [](int j) const
-{
-    // TODO: Review for Column Major
-    return Vec4F(n[0][j], n[1][j], n[2][j], n[3][j]);
-}
-
 float& Mat4F::operator ()(int i, int j)
 {
-    // Column Major
-    return n[j][i];
+    return n[i][j];
 }
 
 c_float& Mat4F::operator ()(int i, int j) const
 {
-    // Column Major
-    return n[j][i];
+    return n[i][j];
 }
 
 c_float* Mat4F::getPointer()
@@ -684,46 +656,49 @@ c_float* Mat4F::getPointer()
 
 Mat4F operator +(const Mat4F& a, const Mat4F& b)
 {
-    return Mat4F(a(0, 0) + b(0, 0), a(0, 1) + b(0, 1), a(0, 2) + b(0, 2), a(0, 3) + b(0, 3),
-		 a(1, 0) + b(1, 0), a(1, 1) + b(1, 1), a(1, 2) + b(1, 2), a(1, 3) + b(1, 3),
-		 a(2, 0) + b(2, 0), a(2, 1) + b(2, 1), a(2, 2) + b(2, 2), a(2, 3) + b(2, 3),
-		 a(3, 0) + b(3, 0), a(3, 1) + b(3, 1), a(3, 2) + b(3, 2), a(3, 3) + b(3, 3));
+    // Column Major
+    return Mat4F(a(0, 0) + b(0, 0), a(1, 0) + b(1, 0), a(2, 0) + b(2, 0), a(3, 0) + b(3, 0),
+		 a(0, 1) + b(0, 1), a(1, 1) + b(1, 1), a(2, 1) + b(2, 1), a(3, 1) + b(3, 1),
+		 a(0, 2) + b(0, 2), a(1, 2) + b(1, 2), a(2, 2) + b(2, 2), a(3, 2) + b(3, 2),
+		 a(0, 3) + b(0, 3), a(1, 3) + b(1, 3), a(2, 3) + b(2, 3), a(3, 3) + b(3, 3));
 }
 
 Mat4F operator -(const Mat4F& a, const Mat4F& b)
 {
-    return Mat4F(a(0, 0) - b(0, 0), a(0, 1) - b(0, 1), a(0, 2) - b(0, 2), a(0, 3) - b(0, 3),
-		 a(1, 0) - b(1, 0), a(1, 1) - b(1, 1), a(1, 2) - b(1, 2), a(1, 3) - b(1, 3),
-		 a(2, 0) - b(2, 0), a(2, 1) - b(2, 1), a(2, 2) - b(2, 2), a(2, 3) - b(2, 3),
-		 a(3, 0) - b(3, 0), a(3, 1) - b(3, 1), a(3, 2) - b(3, 2), a(3, 3) - b(3, 3));
+    // Column Major
+    return Mat4F(a(0, 0) - b(0, 0), a(1, 0) - b(1, 0), a(2, 0) - b(2, 0), a(3, 0) - b(3, 0),
+		 a(0, 1) - b(0, 1), a(1, 1) - b(1, 1), a(2, 1) - b(2, 1), a(3, 1) - b(3, 1),
+		 a(0, 2) - b(0, 2), a(1, 2) - b(1, 2), a(2, 2) - b(2, 2), a(3, 2) - b(3, 2),
+		 a(0, 3) - b(0, 3), a(1, 3) - b(1, 3), a(2, 3) - b(2, 3), a(3, 3) - b(3, 3));
 }
 
 Mat4F operator *(const Mat4F& a, const Mat4F& b)
 {
-    return Mat4F(a(0, 0) * b(0, 0) + a(0, 1) * b(1, 0) + a(0, 2) * b(2, 0) + a(0, 3) * b(3, 0), // row 1
-	         a(0, 0) * b(0, 1) + a(0, 1) * b(1, 1) + a(0, 2) * b(2, 1) + a(0, 3) * b(3, 1),
-		 a(0, 0) * b(0, 2) + a(0, 1) * b(1, 2) + a(0, 2) * b(2, 2) + a(0, 3) * b(3, 2),
-		 a(0, 0) * b(0, 3) + a(0, 1) * b(1, 3) + a(0, 2) * b(2, 3) + a(0, 3) * b(3, 3),
+    // Column Major
+    return Mat4F(a(0, 0) * b(0, 0) + a(1, 0) * b(0, 1) + a(2, 0) * b(0, 2) + a(3, 0) * b(0, 3), // row 1
+	         a(0, 0) * b(1, 0) + a(1, 0) * b(1, 1) + a(2, 0) * b(1, 2) + a(3, 0) * b(1, 3),
+		 a(0, 0) * b(2, 0) + a(1, 0) * b(2, 1) + a(2, 0) * b(2, 2) + a(3, 0) * b(2, 3),
+		 a(0, 0) * b(3, 0) + a(1, 0) * b(3, 1) + a(2, 0) * b(3, 2) + a(3, 0) * b(3, 3),
 
-		 a(1, 0) * b(0, 0) + a(1, 1) * b(1, 0) + a(1, 2) * b(2, 0) + a(1, 3) * b(3, 0), // row 2
-		 a(1, 0) * b(0, 1) + a(1, 1) * b(1, 1) + a(1, 2) * b(2, 1) + a(1, 3) * b(3, 1),
-		 a(1, 0) * b(0, 2) + a(1, 1) * b(1, 2) + a(1, 2) * b(2, 2) + a(1, 3) * b(3, 2),
-		 a(1, 0) * b(0, 3) + a(1, 1) * b(1, 3) + a(1, 2) * b(2, 3) + a(1, 3) * b(3, 3),
+		 a(0, 1) * b(0, 0) + a(1, 1) * b(0, 1) + a(2, 1) * b(0, 2) + a(3, 1) * b(0, 3), // row 2
+		 a(0, 1) * b(1, 0) + a(1, 1) * b(1, 1) + a(2, 1) * b(1, 2) + a(3, 1) * b(1, 3),
+		 a(0, 1) * b(2, 0) + a(1, 1) * b(2, 1) + a(2, 1) * b(2, 2) + a(3, 1) * b(2, 3),
+		 a(0, 1) * b(3, 0) + a(1, 1) * b(3, 1) + a(2, 1) * b(3, 2) + a(3, 1) * b(3, 3),
 
-		 a(2, 0) * b(0, 0) + a(2, 1) * b(1, 0) + a(2, 2) * b(2, 0) + a(2, 3) * b(3, 0), // row 3
-		 a(2, 0) * b(0, 1) + a(2, 1) * b(1, 1) + a(2, 2) * b(2, 1) + a(2, 3) * b(3, 1),
-		 a(2, 0) * b(0, 2) + a(2, 1) * b(1, 2) + a(2, 2) * b(2, 2) + a(2, 3) * b(3, 2),
-		 a(2, 0) * b(0, 3) + a(2, 1) * b(1, 3) + a(2, 2) * b(2, 3) + a(2, 3) * b(3, 3),
+		 a(0, 2) * b(0, 0) + a(1, 2) * b(0, 1) + a(2, 2) * b(0, 2) + a(3, 2) * b(0, 3), // row 3
+		 a(0, 2) * b(1, 0) + a(1, 2) * b(1, 1) + a(2, 2) * b(1, 2) + a(3, 2) * b(1, 3),
+		 a(0, 2) * b(2, 0) + a(1, 2) * b(2, 1) + a(2, 2) * b(2, 2) + a(3, 2) * b(2, 3),
+		 a(0, 2) * b(3, 0) + a(1, 2) * b(3, 1) + a(2, 2) * b(3, 2) + a(3, 2) * b(3, 3),
 
-		 a(3, 0) * b(0, 0) + a(3, 1) * b(1, 0) + a(3, 2) * b(2, 0) + a(3, 3) * b(3, 0), // row 4
-		 a(3, 0) * b(0, 1) + a(3, 1) * b(1, 1) + a(3, 2) * b(2, 1) + a(3, 3) * b(3, 1),
-		 a(3, 0) * b(0, 2) + a(3, 1) * b(1, 2) + a(3, 2) * b(2, 2) + a(3, 3) * b(3, 2),
-		 a(3, 0) * b(0, 3) + a(3, 1) * b(1, 3) + a(3, 2) * b(2, 3) + a(3, 3) * b(3, 3));
+		 a(0, 3) * b(0, 0) + a(1, 3) * b(0, 1) + a(2, 3) * b(0, 2) + a(3, 3) * b(0, 3), // row 4
+		 a(0, 3) * b(1, 0) + a(1, 3) * b(1, 1) + a(2, 3) * b(1, 2) + a(3, 3) * b(1, 3),
+		 a(0, 3) * b(2, 0) + a(1, 3) * b(2, 1) + a(2, 3) * b(2, 2) + a(3, 3) * b(2, 3),
+		 a(0, 3) * b(3, 0) + a(1, 3) * b(3, 1) + a(2, 3) * b(3, 2) + a(3, 3) * b(3, 3));
 }
 
 Vec4F operator *(const Mat4F& m, const Vec4F& v)
 {
-    // TODO: Review for Column Major
+    // Column Major
     return Vec4F(m(0, 0) * v.x + m(0, 1) * v.y + m(0, 2) * v.z + m(0, 3) * v.w,
 		 m(1, 0) * v.x + m(1, 1) * v.y + m(1, 2) * v.z + m(1, 3) * v.w,
 		 m(2, 0) * v.x + m(2, 1) * v.y + m(2, 2) * v.z + m(2, 3) * v.w,
@@ -733,10 +708,10 @@ Vec4F operator *(const Mat4F& m, const Vec4F& v)
 Mat4F transpose(const Mat4F& m)
 {
     // Column Major
-    return Mat4F(m(0, 0), m(1, 0), m(2, 0), m(3, 0),
-		 m(0, 1), m(1, 1), m(2, 1), m(3, 1),
-		 m(0, 2), m(1, 2), m(2, 2), m(3, 2),
-		 m(0, 3), m(1, 3), m(2, 3), m(3, 3));
+    return Mat4F(m(0, 0), m(0, 1), m(0, 2), m(0, 3),
+		 m(1, 0), m(1, 1), m(1, 2), m(1, 3),
+		 m(2, 0), m(2, 1), m(2, 2), m(2, 3),
+		 m(3, 0), m(3, 1), m(3, 2), m(3, 3));
 }
 
 void print(const Mat4F& m)
@@ -746,7 +721,7 @@ void print(const Mat4F& m)
     {
 	printf("\n");
 	for(int y = 0; y < 4; y++)
-	    printf("%f, ", m(x, y));
+	    printf("%f, ", m(y, x));
     }
     printf("\n");
 }
