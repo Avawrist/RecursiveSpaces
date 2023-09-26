@@ -279,11 +279,11 @@ void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_mana
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // View Mat
-    Mat4F view = cameraGetView(camera, cam_pos);
+    Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
     // Projection Mat
-    Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
-    shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 12.0f);
+    shaderAddMat4Uniform(bp_shader_p, "projection", glm::value_ptr(projection));
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
     // Single Dir Light (TODO: Make DirLight a component)
@@ -332,22 +332,22 @@ void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manage
     /////////////////////////////////
     // Update Grid Shader Uniforms //
     /////////////////////////////////
-    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
+    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DB_GRID);
     glUseProgram(grid_shader_p->program_id);
     // Model
     Mat4F grid_model = Mat4F(1.0f);
     shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
     // View
-    Mat4F view = cameraGetView(camera, cam_pos);
+    Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
-    Mat4F projection = cameraGetOrthographic(camera, game_window.win_width, game_window.win_height);
-    shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
+    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 12.0f);
+    shaderAddMat4Uniform(grid_shader_p, "projection", glm::value_ptr(projection));
 }
 
 void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p)
 {
-    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DEBUG);
+    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DB_GRID);
     glUseProgram(grid_shader_p->program_id);
     
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);

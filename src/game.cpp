@@ -122,7 +122,7 @@ int main()
     
     // Camera
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
-			       Vec3F(20.0f, 20.0f, 20.0f), CAMERA);
+			       Vec3F(6.0f, 6.0f, 6.0f), CAMERA);
     
     ///////////////
     // Game Loop //
@@ -464,7 +464,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     ///////////////////////////////
     // Render Pass 0 - Depth Map //
     ///////////////////////////////
-
+/*
     // -> Move everything into platformSetRenderStateShadowMap(),
     //    platformPrepShaderShadowMap(),
     //    platformRenderShadowMap()
@@ -480,7 +480,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     glUseProgram(shadowmap_shader_p->program_id);
     Mat4F view = lookAt(active_entities.transform[dir_light_id].position,
 			Vec3F(0.0f, 0.0f, 0.0f),
-			Vec3F(0.0, 1.0f, 0.0f));
+			Vec3F(0.0f, 1.0f, 0.0f));
     //Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
     //					     game_window.win_width,
     //					     game_window.win_height);
@@ -517,11 +517,11 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     glBindTexture(GL_TEXTURE_2D, depth_ftexture_p->depth_text_id);
     glBindVertexArray(depth_ftexture_p->quad_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);    
-  
+*/
     ///////////////////////////////
     // Render Pass 1 -  Entities //
     ///////////////////////////////
-    /*
+
     // Update shader uniforms
     platformSetRenderStateDefault(game_window, *ftexture_p);
     platformPrepShaderDefault(game_window,
@@ -552,7 +552,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Render Pass 2 - Post Processing //
     /////////////////////////////////////
     platformRenderPP(asset_manager, game_window, ftexture_p);
-    */
+    
     // Swap buffers
     platformSwapBuffers(game_window);
 

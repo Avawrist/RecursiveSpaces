@@ -1390,10 +1390,6 @@ ShaderTableDir::ShaderTableDir()
     // Shadow Map Shader Program
     table[SHADOWMAP][VERTEX]   = "..\\data\\assets\\shaders\\shadowmap.vert";
     table[SHADOWMAP][FRAGMENT] = "..\\data\\assets\\shaders\\shadowmap.frag";
-
-    // Shadow Map Debug Shader Program
-    table[SMDEBUG][VERTEX]   = "..\\data\\assets\\shaders\\shadowmap_db.vert";
-    table[SMDEBUG][FRAGMENT] = "..\\data\\assets\\shaders\\shadowmap_db.frag";
     
     // Blinn-Phong Shader Program
     table[BLINNPHONG][VERTEX]   = "..\\data\\assets\\shaders\\blinn_phong.vert";
@@ -1404,8 +1400,12 @@ ShaderTableDir::ShaderTableDir()
     table[POSTPROCESS][FRAGMENT] = "..\\data\\assets\\shaders\\pp.frag";
 
     // Grid Shader Program
-    table[GRID][VERTEX]   = "..\\data\\assets\\shaders\\db_grid.vert";
-    table[GRID][FRAGMENT] = "..\\data\\assets\\shaders\\db_grid.frag";
+    table[DB_GRID][VERTEX]   = "..\\data\\assets\\shaders\\db_grid.vert";
+    table[DB_GRID][FRAGMENT] = "..\\data\\assets\\shaders\\db_grid.frag";
+
+    // Shadow Map Debug Shader Program
+    table[SMDEBUG][VERTEX]   = "..\\data\\assets\\shaders\\shadowmap_db.vert";
+    table[SMDEBUG][FRAGMENT] = "..\\data\\assets\\shaders\\shadowmap_db.frag";
 }
 
 //////////////////////////

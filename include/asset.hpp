@@ -241,10 +241,10 @@ typedef struct ActiveSounds
 typedef enum ShaderProgram
 {
     SHADOWMAP             = 0,
-    SMDEBUG               = 1,
-    BLINNPHONG            = 2,
-    POSTPROCESS           = 3,
-    DEBUG                 = 4,
+    BLINNPHONG            = 1,
+    POSTPROCESS           = 2,
+    DB_GRID               = 3,
+    SMDEBUG               = 4,
     TOTAL_SHADER_PROGRAMS = 5
 } ShaderProgram;
 
