@@ -122,7 +122,7 @@ int main()
     
     // Camera
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
-			       Vec3F(6.0f, 6.0f, 6.0f), CAMERA);
+			       Vec3F(8.0f, 4.0f, 8.0f), CAMERA);
     
     ///////////////
     // Game Loop //

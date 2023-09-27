@@ -14,7 +14,7 @@ int platformInitAPIs(GameWindow& game_window)
     if(!platformInitGLFW()) {return 0;}
 
     // Initialize window
-    if(!platformInitWindow(game_window, 1024, 1024, "First Game")) {return 0;}
+    if(!platformInitWindow(game_window, 1920, 1080, "First Game")) {return 0;}
 
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!platformInitOpenGL()) {return 0;}
@@ -284,8 +284,14 @@ void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_mana
     Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
     // Projection Mat
-    // TODO: Adapt projection dynamically to window resolution (not framebuffer resolution)
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 12.0f);
+    float ortho_height = 6.5f;
+    float ortho_width = ortho_height * game_window.win_ar;
+    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
+				       ortho_width * 0.5f,
+				      -ortho_height * 0.5f,
+				       ortho_height * 0.5f,
+				       0.05f,
+				       20.0f);
     shaderAddMat4Uniform(bp_shader_p, "projection", glm::value_ptr(projection));
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
@@ -344,8 +350,14 @@ void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manage
     Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
-    // TODO: Adapt projection dynamically to window resolution (not framebuffer resolution)
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 12.0f);
+    float ortho_height = 6.5f;
+    float ortho_width = ortho_height * game_window.win_ar;
+    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
+				       ortho_width * 0.5f,
+				      -ortho_height * 0.5f,
+				       ortho_height * 0.5f,
+				       0.05f,
+				       20.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", glm::value_ptr(projection));
 }
 
