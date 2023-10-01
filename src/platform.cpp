@@ -40,7 +40,7 @@ int platformInitGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 4); // multisampling with 4 subsamples per screen coordinate
+    //glfwWindowHint(GLFW_SAMPLES, 4); // Move to default render stage
     
     return 1;
 }
@@ -63,7 +63,7 @@ int platformInitOpenGL()
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
     //Multisampling
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE); // Move to default render stage
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
