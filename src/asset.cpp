@@ -810,12 +810,15 @@ void textureDataToGPU(Texture* texture_p)
 // Struct FrameTexture //
 /////////////////////////
 
-FrameTexture::FrameTexture(int _width, int _height, bool is_depth_map)
+FrameTexture::FrameTexture(int _width, int _height, bool _is_depth_map, bool _is_MSAA)
 {
     //////////////////////////////
     // Initialize FBO & Texture //
     //////////////////////////////
 
+    is_depth_map = _is_depth_map;
+    is_MSAA      = _is_MSAA;
+    
     // FBO:
     glGenFramebuffers(1, &fbo);
 
@@ -862,7 +865,7 @@ FrameTexture::~FrameTexture()
     glDeleteBuffers(1, &quad_vbo);
 }
 
-void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map)
+void frameTextureDataToGPU(FrameTexture* ftexture_p)
 {
     //////////////////////////////////////
     // Config Framebuffer with Textures //
@@ -870,7 +873,7 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map)
     
     glBindFramebuffer(GL_FRAMEBUFFER, ftexture_p->fbo);
 
-    if(is_depth_map)
+    if(ftexture_p->is_depth_map)
     {
 	///////////////////
 	// Depth Texture //
@@ -891,7 +894,6 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 	glFramebufferTexture2D(GL_FRAMEBUFFER,
 			       GL_DEPTH_ATTACHMENT,
 			       GL_TEXTURE_2D,
@@ -905,29 +907,49 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map)
 	///////////////////
 	// Color Texture //
 	///////////////////
-    
-	// Allocate memory for color texture on GPU
-	glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id);
-	glTexImage2D(GL_TEXTURE_2D,
-		     0,
-		     GL_RGB,
-		     ftexture_p->width,
-		     ftexture_p->height,
-		     0,
-		     GL_RGB,
-		     GL_UNSIGNED_BYTE,
-		     NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Attach texture to FBO
-	glFramebufferTexture2D(GL_FRAMEBUFFER,
-			       GL_COLOR_ATTACHMENT0,
-			       GL_TEXTURE_2D,
-			       ftexture_p->color_text_id,
-			       0);
-
+	if(ftexture_p->is_MSAA)
+	{
+	    // Allocate memory for MSAA color texture on GPU
+	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ftexture_p->color_text_id);
+	    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
+				      4,
+				      GL_RGB,
+				      ftexture_p->width,
+				      ftexture_p->height,
+				      GL_TRUE);
+	    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	    glFramebufferTexture2D(GL_FRAMEBUFFER,
+				   GL_COLOR_ATTACHMENT0,
+				   GL_TEXTURE_2D_MULTISAMPLE,
+				   ftexture_p->color_text_id,
+				   0);
+	}
+	else
+	{
+	    // Allocate memory for color texture on GPU
+	    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id);
+	    glTexImage2D(GL_TEXTURE_2D,
+			 0,
+			 GL_RGB,
+			 ftexture_p->width,
+			 ftexture_p->height,
+			 0,
+			 GL_RGB,
+			 GL_UNSIGNED_BYTE,
+			 NULL);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glBindTexture(GL_TEXTURE_2D, 0); // Reset to GL_TEXTURE_2D if multisampling doesnt work
+	    glFramebufferTexture2D(GL_FRAMEBUFFER,
+				   GL_COLOR_ATTACHMENT0,
+				   GL_TEXTURE_2D,
+				   ftexture_p->color_text_id,
+				   0);
+	}	
+       
 	///////////////////////////
 	// Depth/Stencil Texture //
 	///////////////////////////

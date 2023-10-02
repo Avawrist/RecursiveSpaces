@@ -46,7 +46,7 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_p, Level& level,
+			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p, FrameTexture* ftexture_non_msaa_p, Level& level,
 			DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
@@ -83,10 +83,18 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Pre-Process Framebuffer
-    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true);
-    frameTextureDataToGPU(depth_ftexture_p, true);
-    FrameTexture* ftexture_p = new FrameTexture(game_window.view_width, game_window.view_height, false);
-    frameTextureDataToGPU(ftexture_p, false);
+    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true, false);
+    frameTextureDataToGPU(depth_ftexture_p);
+    FrameTexture* ftexture_msaa_p = new FrameTexture(game_window.win_width,
+						     game_window.win_height,
+						     false,
+						     true);
+    frameTextureDataToGPU(ftexture_msaa_p);
+    FrameTexture* ftexture_non_msaa_p = new FrameTexture(game_window.win_width,
+	                                                 game_window.win_height,
+	                                                 false,
+							 false);
+    frameTextureDataToGPU(ftexture_non_msaa_p);
     // Create Debug Grid Object
     DebugGrid* grid_p = new DebugGrid(level_p->grid.dimensions,
 				      MAX_WIDTH + 1,
@@ -129,8 +137,16 @@ int main()
     ///////////////
     while(!game_window.close)
     {	
-	gameUpdateAndRender(test_soundStream_p, game_window, input_manager, *active_entities_p,
-			    asset_manager, depth_ftexture_p, ftexture_p, *level_p, grid_p);
+	gameUpdateAndRender(test_soundStream_p,
+			    game_window,
+			    input_manager,
+			    *active_entities_p,
+			    asset_manager,
+			    depth_ftexture_p,
+			    ftexture_msaa_p,
+			    ftexture_non_msaa_p,
+			    *level_p,
+			    grid_p);
         gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
 	
 	// Close condition
@@ -147,7 +163,9 @@ int main()
     delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
-    delete ftexture_p;
+    delete depth_ftexture_p;
+    delete ftexture_msaa_p;
+    delete ftexture_non_msaa_p;
     
     return 0;
 }
@@ -420,8 +438,8 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_p, Level& level,
-			DebugGrid* grid_p)
+			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p,
+			FrameTexture* ftexture_non_msaa_p, Level& level, DebugGrid* grid_p)
 {
     ////////////
     // Update //
@@ -508,7 +526,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // PlatformRenderShadowMap()
     Shader* sm_debug_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SMDEBUG);
     glViewport(0, 0, game_window.win_width, game_window.win_height);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // TODO Change to depth ftexture fbo when not testing
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     glUseProgram(sm_debug_shader_p->program_id);
@@ -523,7 +541,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     ///////////////////////////////
 
     // Update shader uniforms
-    platformSetRenderStateDefault(game_window, *ftexture_p);
+    platformSetRenderStateDefault(*ftexture_msaa_p);
     platformPrepShaderDefault(game_window,
 			      asset_manager,
 			      active_entities.camera[cam_id],
@@ -547,11 +565,25 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 			    active_entities.camera[cam_id],
 			    active_entities.transform[cam_id].position);
     platformRenderDebug(asset_manager, grid_p);
+
+    // TODO move to platform code - blit msaa render texture to non MSAA render texture to be used in the post process render
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, ftexture_msaa_p->fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ftexture_non_msaa_p->fbo);
+    glBlitFramebuffer(0,
+		      0,
+		      ftexture_msaa_p->width,
+		      ftexture_msaa_p->height,
+		      0,
+		      0,
+		      ftexture_non_msaa_p->width,
+		      ftexture_non_msaa_p->height,
+		      GL_COLOR_BUFFER_BIT,
+		      GL_NEAREST);
     
     /////////////////////////////////////
     // Render Pass 2 - Post Processing //
     /////////////////////////////////////
-    platformRenderPP(asset_manager, game_window, ftexture_p);
+    platformRenderPP(asset_manager, ftexture_non_msaa_p);
     
     // Swap buffers
     platformSwapBuffers(game_window);

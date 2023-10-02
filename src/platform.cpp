@@ -40,7 +40,7 @@ int platformInitGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    //glfwWindowHint(GLFW_SAMPLES, 4); // Move to default render stage
+    glfwWindowHint(GLFW_SAMPLES, 4);
     
     return 1;
 }
@@ -62,8 +62,8 @@ int platformInitOpenGL()
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
-    //Multisampling
-    //glEnable(GL_MULTISAMPLE); // Move to default render stage
+    // MSAA
+    glEnable(GL_MULTISAMPLE);
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -261,10 +261,10 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
     glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
 
-void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& framebuffer)
+void platformSetRenderStateDefault(FrameTexture& framebuffer)
 {
     // Set GL state
-    glViewport(0, 0, game_window.view_width, game_window.view_height);
+    glViewport(0, 0, framebuffer.width, framebuffer.height);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -369,13 +369,13 @@ void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p)
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
 }
 
-void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p)
+void platformRenderPP(AssetManager& asset_manager, FrameTexture* ftexture_p)
 {
     // Get PP shader
     Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
     
     // Set proper state to render
-    glViewport(0, 0, game_window.view_width, game_window.view_height);
+    glViewport(0, 0, ftexture_p->width, ftexture_p->height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); // clear screen
     glDisable(GL_DEPTH_TEST); // Disable so quad is visible

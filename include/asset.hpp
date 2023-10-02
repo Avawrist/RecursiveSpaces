@@ -161,10 +161,12 @@ typedef struct FrameTexture
 	 1.0f, -1.0f, 1.0f, 0.0f,
 	 1.0f,  1.0f, 1.0f, 1.0f
     };
-    FrameTexture(int _width, int _height, bool is_depth_map);
+    bool is_depth_map;
+    bool is_MSAA;
+    FrameTexture(int _width, int _height, bool is_depth_map, bool is_MSAA);
     ~FrameTexture();
 } FrameTexture;
-void frameTextureDataToGPU(FrameTexture* ftexture_p, bool is_depth_map);
+void frameTextureDataToGPU(FrameTexture* ftexture_p);
 
 /////////////////////////
 // Struct AssetTableID //

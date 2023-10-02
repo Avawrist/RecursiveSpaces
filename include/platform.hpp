@@ -68,7 +68,7 @@ void platformSwapBuffers(GameWindow& game_window);
 
 void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 
-void platformSetRenderStateDefault(GameWindow& game_window, FrameTexture& framebuffer);
+void platformSetRenderStateDefault(FrameTexture& framebuffer);
 
 void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
 			       Camera& camera, Vec3F cam_pos, DirLight& dir_light);
@@ -80,7 +80,7 @@ void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F m
 
 void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p);
 
-void platformRenderPP(AssetManager& asset_manager, GameWindow& game_window, FrameTexture* ftexture_p);
+void platformRenderPP(AssetManager& asset_manager, FrameTexture* ftexture_p);
 
 int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path);
 
