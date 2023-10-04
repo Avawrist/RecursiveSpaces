@@ -40,7 +40,6 @@ int platformInitGLFW()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // TO-DO: Remove on release
-    glfwWindowHint(GLFW_SAMPLES, 4);
     
     return 1;
 }
@@ -62,8 +61,6 @@ int platformInitOpenGL()
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
-    // MSAA
-    glEnable(GL_MULTISAMPLE);
     // Debug - TO-DO: Remove following lines for release build
     glEnable(GL_DEBUG_OUTPUT); 
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -271,7 +268,7 @@ void platformSetRenderStateDefault(FrameTexture& framebuffer)
 }
 
 void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, Vec3F cam_pos, DirLight& dir_light)
+			       Camera& camera, Vec3F cam_pos, DirLight& dir_light, Level& level)
 {
     /////////////////////////////////
     // Update Blinn-Phong Uniforms //
@@ -281,7 +278,7 @@ void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_mana
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // View Mat
-    Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F view = lookAt(cam_pos, level.grid.center, Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
     // Projection Mat
     float ortho_height = 6.5f;
@@ -336,7 +333,7 @@ void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F m
 }
 
 void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
-                             Vec3F cam_pos)
+                             Vec3F cam_pos, Level& level)
 {
     /////////////////////////////////
     // Update Grid Shader Uniforms //
@@ -347,7 +344,7 @@ void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manage
     Mat4F grid_model = Mat4F(1.0f);
     shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
     // View
-    Mat4F view = lookAt(cam_pos, Vec3F(0.0f, 0.0f, 0.0f), Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F view = lookAt(cam_pos, level.grid.center, Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
     float ortho_height = 6.5f;

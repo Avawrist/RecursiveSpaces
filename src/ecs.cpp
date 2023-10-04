@@ -226,11 +226,6 @@ LevelGrid::LevelGrid()
 // Struct Level //
 //////////////////
 
-Level::Level()
-{
-    turn = TURN_PLAYER;
-}
-
 //////////////////////////////
 // ActiveEntities Functions //
 //////////////////////////////

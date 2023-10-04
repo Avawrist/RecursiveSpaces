@@ -82,7 +82,7 @@ int main()
     
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
-    // Initialize Pre-Process Framebuffer
+    // Initialize Framebuffers
     FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true, false);
     frameTextureDataToGPU(depth_ftexture_p);
     FrameTexture* ftexture_msaa_p = new FrameTexture(game_window.win_width,
@@ -126,11 +126,10 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
     
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(6.0f, 6.0f, 6.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(8.0f, 4.0f, 8.0f), DIR_LIGHT);
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
-			       Vec3F(8.0f, 4.0f, 8.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(0.0f, 6.0f, 8.0f), CAMERA);
     
     ///////////////
     // Game Loop //
@@ -200,7 +199,6 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 					 cur_grid_pos.y,
 					 cur_grid_pos.z + 1);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    level.turn = TURN_AI;
 		}
 		// Up
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
@@ -209,7 +207,6 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 					 cur_grid_pos.y,
 					 cur_grid_pos.z - 1);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    level.turn = TURN_AI;
 		}
 		// Left
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
@@ -218,7 +215,6 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    level.turn = TURN_AI;
 		}
 		// Right
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
@@ -227,7 +223,6 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
 		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
-		    level.turn = TURN_AI;
 		}
 	    }
 
@@ -452,18 +447,11 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     gameUpdateDogStates(active_entities);
     
     // Update Player
-    if(level.turn == TURN_PLAYER)
-    {
-	gameUpdatePlayer(active_entities, level, input_manager);
-    }
+    gameUpdatePlayer(active_entities, level, input_manager);
 
     // Update AI
-    if (level.turn == TURN_AI)
-    {
-	gameUpdateAI(active_entities, level);
-	level.turn = TURN_PLAYER;
-    }
-    
+    gameUpdateAI(active_entities, level);
+
     // Update Transforms
     gameUpdateTransforms(active_entities, level.grid);
     
@@ -479,14 +467,10 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level.grid);
 
-    ///////////////////////////////
-    // Render Pass 0 - Depth Map //
-    ///////////////////////////////
+    ////////////////////////////////
+    // Render Pass 1 - Shadow Map //
+    ////////////////////////////////
 /*
-    // -> Move everything into platformSetRenderStateShadowMap(),
-    //    platformPrepShaderShadowMap(),
-    //    platformRenderShadowMap()
-
     // platformSetRenderStateShadowMap()
     glViewport(0, 0, depth_ftexture_p->width, depth_ftexture_p->height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_ftexture_p->fbo);
@@ -496,16 +480,21 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // platformPrepShaderShadowMap()
     Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
     glUseProgram(shadowmap_shader_p->program_id);
+    // View Mat
     Mat4F view = lookAt(active_entities.transform[dir_light_id].position,
 			Vec3F(0.0f, 0.0f, 0.0f),
 			Vec3F(0.0f, 1.0f, 0.0f));
-    //Mat4F projection = cameraGetOrthographic(active_entities.camera[cam_id],
-    //					     game_window.win_width,
-    //					     game_window.win_height);
-    glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.05f, 10.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
+    // Projection Mat
+    float ortho_height = 6.5f;
+    float ortho_width = ortho_height * game_window.win_ar;
+    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
+				       ortho_width * 0.5f,
+				      -ortho_height * 0.5f,
+				       ortho_height * 0.5f,
+				       0.05f,
+				       20.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
-
 
     // Render renderable entities
     for(uint i = 0; i < active_entities.count; i++)
@@ -526,7 +515,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // PlatformRenderShadowMap()
     Shader* sm_debug_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SMDEBUG);
     glViewport(0, 0, game_window.win_width, game_window.win_height);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // TODO Change to depth ftexture fbo when not testing
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     glUseProgram(sm_debug_shader_p->program_id);
@@ -537,17 +526,15 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     glDrawArrays(GL_TRIANGLES, 0, 6);    
 */
     ///////////////////////////////
-    // Render Pass 1 -  Entities //
+    // Render Pass 2 -  Entities //
     ///////////////////////////////
-
-    // Update shader uniforms
     platformSetRenderStateDefault(*ftexture_msaa_p);
     platformPrepShaderDefault(game_window,
 			      asset_manager,
 			      active_entities.camera[cam_id],
 			      active_entities.transform[cam_id].position,
-			      active_entities.dir_light[dir_light_id]);
-
+			      active_entities.dir_light[dir_light_id],
+			      level);
     // Render renderable entities
     for(uint i = 0; i < active_entities.count; i++)
     {
@@ -559,13 +546,18 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 	}
     }
 
-    // Render debug elements
+    ///////////////////////////
+    // Render Pass 3 - Debug //
+    ///////////////////////////
     platformPrepShaderDebug(game_window,
 			    asset_manager,
 			    active_entities.camera[cam_id],
-			    active_entities.transform[cam_id].position);
+			    active_entities.transform[cam_id].position, level);
     platformRenderDebug(asset_manager, grid_p);
 
+    /////////////////////////////////////
+    // Render Pass 4 - Post Processing //
+    /////////////////////////////////////			    
     // TODO move to platform code - blit msaa render texture to non MSAA render texture to be used in the post process render
     glBindFramebuffer(GL_READ_FRAMEBUFFER, ftexture_msaa_p->fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ftexture_non_msaa_p->fbo);
@@ -579,13 +571,11 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 		      ftexture_non_msaa_p->height,
 		      GL_COLOR_BUFFER_BIT,
 		      GL_NEAREST);
-    
-    /////////////////////////////////////
-    // Render Pass 2 - Post Processing //
-    /////////////////////////////////////
     platformRenderPP(asset_manager, ftexture_non_msaa_p);
-    
-    // Swap buffers
+
+    //////////////////
+    // Swap buffers //
+    //////////////////
     platformSwapBuffers(game_window);
 
     return 1;

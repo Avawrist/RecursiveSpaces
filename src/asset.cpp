@@ -816,6 +816,8 @@ FrameTexture::FrameTexture(int _width, int _height, bool _is_depth_map, bool _is
     // Initialize FBO & Texture //
     //////////////////////////////
 
+    width  = _width;
+    height = _height;
     is_depth_map = _is_depth_map;
     is_MSAA      = _is_MSAA;
     
@@ -832,10 +834,6 @@ FrameTexture::FrameTexture(int _width, int _height, bool _is_depth_map, bool _is
 	glGenTextures(1, &color_text_id);
 	glGenTextures(1, &depth_stencil_text_id);
     }
-
-    // Dimensions
-    width  = _width;
-    height = _height;
 
     ////////////////////
     // Initalize Quad //
@@ -913,18 +911,34 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
 	    // Allocate memory for MSAA color texture on GPU
 	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ftexture_p->color_text_id);
 	    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
-				      4,
-				      GL_RGB,
-				      ftexture_p->width,
-				      ftexture_p->height,
-				      GL_TRUE);
-	    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				    4,
+				    GL_RGB,
+				    ftexture_p->width,
+				    ftexture_p->height,
+				    GL_TRUE);
 	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	    glFramebufferTexture2D(GL_FRAMEBUFFER,
 				   GL_COLOR_ATTACHMENT0,
 				   GL_TEXTURE_2D_MULTISAMPLE,
 				   ftexture_p->color_text_id,
+				   0);
+
+	    // Allocate memory for multisampled depth/stencil texture on GPU
+	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, ftexture_p->depth_stencil_text_id);
+	    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
+				    4,
+				    GL_DEPTH24_STENCIL8,
+				    ftexture_p->width,
+				    ftexture_p->height,
+				    GL_TRUE);
+	    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	    // Attach texture to FBO
+	    glFramebufferTexture2D(GL_FRAMEBUFFER,
+				   GL_DEPTH_STENCIL_ATTACHMENT,
+				   GL_TEXTURE_2D_MULTISAMPLE,
+				   ftexture_p->depth_stencil_text_id,
 				   0);
 	}
 	else
@@ -948,34 +962,34 @@ void frameTextureDataToGPU(FrameTexture* ftexture_p)
 				   GL_TEXTURE_2D,
 				   ftexture_p->color_text_id,
 				   0);
-	}	
-       
-	///////////////////////////
-	// Depth/Stencil Texture //
-	///////////////////////////
-    
-	// Allocate memory for depth texture on GPU
-	glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_stencil_text_id);
-	glTexImage2D(GL_TEXTURE_2D,
-		     0,
-		     GL_DEPTH24_STENCIL8,
-		     ftexture_p->width,
-		     ftexture_p->height,
-		     0,
-		     GL_DEPTH_STENCIL,
-		     GL_UNSIGNED_INT_24_8,
-		     NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// Attach texture to FBO
-	glFramebufferTexture2D(GL_FRAMEBUFFER,
-			       GL_DEPTH_STENCIL_ATTACHMENT,
-			       GL_TEXTURE_2D,
-			       ftexture_p->depth_stencil_text_id,
-			       0);
-    
+	    // Allocate memory for depth/stencil texture on GPU
+	    glBindTexture(GL_TEXTURE_2D, ftexture_p->depth_stencil_text_id);
+	    glTexImage2D(GL_TEXTURE_2D,
+			 0,
+			 GL_DEPTH24_STENCIL8,
+			 ftexture_p->width,
+			 ftexture_p->height,
+			 0,
+			 GL_DEPTH_STENCIL,
+			 GL_UNSIGNED_INT_24_8,
+			 NULL);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glBindTexture(GL_TEXTURE_2D, 0);
+	    // Attach texture to FBO
+	    glFramebufferTexture2D(GL_FRAMEBUFFER,
+				   GL_DEPTH_STENCIL_ATTACHMENT,
+				   GL_TEXTURE_2D,
+				   ftexture_p->depth_stencil_text_id,
+				   0);
+	}	
+    }
+
+    // Check for OpenGL completeness
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+	OutputDebugStringA("ERROR: Framebuffer is incomplete.\n");
     }
     
     // Unbind

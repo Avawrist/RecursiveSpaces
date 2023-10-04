@@ -71,10 +71,10 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 void platformSetRenderStateDefault(FrameTexture& framebuffer);
 
 void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, Vec3F cam_pos, DirLight& dir_light);
+			       Camera& camera, Vec3F cam_pos, DirLight& dir_light, Level& level);
 
 void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
-                             Vec3F cam_pos);
+                             Vec3F cam_pos, Level& level);
 
 void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model);
 

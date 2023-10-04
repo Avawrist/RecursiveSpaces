@@ -228,6 +228,7 @@ typedef struct LevelGrid
 {
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
     float dimensions = 0.5f;
+    Vec3F center = Vec3F(MAX_WIDTH * dimensions * 0.5f, 0.0f, MAX_LENGTH * dimensions * 0.5f);
     LevelGrid();
 } LevelGrid;
 
@@ -244,8 +245,6 @@ typedef enum Turns
 typedef struct Level
 {
     LevelGrid grid;
-    uint      turn;
-    Level();
 } Level;
 
 /////////////////////////
