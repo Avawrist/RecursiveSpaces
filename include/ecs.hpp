@@ -260,7 +260,7 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
 void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid);
 
 // Transform Function Prototypes
-Mat4F transformGetModel(Transform& transform);
+Mat4F transformGetModel(const Transform& transform);
 
 // Camera Function Prototypes
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);

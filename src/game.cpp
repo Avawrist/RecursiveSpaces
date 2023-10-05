@@ -467,97 +467,31 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level.grid);
 
-    ////////////////////////////////
-    // Render Pass 1 - Shadow Map //
-    ////////////////////////////////
-/*
-    // platformSetRenderStateShadowMap()
-    glViewport(0, 0, depth_ftexture_p->width, depth_ftexture_p->height);
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_ftexture_p->fbo);
-    glEnable(GL_DEPTH_TEST);
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    // platformPrepShaderShadowMap()
-    Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
-    glUseProgram(shadowmap_shader_p->program_id);
-    // View Mat
-    Mat4F view = lookAt(active_entities.transform[dir_light_id].position,
-			Vec3F(0.0f, 0.0f, 0.0f),
-			Vec3F(0.0f, 1.0f, 0.0f));
-    shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
-    // Projection Mat
-    float ortho_height = 6.5f;
-    float ortho_width = ortho_height * game_window.win_ar;
-    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
-				       ortho_width * 0.5f,
-				      -ortho_height * 0.5f,
-				       ortho_height * 0.5f,
-				       0.05f,
-				       20.0f);
-    shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
-
-    // Render renderable entities
-    for(uint i = 0; i < active_entities.count; i++)
-    {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
-	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
-	{
-	    Mat4F model = transformGetModel(active_entities.transform[i]);
-	    // platformFillShadowMap()
-	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
-	    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.type[i],
-							    MESH01, 0);
-	    glBindVertexArray(mesh_01_p->vao);
-	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
-	}
-    }
-
-    // PlatformRenderShadowMap()
-    Shader* sm_debug_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SMDEBUG);
-    glViewport(0, 0, game_window.win_width, game_window.win_height);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glUseProgram(sm_debug_shader_p->program_id);
-    shaderAddIntUniform(sm_debug_shader_p, "depth_map", 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, depth_ftexture_p->depth_text_id);
-    glBindVertexArray(depth_ftexture_p->quad_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);    
-*/
-    ///////////////////////////////
-    // Render Pass 2 -  Entities //
-    ///////////////////////////////
-    platformSetRenderStateDefault(*ftexture_msaa_p);
-    platformPrepShaderDefault(game_window,
-			      asset_manager,
-			      active_entities.camera[cam_id],
-			      active_entities.transform[cam_id].position,
-			      active_entities.dir_light[dir_light_id],
-			      level);
-    // Render renderable entities
-    for(uint i = 0; i < active_entities.count; i++)
-    {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
-	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
-	{
-	    Mat4F model = transformGetModel(active_entities.transform[i]);
-	    platformRenderEntity(asset_manager, active_entities.type[i], model);
-	}
-    }
-
-    ///////////////////////////
-    // Render Pass 3 - Debug //
-    ///////////////////////////
-    platformPrepShaderDebug(game_window,
-			    asset_manager,
-			    active_entities.camera[cam_id],
-			    active_entities.transform[cam_id].position, level);
-    platformRenderDebug(asset_manager, grid_p);
-
-    /////////////////////////////////////
-    // Render Pass 4 - Post Processing //
-    /////////////////////////////////////			    
+    // Render Pass 1 - Shadow Map
+    platformRenderShadowMapToBuffer(active_entities,
+				    *depth_ftexture_p,
+				    asset_manager,
+				    game_window,
+				    active_entities.transform[dir_light_id].position,
+				    level.grid.center);
+    
+    // Render Pass 2 -  Entities
+    platformRenderEntitiesToBuffer(active_entities,
+				   *ftexture_msaa_p,
+				   game_window,
+				   asset_manager,
+				   active_entities.transform[cam_id].position,
+				   level.grid.center,
+				   active_entities.dir_light[dir_light_id]);
+    
+    // Render Pass 3 - Debug
+    platformRenderDebugElementsToBuffer(game_window,
+					asset_manager,
+					active_entities.transform[cam_id].position,
+					level.grid.center,
+					grid_p);
+    
+    // Render Pass 4 - Post Processing
     // TODO move to platform code - blit msaa render texture to non MSAA render texture to be used in the post process render
     glBindFramebuffer(GL_READ_FRAMEBUFFER, ftexture_msaa_p->fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ftexture_non_msaa_p->fbo);
@@ -571,7 +505,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 		      ftexture_non_msaa_p->height,
 		      GL_COLOR_BUFFER_BIT,
 		      GL_NEAREST);
-    platformRenderPP(asset_manager, ftexture_non_msaa_p);
+    platformRenderPP(asset_manager, *ftexture_non_msaa_p);
 
     //////////////////
     // Swap buffers //

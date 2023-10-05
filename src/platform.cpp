@@ -258,27 +258,99 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
     glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
 
-void platformSetRenderStateDefault(FrameTexture& framebuffer)
+void platformRenderShadowMapToScreen(AssetManager& asset_manager,
+				     GameWindow& game_window,
+				     FrameTexture& depth_framebuffer)
 {
-    // Set GL state
+    Shader* sm_debug_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SMDEBUG);
+    glViewport(0, 0, game_window.win_width, game_window.win_height);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glUseProgram(sm_debug_shader_p->program_id);
+    shaderAddIntUniform(sm_debug_shader_p, "depth_map", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depth_framebuffer.depth_text_id);
+    glBindVertexArray(depth_framebuffer.quad_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);    
+}
+
+void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
+				     const FrameTexture& depth_framebuffer,
+				     AssetManager& asset_manager,
+				     const GameWindow& game_window,
+				     const Vec3F& light_pos,
+				     const Vec3F& look_at)
+{
+    //////////////////
+    // Set GL state //
+    //////////////////
+    glViewport(0, 0, depth_framebuffer.width, depth_framebuffer.height);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer.fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    /////////////////
+    // Prep Shader //
+    /////////////////
+    Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
+    glUseProgram(shadowmap_shader_p->program_id);
+
+    // View Mat
+    Mat4F view = lookAt(light_pos, look_at, Vec3F(0.0f, 1.0f, 0.0f));
+    shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
+
+    // Projection Mat
+    float ortho_height = 6.5f;
+    float ortho_width  = ortho_height * game_window.win_ar;
+    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
+				       ortho_width * 0.5f,
+				      -ortho_height * 0.5f,
+				       ortho_height * 0.5f,
+				       0.05f,
+				       20.0f);
+    shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
+
+    //////////////////////////
+    // Render Entity Depths //
+    //////////////////////////
+    for(uint i = 0; i < active_entities.count; i++)
+    {
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
+	{
+	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
+	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.type[i], MESH01, 0);
+	    glBindVertexArray(mesh_01_p->vao);
+	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
+	}
+    }
+}
+
+void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
+				    const FrameTexture& framebuffer,
+				    const GameWindow& game_window,
+				    AssetManager& asset_manager,
+				    Vec3F cam_pos,
+				    Vec3F cam_target,
+				    const DirLight& dir_light)
+{
+    //////////////////
+    // Set GL state //
+    //////////////////
     glViewport(0, 0, framebuffer.width, framebuffer.height);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
 
-void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, Vec3F cam_pos, DirLight& dir_light, Level& level)
-{
-    /////////////////////////////////
-    // Update Blinn-Phong Uniforms //
-    /////////////////////////////////
-
-    // Update Blinn-Phong Shader Uniforms
+    /////////////////////////
+    // Set Shader Uniforms //
+    /////////////////////////
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // View Mat
-    Mat4F view = lookAt(cam_pos, level.grid.center, Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
     // Projection Mat
     float ortho_height = 6.5f;
@@ -299,52 +371,71 @@ void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_mana
     // Textures
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
     shaderAddIntUniform(bp_shader_p, "normal_map",  1);
+
+    ///////////////////////////////
+    // Render Entities to Buffer //
+    ///////////////////////////////
+    for(uint i = 0; i < active_entities.count; i++)
+    {
+	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
+	{
+	    // Mesh 01
+	    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager,
+							    active_entities.type[i],
+							    MESH01,
+							    0);
+	    // Diffuse Texture
+	    Texture* texture_d_p = (Texture*)assetManagerGetAssetP(asset_manager,
+								   active_entities.type[i],
+								   TEXTURE_D,
+								   0);
+	    // Normal Texture
+	    Texture* texture_n_p = (Texture*)assetManagerGetAssetP(asset_manager,
+								   active_entities.type[i],
+								   TEXTURE_N,
+								   0);
+	    // Specular Texture
+	    Texture* texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager,
+								   active_entities.type[i],
+								   TEXTURE_S,
+								   0);
+	    
+	    // Update Model Uniform in Shader
+	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());
+	    // Bind Diffuse Texture
+	    glActiveTexture(GL_TEXTURE0);
+	    glBindTexture(GL_TEXTURE_2D, texture_d_p->texture_id);
+	    // Bind Normal Texture
+	    glActiveTexture(GL_TEXTURE1);
+	    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
+	    // Bind Specular Texture
+	    // 
+	    // Bind Mesh
+	    glBindVertexArray(mesh_01_p->vao);
+	    // Draw
+	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
+	}
+    }
 }
 
-void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model)
+void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
+					 AssetManager& asset_manager,
+					 Vec3F cam_pos,
+					 Vec3F cam_target,
+					 DebugGrid* grid_p)
 {
-    // Mesh 01
-    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager, entity_type, MESH01, 0);
-    // Diffuse Texture
-    Texture* texture_d_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_D, 0);
-    // Normal Texture
-    Texture* texture_n_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_N, 0);
-    // Specular Texture
-    Texture* texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager, entity_type, TEXTURE_S, 0);
-    // Shader
-    Shader* shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
-    
-    // Set Shader
-    glUseProgram(shader_p->program_id);
-    // Update Model Uniform in Shader
-    shaderAddMat4Uniform(shader_p, "model", model.getPointer());
-    // Bind Diffuse Texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_d_p->texture_id);
-    // Bind Normal Texture
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
-    // Bind Specular Texture
-    // 
-    // Bind Mesh
-    glBindVertexArray(mesh_01_p->vao);
-    // Draw
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
-}
-
-void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
-                             Vec3F cam_pos, Level& level)
-{
-    /////////////////////////////////
-    // Update Grid Shader Uniforms //
-    /////////////////////////////////
+    //////////////////////////////
+    // Set Grid Shader Uniforms //
+    //////////////////////////////
     Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DB_GRID);
     glUseProgram(grid_shader_p->program_id);
     // Model
     Mat4F grid_model = Mat4F(1.0f);
     shaderAddMat4Uniform(grid_shader_p, "model", grid_model.getPointer());
     // View
-    Mat4F view = lookAt(cam_pos, level.grid.center, Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
     float ortho_height = 6.5f;
@@ -356,33 +447,37 @@ void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manage
 				       0.05f,
 				       20.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", glm::value_ptr(projection));
-}
 
-void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p)
-{
-    Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DB_GRID);
-    glUseProgram(grid_shader_p->program_id);
-    
+    ///////////////////////////
+    // Render Debug Elements //
+    ///////////////////////////
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
 }
 
-void platformRenderPP(AssetManager& asset_manager, FrameTexture* ftexture_p)
+void platformRenderPP(AssetManager& asset_manager,
+		      const FrameTexture& non_msaa_framebuffer)
 {
-    // Get PP shader
-    Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
-    
-    // Set proper state to render
-    glViewport(0, 0, ftexture_p->width, ftexture_p->height);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // bind the default framebuffer
-    glClear(GL_COLOR_BUFFER_BIT); // clear screen
+    //////////////////
+    // Set GL State //
+    //////////////////
+    glViewport(0, 0, non_msaa_framebuffer.width, non_msaa_framebuffer.height);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+    glClear(GL_COLOR_BUFFER_BIT); 
     glDisable(GL_DEPTH_TEST); // Disable so quad is visible
 
+    /////////////////////////
+    // Set Shader Uniforms //
+    /////////////////////////
+    Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
     glUseProgram(pp_shader_p->program_id); // Set post-process shader
     shaderAddIntUniform(pp_shader_p, "color_texture", 0); // Update uniform
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, ftexture_p->color_text_id); // Bind color texture to post-process shader
-    glBindVertexArray(ftexture_p->quad_vao); // Bind quad vao
+    glBindTexture(GL_TEXTURE_2D, non_msaa_framebuffer.color_text_id); // Bind color texture to pp shader
+    glBindVertexArray(non_msaa_framebuffer.quad_vao); // Bind quad vao
 
+    ///////////////////////
+    // Render PP Texture //
+    ///////////////////////
     glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices in the quad data
     glEnable(GL_DEPTH_TEST);
 }

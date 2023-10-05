@@ -68,20 +68,34 @@ void platformSwapBuffers(GameWindow& game_window);
 
 void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 
-void platformSetRenderStateDefault(FrameTexture& framebuffer);
+void platformRenderShadowMapToScreen(AssetManager& asset_manager,
+				     GameWindow& game_window,
+				     FrameTexture& depth_framebuffer);
 
-void platformPrepShaderDefault(GameWindow& game_window, AssetManager& asset_manager,
-			       Camera& camera, Vec3F cam_pos, DirLight& dir_light, Level& level);
+void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
+				     const FrameTexture& depth_framebuffer,
+				     AssetManager& asset_manager,
+				     const GameWindow& game_window,
+				     const Vec3F& light_pos,
+				     const Vec3F& look_at);
 
-void platformPrepShaderDebug(GameWindow& game_window, AssetManager& asset_manager, Camera& camera,
-                             Vec3F cam_pos, Level& level);
+void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
+				    const FrameTexture& framebuffer,
+				    const GameWindow& game_window,
+				    AssetManager& asset_manager,
+				    Vec3F cam_pos,
+				    Vec3F cam_target,
+				    const DirLight& dir_light);
 
-void platformRenderEntity(AssetManager& asset_manager, uint entity_type, Mat4F model);
+void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
+					 AssetManager& asset_manager,
+					 Vec3F cam_pos,
+					 Vec3F cam_target,
+					 DebugGrid* grid_p);
 
-void platformRenderDebug(AssetManager& asset_manager, DebugGrid* grid_p);
-
-void platformRenderPP(AssetManager& asset_manager, FrameTexture* ftexture_p);
-
+void platformRenderPP(AssetManager& asset_manager,
+		      const FrameTexture& non_msaa_framebuffer);
+    
 int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path);
 
 /////////////////////
