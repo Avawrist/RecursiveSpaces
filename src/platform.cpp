@@ -6,7 +6,7 @@
 
 #include "platform.hpp"
 
-int platformInitAPIs(GameWindow& game_window)
+int platformInitAPIs(GameWindow& game_window, uint width, uint height)
 {
     // Returns 1 on success, 0 on failure
     
@@ -14,7 +14,7 @@ int platformInitAPIs(GameWindow& game_window)
     if(!platformInitGLFW()) {return 0;}
 
     // Initialize window
-    if(!platformInitWindow(game_window, 1920, 1080, "First Game")) {return 0;}
+    if(!platformInitWindow(game_window, width, height, "First Game")) {return 0;}
 
     // Load OpenGL Functions & Extensions (Must be called after window creation)
     if(!platformInitOpenGL()) {return 0;}
@@ -330,6 +330,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
+				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    Vec3F cam_pos,
@@ -370,8 +371,9 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dir_light.ambient_strength);
     // Textures
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
-    shaderAddIntUniform(bp_shader_p, "normal_map",  1);
-
+    shaderAddIntUniform(bp_shader_p, "normal_map", 1);
+    shaderAddIntUniform(bp_shader_p, "shadow_map", 2);
+    
     ///////////////////////////////
     // Render Entities to Buffer //
     ///////////////////////////////
@@ -411,7 +413,10 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 	    glActiveTexture(GL_TEXTURE1);
 	    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
 	    // Bind Specular Texture
-	    // 
+	    //
+	    // Bind Normal Map Texture
+	    glActiveTexture(GL_TEXTURE2);
+	    glBindTexture(GL_TEXTURE_2D, depth_framebuffer.depth_text_id);
 	    // Bind Mesh
 	    glBindVertexArray(mesh_01_p->vao);
 	    // Draw
@@ -452,6 +457,28 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
     // Render Debug Elements //
     ///////////////////////////
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
+}
+
+void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
+				const FrameTexture& target_framebuffer,
+				uint src_x0, uint src_y0,
+				uint src_x1, uint src_y1,
+				uint dst_x0, uint dst_y0,
+				uint dst_x1, uint dst_y1)
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, source_framebuffer.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target_framebuffer.fbo);
+    glBlitFramebuffer(src_x0,
+		      src_y0,
+		      src_x1,
+		      src_y1,
+		      dst_x0,
+		      dst_y0,
+		      dst_x1,
+		      dst_y1,
+		      GL_COLOR_BUFFER_BIT,
+		      GL_NEAREST);
+
 }
 
 void platformRenderPP(AssetManager& asset_manager,

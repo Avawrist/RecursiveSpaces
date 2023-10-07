@@ -29,7 +29,7 @@ using namespace std;
 // Function Prototpes //
 ////////////////////////
 
-void gameInit(GameWindow& game_window, InputManager& input_manager);
+void gameInit(GameWindow& game_window, uint width, uint height, InputManager& input_manager);
 
 void gameUpdateStates(ActiveEntities& entities);
 
@@ -65,7 +65,7 @@ int main()
     /////////////////////////////////////////////////////////////////////
     GameWindow      game_window;
     InputManager    input_manager;
-    gameInit(game_window, input_manager);
+    gameInit(game_window, 1920, 1080, input_manager);
     AssetManager    asset_manager;
     SoundInterface  sound_interface;
     ActiveEntities* active_entities_p = new ActiveEntities();
@@ -173,9 +173,9 @@ int main()
 // Function Definitions //
 //////////////////////////
 
-void gameInit(GameWindow& game_window, InputManager& input_manager)
+void gameInit(GameWindow& game_window, uint width, uint height, InputManager& input_manager)
 {
-    platformInitAPIs(game_window);
+    platformInitAPIs(game_window, width, height);
     gameUpdateInputs(input_manager, game_window);
 }
 
@@ -478,6 +478,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     // Render Pass 2 -  Entities
     platformRenderEntitiesToBuffer(active_entities,
 				   *ftexture_msaa_p,
+				   *depth_ftexture_p,
 				   game_window,
 				   asset_manager,
 				   active_entities.transform[cam_id].position,
@@ -490,21 +491,13 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 					active_entities.transform[cam_id].position,
 					level.grid.center,
 					grid_p);
-    
+
+
     // Render Pass 4 - Post Processing
-    // TODO move to platform code - blit msaa render texture to non MSAA render texture to be used in the post process render
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, ftexture_msaa_p->fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, ftexture_non_msaa_p->fbo);
-    glBlitFramebuffer(0,
-		      0,
-		      ftexture_msaa_p->width,
-		      ftexture_msaa_p->height,
-		      0,
-		      0,
-		      ftexture_non_msaa_p->width,
-		      ftexture_non_msaa_p->height,
-		      GL_COLOR_BUFFER_BIT,
-		      GL_NEAREST);
+    platformBlitBufferToBuffer(*ftexture_msaa_p,
+			       *ftexture_non_msaa_p,
+			       0, 0, ftexture_msaa_p->width, ftexture_msaa_p->height,
+			       0, 0, ftexture_non_msaa_p->width, ftexture_non_msaa_p->height);
     platformRenderPP(asset_manager, *ftexture_non_msaa_p);
 
     //////////////////

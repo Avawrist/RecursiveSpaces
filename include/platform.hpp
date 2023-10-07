@@ -52,7 +52,7 @@ typedef struct GameWindow
 // Platform Function Prototypes //
 //////////////////////////////////
 
-int platformInitAPIs(GameWindow& game_window);
+int platformInitAPIs(GameWindow& game_window, uint width, uint height);
 
 int platformInitGLFW();
 
@@ -81,6 +81,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
+				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    Vec3F cam_pos,
@@ -92,6 +93,13 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
 					 DebugGrid* grid_p);
+
+void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
+				const FrameTexture& target_framebuffer,
+				uint src_x0, uint src_y0,
+				uint src_x1, uint src_y1,
+				uint dst_x0, uint dst_y0,
+				uint dst_x1, uint dst_y1);
 
 void platformRenderPP(AssetManager& asset_manager,
 		      const FrameTexture& non_msaa_framebuffer);

@@ -21,6 +21,7 @@ struct DirLight
 uniform DirLight  dirLight;
 uniform sampler2D diffuse_map;
 uniform sampler2D normal_map;
+uniform sampler2D shadow_map; // TODO: Add to calculation
 uniform vec3      cam_pos;
 
 // Function Prototypes
