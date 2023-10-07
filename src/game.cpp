@@ -46,7 +46,8 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p, FrameTexture* ftexture_non_msaa_p, Level& level,
+			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p,
+			FrameTexture* ftexture_non_msaa_p, Level& level,
 			DebugGrid* grid_p);
 
 void gameUpdateInputs(InputManager& im, GameWindow& game_window);
@@ -83,7 +84,7 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Framebuffers
-    FrameTexture* depth_ftexture_p = new FrameTexture(1920, 1080, true, false);
+    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true, false);
     frameTextureDataToGPU(depth_ftexture_p);
     FrameTexture* ftexture_msaa_p = new FrameTexture(game_window.win_width,
 						     game_window.win_height,

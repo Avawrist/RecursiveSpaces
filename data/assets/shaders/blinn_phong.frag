@@ -27,7 +27,7 @@ uniform vec3      cam_pos;
 
 // Function Prototypes
 vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, vec4 frag_pos_light_space);
-float calculateShadow(vec4 frag_pos_light_space);
+float calculateShadow(vec4 frag_pos_light_space, vec3 norm, vec3 light_dir);
 
 // Function Definitions
 void main()
@@ -83,12 +83,12 @@ vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, ve
 	vec3 specular_comp = pow(max(dot(norm, n_half), 0.0), 128.0) * dirLight.color;
 
 	// Shadow Component
-	float shadow = calculateShadow(frag_pos_light_space);
+	float shadow = calculateShadow(frag_pos_light_space, norm, light_dir);
 	
 	return (ambient_comp + (shadow) * (diffuse_comp + specular_comp));
 }
 
-float calculateShadow(vec4 frag_pos_light_space)
+float calculateShadow(vec4 frag_pos_light_space, vec3 norm, vec3 light_dir)
 {
 	// Perform perspective divide
 	vec3 proj_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
@@ -99,7 +99,8 @@ float calculateShadow(vec4 frag_pos_light_space)
 	// Get depth of current fragment
 	float current_depth = proj_coords.z;
 	// Check whether current frag pos is in shadow
-	float bias = 0.005;
+	//float bias = 0.005;
+	float bias = max(0.05 * (1.0 - dot(norm, light_dir)), 0.005);
 	float shadow = current_depth - bias > closest_depth ? 0.0 : 1.0;
 
 	return shadow;
