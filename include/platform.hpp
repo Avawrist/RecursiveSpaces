@@ -84,6 +84,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
+				    Vec3F light_pos,
 				    Vec3F cam_pos,
 				    Vec3F cam_target,
 				    const DirLight& dir_light);

@@ -83,7 +83,7 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Framebuffers
-    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true, false);
+    FrameTexture* depth_ftexture_p = new FrameTexture(1920, 1080, true, false);
     frameTextureDataToGPU(depth_ftexture_p);
     FrameTexture* ftexture_msaa_p = new FrameTexture(game_window.win_width,
 						     game_window.win_height,
@@ -126,10 +126,10 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
     
     // DirLight
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(8.0f, 4.0f, 8.0f), DIR_LIGHT);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 4.0f, 8.0f), DIR_LIGHT);
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(0.0f, 6.0f, 8.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(8.0f, 6.0f, 8.0f), CAMERA);
     
     ///////////////
     // Game Loop //
@@ -481,6 +481,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 				   *depth_ftexture_p,
 				   game_window,
 				   asset_manager,
+				   active_entities.transform[dir_light_id].position,
 				   active_entities.transform[cam_id].position,
 				   level.grid.center,
 				   active_entities.dir_light[dir_light_id]);

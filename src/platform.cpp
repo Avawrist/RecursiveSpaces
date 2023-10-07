@@ -333,6 +333,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
+				    Vec3F light_pos,
 				    Vec3F cam_pos,
 				    Vec3F cam_target,
 				    const DirLight& dir_light)
@@ -350,9 +351,12 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     /////////////////////////
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
-    // View Mat
-    Mat4F view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
-    shaderAddMat4Uniform(bp_shader_p, "view", view.getPointer());
+    // Light View Mat
+    Mat4F light_view = lookAt(light_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
+    shaderAddMat4Uniform(bp_shader_p, "light_view", light_view.getPointer());    
+    // Cam View Mat
+    Mat4F cam_view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
+    shaderAddMat4Uniform(bp_shader_p, "cam_view", cam_view.getPointer());
     // Projection Mat
     float ortho_height = 6.5f;
     float ortho_width = ortho_height * game_window.win_ar;
@@ -414,7 +418,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 	    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
 	    // Bind Specular Texture
 	    //
-	    // Bind Normal Map Texture
+	    // Bind Shadow Map Texture
 	    glActiveTexture(GL_TEXTURE2);
 	    glBindTexture(GL_TEXTURE_2D, depth_framebuffer.depth_text_id);
 	    // Bind Mesh

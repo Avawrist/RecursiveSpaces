@@ -8,9 +8,11 @@ out vec2 uv;
 out vec3 frag_pos;
 out vec3 vert_norm;
 out mat3 TBN;
+out vec4 frag_pos_light_space;
 
 uniform mat4 model;
-uniform mat4 view;
+uniform mat4 light_view;
+uniform mat4 cam_view;
 uniform mat4 projection;
 
 void main()
@@ -29,5 +31,6 @@ void main()
 	uv          = in_uv;
 	frag_pos    = vec3(model * vec4(in_pos, 1.0));
 	vert_norm   = in_norm;
-	gl_Position = projection * view * model * vec4(in_pos, 1.0);
+	frag_pos_light_space = projection * light_view * vec4(frag_pos, 1.0);
+	gl_Position = projection * cam_view * vec4(frag_pos, 1.0);
 }

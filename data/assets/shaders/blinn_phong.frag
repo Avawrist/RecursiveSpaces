@@ -5,6 +5,7 @@ in vec2 uv;
 in vec3 frag_pos;
 in vec3 vert_norm;
 in mat3 TBN;
+in vec4 frag_pos_light_space;
 
 // Out Variables
 out vec4 final_color;
@@ -21,12 +22,12 @@ struct DirLight
 uniform DirLight  dirLight;
 uniform sampler2D diffuse_map;
 uniform sampler2D normal_map;
-uniform sampler2D shadow_map; // TODO: Add to calculation
+uniform sampler2D shadow_map;
 uniform vec3      cam_pos;
 
 // Function Prototypes
-vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm);
-float reduceGradient(float n_value_f);
+vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, vec4 frag_pos_light_space);
+float calculateShadow(vec4 frag_pos_light_space);
 
 // Function Definitions
 void main()
@@ -51,7 +52,8 @@ void main()
 	////////////////
 
 	// Add DirLight
-	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, vert_norm);
+	// TODO: Pass frag_norm instead of vert_norm when all assets have normal maps
+	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, vert_norm, frag_pos_light_space);
 
 	// Add PointLight
 
@@ -63,7 +65,7 @@ void main()
 	final_color = vec4(object_color, 1.0);
 }
 
-vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm)
+vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, vec4 frag_pos_light_space)
 {
 	// Blinn-Phong method. Takes normalized vectors as input.
 		
@@ -78,15 +80,27 @@ vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm)
 
 	// Specular Component
 	// TODO: Get shininess from material (currently 128)
-	vec3 specular_comp = pow(reduceGradient(max(dot(norm, n_half), 0.0)), 128) * dirLight.color;
+	vec3 specular_comp = pow(max(dot(norm, n_half), 0.0), 128.0) * dirLight.color;
+
+	// Shadow Component
+	float shadow = calculateShadow(frag_pos_light_space);
 	
-	return (ambient_comp + diffuse_comp + specular_comp);
+	return (ambient_comp + (shadow) * (diffuse_comp + specular_comp));
 }
 
-float reduceGradient(float n_value_f)
+float calculateShadow(vec4 frag_pos_light_space)
 {
-	// Takes a float value between 0 and 1 as input
-	n_value_f *= 256;              // range is now 0 - 256 (float)
-	n_value_f = floor(n_value_f);  // range is now 0 - 256 (rounded float)
-	return n_value_f * 0.00391;    // returned range is now 0 - 1 (float)
+	// Perform perspective divide
+	vec3 proj_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
+	// Transform to [0,1] range
+	proj_coords = (proj_coords * 0.5) + 0.5;
+	// Get closest depth from light's perspective
+	float closest_depth = texture(shadow_map, proj_coords.xy).r;
+	// Get depth of current fragment
+	float current_depth = proj_coords.z;
+	// Check whether current frag pos is in shadow
+	float bias = 0.005;
+	float shadow = current_depth - bias > closest_depth ? 0.0 : 1.0;
+
+	return shadow;
 }
