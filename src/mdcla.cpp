@@ -937,3 +937,11 @@ Mat4F lookAt(const Vec3F& eye, const Vec3F& at, const Vec3F& up)
 		 0.0f, 0.0f, 0.0f, 1.0f);
     
 }
+
+Mat4F getOrthoProjection(float l, float r, float b, float t, float n, float f)
+{
+    return Mat4F(2/(r - l), 0.0f, 0.0f,  -(r + l) / (r - l),
+		 0.0f, 2/(t - b), 0.0f,  -(t + b) / (t - b),
+		 0.0f, 0.0f, -2/(f - n), -(f + n) / (f - n),
+		 0.0f, 0.0f, 0.0f, 1.0f);
+}

@@ -303,13 +303,13 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
     // Projection Mat
     float ortho_height = 10.0f;
     float ortho_width  = ortho_height * game_window.win_ar;
-    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
-				       ortho_width * 0.5f,
-				      -ortho_height * 0.5f,
-				       ortho_height * 0.5f,
-				       0.05f,
-				       20.0f);
-    shaderAddMat4Uniform(shadowmap_shader_p, "projection", glm::value_ptr(projection));
+    Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
+					   ortho_width * 0.5f,
+					  -ortho_height * 0.5f,
+					   ortho_height * 0.5f,
+					   0.05f,
+					   20.0f);
+    shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
 
     //////////////////////////
     // Render Entity Depths //
@@ -360,13 +360,13 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     // Projection Mat
     float ortho_height = 10.0f;
     float ortho_width = ortho_height * game_window.win_ar;
-    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
-				       ortho_width * 0.5f,
-				      -ortho_height * 0.5f,
-				       ortho_height * 0.5f,
-				       0.05f,
-				       20.0f);
-    shaderAddMat4Uniform(bp_shader_p, "projection", glm::value_ptr(projection));
+    Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
+					   ortho_width * 0.5f,
+					  -ortho_height * 0.5f,
+					   ortho_height * 0.5f,
+					   0.05f,
+					   20.0f);
+    shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
     // Single Dir Light (TODO: Make DirLight a component)
@@ -449,13 +449,13 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
     // Projection
     float ortho_height = 10.0f;
     float ortho_width = ortho_height * game_window.win_ar;
-    glm::mat4 projection = glm::ortho(-ortho_width * 0.5f,
-				       ortho_width * 0.5f,
-				      -ortho_height * 0.5f,
-				       ortho_height * 0.5f,
-				       0.05f,
-				       20.0f);
-    shaderAddMat4Uniform(grid_shader_p, "projection", glm::value_ptr(projection));
+    Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
+					   ortho_width * 0.5f,
+					  -ortho_height * 0.5f,
+					   ortho_height * 0.5f,
+					   0.05f,
+					   20.0f);
+    shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
     ///////////////////////////
     // Render Debug Elements //

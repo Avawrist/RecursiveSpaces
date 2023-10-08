@@ -1059,7 +1059,7 @@ AssetTableDir::AssetTableDir()
     table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\green.bmp";
     table[PLAYER][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
     table[PLAYER][TEXTURE_S] = NULL;
-    table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
+    table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\sphere.obj";
     table[PLAYER][SOUND01]   = NULL;
     table[PLAYER][SOUND02]   = NULL;
     table[PLAYER][SOUND03]   = NULL;

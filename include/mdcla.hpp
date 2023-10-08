@@ -212,4 +212,6 @@ Vec3F rotate(const Vec3F& v, const Quaternion& q);
 
 Mat4F lookAt(const Vec3F& eye, const Vec3F& at, const Vec3F& up);
 
+Mat4F getOrthoProjection(float l, float r, float b, float t, float n, float f);
+
 #endif
