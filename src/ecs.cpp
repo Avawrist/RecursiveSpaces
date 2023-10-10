@@ -136,6 +136,16 @@ DirLight::DirLight()
     ambient_strength = 0.5f;
 }
 
+/////////////////////////////////
+// Struct Component PointLight //
+/////////////////////////////////
+
+PointLight::PointLight()
+{
+    color = Vec3F(1.0f, 1.0f, 1.0f);
+    ambient_strength = 0.5f;
+}
+
 ///////////////////////////////////
 // Struct Component GridPosition //
 ///////////////////////////////////
@@ -192,17 +202,6 @@ AI::AI()
     next_move = MOVE_WALK;
 }
 
-/////////////////////
-// Struct DogState //
-/////////////////////
-
-DogState::DogState()
-{
-    first       = 1;
-    filth_level = 0;
-    speed_level = 0;
-}
-
 ////////////////////////////
 // Struct EntityTemplates //
 ////////////////////////////
@@ -233,7 +232,7 @@ LevelGrid::LevelGrid()
 ActiveEntities::ActiveEntities()
 {
     // Initialize all types to 0 (meaning no type, vacancy)
-    memset(type, NONE, MAX_ENTITIES * sizeof(uint));
+    memset(types, NONE, MAX_ENTITIES * sizeof(uint));
 
     count = 0;
 }
@@ -248,16 +247,16 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
     if (entities.count < MAX_ENTITIES)
     {
 	// Activate entity
-	entities.state[entities.count].inactive = false; 
+	entities.states[entities.count].inactive = false; 
 	// Set new type
-	entities.type[entities.count] = entity_type;
+	entities.types[entities.count] = entity_type;
 	// sets transform even if never used
-	entities.transform[entities.count] = Transform(origin);
+	entities.transforms[entities.count] = Transform(origin);
 	// if entity has a grid_position component, add to grid and set grid position
 	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
 	{
-	    levelGridSetEntity(level_grid, entities, origin, entities.count);
-	    entities.grid_position[entities.count].position = origin;
+	    levelGridSetEntity(level_grid, origin, entities.count);
+	    entities.grid_positions[entities.count].position = origin;
 	}
 	// Increase entity count
 	entities.count++;
@@ -273,7 +272,7 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
     _assert(entity_ID >= 0 && entity_ID < entities.count);
     
     // Sets state to inactive, system knows the entity is free to overwrite
-    entities.state[entity_ID].inactive = true;
+    entities.states[entity_ID].inactive = true;
 }
 
 void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid)
@@ -285,35 +284,35 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 
     for(int i = entities.count - 1; i >= 0; i--)
     {
-	if(entities.state[i].inactive)
+	if(entities.states[i].inactive)
 	{
 	    // If inactive entity is on the grid, set ID of removed entity
 	    // back to -1 in the level grid:
-	    if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	    if(entities.entity_templates.table[entities.types[i]][COMPONENT_GRID_POSITION])
 	    {
-		Vec3F inactive_grid_position = entities.grid_position[i].position;
+		Vec3F inactive_grid_position = entities.grid_positions[i].position;
 		levelGridRemoveEntity(level_grid, inactive_grid_position);
 	    }
 	    // If replacement entity is on the grid, update ID of last active
 	    // entity in the grid, since it has changed
-	    if(entities.entity_templates.table[entities.type[entities.count - 1]][COMPONENT_GRID_POSITION])
+	    if(entities.entity_templates.table[entities.types[entities.count - 1]][COMPONENT_GRID_POSITION])
 	    {
-		Vec3F active_grid_position = entities.grid_position[entities.count - 1].position;
-		levelGridSetEntity(level_grid, entities, active_grid_position, i);
+		Vec3F active_grid_position = entities.grid_positions[entities.count - 1].position;
+		levelGridSetEntity(level_grid, active_grid_position, i);
 	    }
 	    // Safe to copy grid position component now 
-	    entities.grid_position[i] = entities.grid_position[entities.count - 1];
+	    entities.grid_positions[i] = entities.grid_positions[entities.count - 1];
 	    // Copy remaining component data from last active entity and fill inactive slot 
-	    entities.transform[i]     = entities.transform[entities.count - 1];
-	    entities.camera[i]        = entities.camera[entities.count - 1];
-	    entities.dir_light[i]     = entities.dir_light[entities.count - 1];
-	    entities.state[i]         = entities.state[entities.count - 1];
-	    entities.ai[i]            = entities.ai[entities.count - 1];
-	    entities.dog_state[i]     = entities.dog_state[entities.count - 1];
+	    entities.transforms[i]     = entities.transforms[entities.count - 1];
+	    entities.cameras[i]        = entities.cameras[entities.count - 1];
+	    entities.dir_lights[i]     = entities.dir_lights[entities.count - 1];
+	    entities.point_lights[i]   = entities.point_lights[entities.count - 1];
+	    entities.states[i]         = entities.states[entities.count - 1];
+	    entities.ai[i]             = entities.ai[entities.count - 1];
 	    // Copy replacement entity's type last
-	    entities.type[i] = entities.type[entities.count - 1];
+	    entities.types[i] = entities.types[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability
-	    entities.type[entities.count - 1] = NONE;
+	    entities.types[entities.count - 1] = NONE;
 	    // Decrease entity count by one, effectively removing the inactive entity
 	    // while preserving the entity on the end of the arrays. 
 	    entities.count--;
@@ -340,7 +339,7 @@ int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos)
     return level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z];
 }
 
-void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID)
+void levelGridSetEntity(LevelGrid& level_grid, Vec3F pos, int entity_ID)
 {
     _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
     _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
@@ -376,7 +375,7 @@ Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
 		int id = level_grid.grid[x][y][z];
 		if(id > -1)
 		{
-		    uint type = entities.type[id]; 
+		    uint type = entities.types[id]; 
 		    if(type == target_type)
 		    {
 			Vec3F pot_new_target = Vec3F((float)x, (float)y, (float)z);

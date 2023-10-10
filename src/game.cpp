@@ -32,8 +32,6 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 
 void gameUpdateAI(ActiveEntities& entities, Level& level);
 
-void gameUpdateDogStates(ActiveEntities& entities);
-
 void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
@@ -79,7 +77,7 @@ int main()
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
     // Initialize Framebuffers
-    FrameTexture* depth_ftexture_p = new FrameTexture(1024, 1024, true, false);
+    FrameTexture* depth_ftexture_p = new FrameTexture(2048, 2048, true, false);
     frameTextureDataToGPU(depth_ftexture_p);
     FrameTexture* ftexture_msaa_p = new FrameTexture(game_window.win_width,
 						     game_window.win_height,
@@ -125,8 +123,8 @@ int main()
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  level_p->grid,
 						  level_p->grid.center + Vec3F(0.0f, 4.0f, 8.0f), DIR_LIGHT);
-    active_entities_p->dir_light[dir_light_id].dir = (level_p->grid.center -
-						      active_entities_p->transform[dir_light_id].position);
+    active_entities_p->dir_lights[dir_light_id].dir = (level_p->grid.center -
+				 		       active_entities_p->transforms[dir_light_id].position);
 
     
     // Camera
@@ -184,14 +182,14 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 {
     for(uint i = 0; i < entities.count; i++)
     {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_PLAYER])
+	if(entities.entity_templates.table[entities.types[i]][COMPONENT_PLAYER])
 	{
 	    // Current and target positions
-	    Vec3F cur_grid_pos = entities.grid_position[i].position;
+	    Vec3F cur_grid_pos = entities.grid_positions[i].position;
 	    Vec3F new_grid_pos = cur_grid_pos;
 
 	    // Set target position based on input
-	    if(entities.state[i].input_cooldown == 0)
+	    if(entities.states[i].input_cooldown == 0)
 	    {
 		// Down
 		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
@@ -199,7 +197,7 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 		    new_grid_pos = Vec3F(cur_grid_pos.x,
 					 cur_grid_pos.y,
 					 cur_grid_pos.z + 1);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    entities.states[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Up
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
@@ -207,7 +205,7 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 		    new_grid_pos = Vec3F(cur_grid_pos.x,
 					 cur_grid_pos.y,
 					 cur_grid_pos.z - 1);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    entities.states[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Left
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
@@ -215,7 +213,7 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 		    new_grid_pos = Vec3F(cur_grid_pos.x - 1,
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    entities.states[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 		// Right
 		else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
@@ -223,7 +221,7 @@ void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& inpu
 		    new_grid_pos = Vec3F(cur_grid_pos.x + 1,
 					 cur_grid_pos.y,
 					 cur_grid_pos.z);
-		    entities.state[i].input_cooldown = INPUT_COOLDOWN_DUR;
+		    entities.states[i].input_cooldown = INPUT_COOLDOWN_DUR;
 		}
 	    }
 
@@ -237,7 +235,7 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 {
     for(uint i = 0; i < entities.count; i++)
     {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_AI])
+	if(entities.entity_templates.table[entities.types[i]][COMPONENT_AI])
 	{
 	    // If walk, then walk
 	    if(entities.ai[i].next_move == MOVE_WALK)
@@ -245,62 +243,12 @@ void gameUpdateAI(ActiveEntities& entities, Level& level)
 		int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
 		int new_z = ((rand() % 3) - 1) * (new_x == 0);
 		Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
-		Vec3F cur_pos = entities.grid_position[i].position;
+		Vec3F cur_pos = entities.grid_positions[i].position;
 	    
 		gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir);
 	    }
 
-	    // If special move, use special move based on additional AI type
-	    else if(entities.ai[i].next_move == MOVE_SPECIAL)
-	    {
-		if(entities.type[i] == SMALL_DOG)
-		{
-		    OutputDebugStringA("Performing small special move.\n");
-		    // Determine target position
-                    /*
-		    Vec3F cur_pos    = entities.grid_position[i].position;
-		    Vec3F target_pos = levelGridFindNearestType(level.grid, entities, cur_pos, SPECIAL_BLOCK);
-		    Vec3F move_dir   = aStarFindPath(level.grid, cur_pos, target_pos);
-		    gameMoveEntitiesOnGrid(level.grid, entities, cur_pos, cur_pos + move_dir); */
-		}
-
-		else if(entities.type[i] == MEDIUM_DOG)
-		{
-		    OutputDebugStringA("Performing medium special move.\n");
-		}
-
-		else if(entities.type[i] == LARGE_DOG)
-		{
-		    // Perform dig special move
-		    Vec3F center_pos_to_dirty = entities.grid_position[i].position - (entities.ai[i].face_dir * 2.0f);
-		    for(int x = -1; x < 2; x++)
-		    {
-			for(int z = -1; z < 2; z++)
-			{
-			    Vec3F pos_to_dirty = center_pos_to_dirty + Vec3F((float)x, 0.0f, (float)z);
-			    int neighbor_id = levelGridGetEntity(level.grid, pos_to_dirty);
-			    if(neighbor_id > -1)
-			    {
-				uint type = entities.type[neighbor_id];
-				if(entities.entity_templates.table[type][COMPONENT_DOG_STATE])
-				{
-				    entities.dog_state[neighbor_id].filth_level = FILTHY;
-				}
-			    }
-			}
-		    }
-		}
-	    }
-
-	    // Set next move
-	    if(entities.type[i] == LARGE_DOG || entities.type[i] == SMALL_DOG)
-	    {
-		entities.ai[i].next_move = MOVE_SPECIAL;
-	    }
-	    else
-	    {
-		entities.ai[i].next_move = rand() % 2;
-	    }
+	    // Set next move?
 	}
     }
 }
@@ -309,35 +257,11 @@ void gameUpdateStates(ActiveEntities& entities)
 {
     for(uint i = 0; i < entities.count; i++)
     {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_STATE])
+	if(entities.entity_templates.table[entities.types[i]][COMPONENT_STATE])
 	{
-	    entities.state[i].input_cooldown -= 1;
-	    entities.state[i].input_cooldown = (int)clamp((float)entities.state[i].input_cooldown,
+	    entities.states[i].input_cooldown -= 1;
+	    entities.states[i].input_cooldown = (int)clamp((float)entities.states[i].input_cooldown,
 						           0, INPUT_COOLDOWN_DUR);
-	}
-    }
-}
-
-void gameUpdateDogStates(ActiveEntities& entities)
-{
-    for(uint i = 0; i < entities.count; i++)
-    {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_DOG_STATE])
-	{
-	    // TODO: load this off of a template eventually
-	    if(entities.dog_state[i].first)
-	    {
-		if(entities.type[i] == SMALL_DOG) {entities.dog_state[i].speed_level = 3;}
-		else if(entities.type[i] == MEDIUM_DOG) {entities.dog_state[i].speed_level = 2;}
-		else if(entities.type[i] == LARGE_DOG) {entities.dog_state[i].speed_level = 1;}
-		entities.dog_state[i].first = 0;
-	    }
-
-	    // If dirty, remove from floor
-	    if(entities.dog_state[i].filth_level == FILTHY && entities.type[i] != PLAYER)
-	    {
-		activeEntitiesMarkInactive(entities, i);
-	    }
 	}
     }
 }
@@ -346,11 +270,9 @@ void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
 {
     for(uint i = 0; i < entities.count; i++)
     {
-	if(entities.entity_templates.table[entities.type[i]][COMPONENT_GRID_POSITION])
+	if(entities.entity_templates.table[entities.types[i]][COMPONENT_GRID_POSITION])
 	{
-	    entities.transform[i].position.x = entities.grid_position[i].position.x * grid.dimensions;
-	    entities.transform[i].position.y = entities.grid_position[i].position.y * grid.dimensions;
-	    entities.transform[i].position.z = entities.grid_position[i].position.z * grid.dimensions;
+	    entities.transforms[i].position = entities.grid_positions[i].position * grid.dimensions;
 	}
     }
 }
@@ -365,11 +287,11 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     
     for(uint i = 0; i < active_entities.count; i++)
     {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM] &&
-	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_CAMERA])
+	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM] &&
+	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_CAMERA])
 	{
-	    Mat4F V          = cameraGetView(active_entities.camera[i],
-		                             active_entities.transform[i].position);
+	    Mat4F V          = cameraGetView(active_entities.cameras[i],
+		                             active_entities.transforms[i].position);
 	    float d_time_spd = game_window.d_time * speed;
 	    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
 
@@ -378,39 +300,39 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 	    // Move forward
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
 	    {
-		active_entities.transform[i].position -= (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
+		active_entities.transforms[i].position -= (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
 							  * d_time_spd);
 	    }
 	    // Move back
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
 	    {
-		active_entities.transform[i].position += (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
+		active_entities.transforms[i].position += (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
 							  * d_time_spd);
 	    }
 	    // Move right
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
 	    {
-	        active_entities.transform[i].position += (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
+	        active_entities.transforms[i].position += (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
 							  * d_time_spd);
 	    }
 	    // Move left
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
 	    {
-	        active_entities.transform[i].position -= (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
+	        active_entities.transforms[i].position -= (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
 							  * d_time_spd);
 	    }
 
 	    ////////////////////
 	    // Camera Looking //
 	    ////////////////////
-	    cameraOffsetAngles(active_entities.camera[i],
+	    cameraOffsetAngles(active_entities.cameras[i],
 			       sensitivity * distance.x,
 			       sensitivity * distance.y);
 
 	    /////////////////////////////
 	    // Set ID to Render Camera //
 	    /////////////////////////////
-	    if(active_entities.camera[i].is_selected) { entity_id = i; }
+	    if(active_entities.cameras[i].is_selected) { entity_id = i; }
 	}
     }
 
@@ -423,7 +345,7 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
     
     for(uint i = 0; i < active_entities.count; i++)
     {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_DIR_LIGHT])
+	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_DIR_LIGHT])
 	{
 	    entity_id = i;
 	}
@@ -443,9 +365,6 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 
     // Update States
     gameUpdateStates(active_entities);
-
-    // Update Dog States
-    gameUpdateDogStates(active_entities);
     
     // Update Player
     gameUpdatePlayer(active_entities, level, input_manager);
@@ -473,7 +392,7 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 				    *depth_ftexture_p,
 				    asset_manager,
 				    game_window,
-				    active_entities.transform[dir_light_id].position,
+				    active_entities.transforms[dir_light_id].position,
 				    level.grid.center);
     
     // Render Pass 2 -  Entities
@@ -482,15 +401,15 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 				   *depth_ftexture_p,
 				   game_window,
 				   asset_manager,
-				   active_entities.transform[dir_light_id].position,
-				   active_entities.transform[cam_id].position,
+				   active_entities.transforms[dir_light_id].position,
+				   active_entities.transforms[cam_id].position,
 				   level.grid.center,
-				   active_entities.dir_light[dir_light_id]);
+				   active_entities.dir_lights[dir_light_id]);
     
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,
 					asset_manager,
-					active_entities.transform[cam_id].position,
+					active_entities.transforms[cam_id].position,
 					level.grid.center,
 					grid_p);
 
@@ -555,10 +474,10 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
     
     // Check neighbor and set entity destination accordingly
     int neighbor_id = grid.grid[(int)new_grid_pos.x][(int)new_grid_pos.y][(int)new_grid_pos.z];
-    if(neighbor_id > -1 && !entities.state[neighbor_id].inactive) // will early out if ID is invalid
+    if(neighbor_id > -1 && !entities.states[neighbor_id].inactive) // will early out if ID is invalid
     {
 	// If target destination contains entity with collision, move fails
-	uint neighbor_type = entities.type[neighbor_id];
+	uint neighbor_type = entities.types[neighbor_id];
 	if(entities.entity_templates.table[neighbor_type][COMPONENT_COLLISION])
 	{
 	    return 0;
@@ -569,7 +488,7 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
 	if(entities.entity_templates.table[neighbor_type][COMPONENT_PUSHABLE])
 	{
 	    Vec3F move_dir       = new_grid_pos - cur_grid_pos;
-	    Vec3F n_cur_grid_pos = entities.grid_position[neighbor_id].position;
+	    Vec3F n_cur_grid_pos = entities.grid_positions[neighbor_id].position;
 	    Vec3F n_new_grid_pos = n_cur_grid_pos + move_dir;
 	    if(!gameMoveEntitiesOnGrid(grid, entities, n_cur_grid_pos, n_new_grid_pos)) {return 0;}
 	}
@@ -577,7 +496,7 @@ int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities, Vec3F cur_
 
     // If none of the fail conditions were met, safe to move the entity
     levelGridRemoveEntity(grid, cur_grid_pos);
-    levelGridSetEntity(grid, entities, new_grid_pos, entity_id);
-    entities.grid_position[entity_id].position = new_grid_pos;
+    levelGridSetEntity(grid, new_grid_pos, entity_id);
+    entities.grid_positions[entity_id].position = new_grid_pos;
     return 1;
 }

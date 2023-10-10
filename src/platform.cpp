@@ -316,12 +316,12 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
     //////////////////////////
     for(uint i = 0; i < active_entities.count; i++)
     {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
-	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
+	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM])
 	{
-	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
-	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.type[i], MESH01, 0);
+	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.types[i], MESH01, 0);
 	    glBindVertexArray(mesh_01_p->vao);
 	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
 	}
@@ -383,32 +383,32 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     ///////////////////////////////
     for(uint i = 0; i < active_entities.count; i++)
     {
-	if(active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_RENDER] &&
-	   active_entities.entity_templates.table[active_entities.type[i]][COMPONENT_TRANSFORM])
+	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
+	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM])
 	{
 	    // Mesh 01
 	    Mesh* mesh_01_p  = (Mesh*)assetManagerGetAssetP(asset_manager,
-							    active_entities.type[i],
+							    active_entities.types[i],
 							    MESH01,
 							    0);
 	    // Diffuse Texture
 	    Texture* texture_d_p = (Texture*)assetManagerGetAssetP(asset_manager,
-								   active_entities.type[i],
+								   active_entities.types[i],
 								   TEXTURE_D,
 								   0);
 	    // Normal Texture
 	    Texture* texture_n_p = (Texture*)assetManagerGetAssetP(asset_manager,
-								   active_entities.type[i],
+								   active_entities.types[i],
 								   TEXTURE_N,
 								   0);
 	    // Specular Texture
 	    Texture* texture_s_p = (Texture*)assetManagerGetAssetP(asset_manager,
-								   active_entities.type[i],
+								   active_entities.types[i],
 								   TEXTURE_S,
 								   0);
 	    
 	    // Update Model Uniform in Shader
-	    Mat4F model = transformGetModel(active_entities.transform[i]);
+	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());
 	    // Bind Diffuse Texture
 	    glActiveTexture(GL_TEXTURE0);

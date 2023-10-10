@@ -33,9 +33,6 @@ typedef enum EntityType
     PLAYER,
     BLOCK,
     SPECIAL_BLOCK,
-    SMALL_DOG,
-    MEDIUM_DOG,
-    LARGE_DOG,
     TOTAL_ENTITY_TYPES
 } EntityType;
 
@@ -50,13 +47,13 @@ typedef enum Component
     COMPONENT_SFX,
     COMPONENT_CAMERA,
     COMPONENT_DIR_LIGHT,
+    COMPONENT_POINT_LIGHT,
     COMPONENT_GRID_POSITION,
     COMPONENT_STATE,
     COMPONENT_PLAYER,
     COMPONENT_COLLISION,
     COMPONENT_PUSHABLE,
     COMPONENT_AI,
-    COMPONENT_DOG_STATE,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -111,6 +108,17 @@ typedef struct DirLight
     float ambient_strength;
     DirLight();
 } DirLight;
+
+//////////////////////////
+// Component PointLight //
+//////////////////////////
+
+typedef struct PointLight
+{
+    Vec3F color;
+    float ambient_strength;
+    PointLight();
+} PointLight;
 
 ////////////////////////////
 // Component GridPosition //
@@ -167,24 +175,6 @@ typedef struct AI
     AI();
 } AI;
 
-/////////////////////////
-// Component Dog State //
-/////////////////////////
-
-typedef enum FilthLevels
-{
-    CLEAN = 0,
-    FILTHY
-} FilthLevels;
-
-typedef struct DogState
-{
-    uint first;
-    uint filth_level;
-    uint speed_level;
-    DogState();
-} DogState;
-
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -195,14 +185,14 @@ typedef struct DogState
 typedef struct ActiveEntities
 {
     EntityTemplates entity_templates;
-    uint         type[MAX_ENTITIES];
-    Transform    transform[MAX_ENTITIES];
-    Camera       camera[MAX_ENTITIES];
-    DirLight     dir_light[MAX_ENTITIES];
-    GridPosition grid_position[MAX_ENTITIES];
-    State        state[MAX_ENTITIES];
+    uint         types[MAX_ENTITIES];
+    Transform    transforms[MAX_ENTITIES];
+    Camera       cameras[MAX_ENTITIES];
+    DirLight     dir_lights[MAX_ENTITIES];
+    PointLight   point_lights[MAX_ENTITIES];
+    GridPosition grid_positions[MAX_ENTITIES];
+    State        states[MAX_ENTITIES];
     AI           ai[MAX_ENTITIES];
-    DogState     dog_state[MAX_ENTITIES];
     uint         count;
     ActiveEntities();
 } ActiveEntities;
@@ -236,12 +226,6 @@ typedef struct LevelGrid
 // Struct Level //
 //////////////////
 
-typedef enum Turns
-{
-    TURN_PLAYER = 0,
-    TURN_AI
-} Turns;
-
 typedef struct Level
 {
     LevelGrid grid;
@@ -274,7 +258,7 @@ Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
 // LevelGrid Function Prototypes
 int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos);
 
-void levelGridSetEntity(LevelGrid& level_grid, ActiveEntities& entities, Vec3F pos, int entity_ID);
+void levelGridSetEntity(LevelGrid& level_grid, Vec3F pos, int entity_ID);
 
 void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
 

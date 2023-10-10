@@ -1081,33 +1081,6 @@ AssetTableDir::AssetTableDir()
     table[SPECIAL_BLOCK][SOUND01]   = NULL;
     table[SPECIAL_BLOCK][SOUND02]   = NULL;
     table[SPECIAL_BLOCK][SOUND03]   = NULL;
-
-    // Small Dog Entity
-    table[SMALL_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\orange.bmp";
-    table[SMALL_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[SMALL_DOG][TEXTURE_S] = NULL;
-    table[SMALL_DOG][MESH01]    = "..\\data\\assets\\meshes\\small_dog.obj";
-    table[SMALL_DOG][SOUND01]   = NULL;
-    table[SMALL_DOG][SOUND02]   = NULL;
-    table[SMALL_DOG][SOUND03]   = NULL;
-
-    // Medium Dog Entity
-    table[MEDIUM_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\black.bmp";
-    table[MEDIUM_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[MEDIUM_DOG][TEXTURE_S] = NULL;
-    table[MEDIUM_DOG][MESH01]    = "..\\data\\assets\\meshes\\medium_dog.obj";
-    table[MEDIUM_DOG][SOUND01]   = NULL;
-    table[MEDIUM_DOG][SOUND02]   = NULL;
-    table[MEDIUM_DOG][SOUND03]   = NULL;
-
-    // Large Dog Entity
-    table[LARGE_DOG][TEXTURE_D] = "..\\data\\assets\\textures\\yellow.bmp";
-    table[LARGE_DOG][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[LARGE_DOG][TEXTURE_S] = NULL;
-    table[LARGE_DOG][MESH01]    = "..\\data\\assets\\meshes\\large_dog.obj";
-    table[LARGE_DOG][SOUND01]   = NULL;
-    table[LARGE_DOG][SOUND02]   = NULL;
-    table[LARGE_DOG][SOUND03]   = NULL;
 }
 
 ///////////////////////////
