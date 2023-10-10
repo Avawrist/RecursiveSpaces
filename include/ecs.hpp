@@ -203,8 +203,8 @@ typedef struct ActiveEntities
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 15,
-    MAX_LENGTH = 15,
+    MAX_WIDTH  = 25,
+    MAX_LENGTH = 25,
     MAX_HEIGHT = 4
 } GridMeasurements;
 

@@ -376,7 +376,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     // Textures
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
     shaderAddIntUniform(bp_shader_p, "normal_map", 1);
-    shaderAddIntUniform(bp_shader_p, "shadow_map", 2);
+    shaderAddIntUniform(bp_shader_p, "spec_map", 2);
+    shaderAddIntUniform(bp_shader_p, "shadow_map", 3);
     
     ///////////////////////////////
     // Render Entities to Buffer //
@@ -417,9 +418,10 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 	    glActiveTexture(GL_TEXTURE1);
 	    glBindTexture(GL_TEXTURE_2D, texture_n_p->texture_id);
 	    // Bind Specular Texture
-	    //
-	    // Bind Shadow Map Texture
 	    glActiveTexture(GL_TEXTURE2);
+	    glBindTexture(GL_TEXTURE_2D, texture_s_p->texture_id);
+	    // Bind Shadow Map Texture
+	    glActiveTexture(GL_TEXTURE3);
 	    glBindTexture(GL_TEXTURE_2D, depth_framebuffer.depth_text_id);
 	    // Bind Mesh
 	    glBindVertexArray(mesh_01_p->vao);

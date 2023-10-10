@@ -122,7 +122,7 @@ int main()
     // DirLight
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  level_p->grid,
-						  level_p->grid.center + Vec3F(0.0f, 4.0f, 8.0f), DIR_LIGHT);
+						  level_p->grid.center + Vec3F(-8.0f, 4.0f, -8.0f), DIR_LIGHT);
     active_entities_p->dir_lights[dir_light_id].dir = (level_p->grid.center -
 				 		       active_entities_p->transforms[dir_light_id].position);
 

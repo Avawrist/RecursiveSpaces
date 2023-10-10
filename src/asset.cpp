@@ -1038,9 +1038,9 @@ AssetTableID::AssetTableID()
 AssetTableDir::AssetTableDir()
 {
     // Chest Entity
-    table[CHEST][TEXTURE_D] = "..\\data\\assets\\textures\\chest.bmp";
+    table[CHEST][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[CHEST][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[CHEST][TEXTURE_S] = NULL;
+    table[CHEST][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
     table[CHEST][MESH01]    = "..\\data\\assets\\meshes\\chest.obj";
     table[CHEST][SOUND01]   = "..\\data\\assets\\sfx\\taunt.wav";
     table[CHEST][SOUND02]   = NULL;
@@ -1056,9 +1056,9 @@ AssetTableDir::AssetTableDir()
     table[GRID][SOUND03]   = NULL;
 
     // Player Entity
-    table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\green.bmp";
+    table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[PLAYER][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[PLAYER][TEXTURE_S] = NULL;
+    table[PLAYER][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
     table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\sphere.obj";
     table[PLAYER][SOUND01]   = NULL;
     table[PLAYER][SOUND02]   = NULL;
@@ -1067,16 +1067,16 @@ AssetTableDir::AssetTableDir()
     // Block Entity
     table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[BLOCK][TEXTURE_S] = NULL;
+    table[BLOCK][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
     table[BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
     table[BLOCK][SOUND01]   = NULL;
     table[BLOCK][SOUND02]   = NULL;
     table[BLOCK][SOUND03]   = NULL;
     
     // Special Block Entity
-    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\chest.bmp";
+    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[SPECIAL_BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[SPECIAL_BLOCK][TEXTURE_S] = NULL;
+    table[SPECIAL_BLOCK][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
     table[SPECIAL_BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
     table[SPECIAL_BLOCK][SOUND01]   = NULL;
     table[SPECIAL_BLOCK][SOUND02]   = NULL;

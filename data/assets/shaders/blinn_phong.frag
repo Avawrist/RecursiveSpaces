@@ -22,12 +22,20 @@ struct DirLight
 uniform DirLight  dirLight;
 uniform sampler2D diffuse_map;
 uniform sampler2D normal_map;
+uniform sampler2D spec_map;
 uniform sampler2D shadow_map;
 uniform vec3      cam_pos;
 
 // Function Prototypes
-vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, vec4 frag_pos_light_space);
-float calculateShadow(vec4 frag_pos_light_space, vec3 norm, vec3 light_dir);
+vec3 getDirLight(DirLight dirLight,
+		 vec2 uv,
+		 vec3 light_dir,
+		 vec3 view_dir,
+		 vec3 norm,
+		 vec4 frag_pos_light_space);
+		 
+float calculateShadow(vec4 frag_pos_light_space,
+		      vec3 norm, vec3 light_dir);
 
 // Function Definitions
 void main()
@@ -52,8 +60,7 @@ void main()
 	////////////////
 
 	// Add DirLight
-	// TODO: Pass frag_norm instead of vert_norm when all assets have normal maps
-	object_color *= getDirLight(dirLight, n_light_dir, n_view_dir, vert_norm, frag_pos_light_space);
+	object_color *= getDirLight(dirLight, uv, n_light_dir, n_view_dir, frag_norm, frag_pos_light_space);
 
 	// Add PointLight
 
@@ -65,7 +72,12 @@ void main()
 	final_color = vec4(object_color, 1.0);
 }
 
-vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, vec4 frag_pos_light_space)
+vec3 getDirLight(DirLight dirLight,
+     		 vec2 uv,
+		 vec3 light_dir,
+		 vec3 view_dir,
+		 vec3 norm,
+		 vec4 frag_pos_light_space)
 {
 	// Blinn-Phong method. Takes normalized vectors as input.
 		
@@ -79,8 +91,7 @@ vec3 getDirLight(DirLight dirLight, vec3 light_dir, vec3 view_dir, vec3 norm, ve
 	vec3 diffuse_comp = max(dot(light_dir, norm), 0.0) * dirLight.color;
 
 	// Specular Component
-	// TODO: Get shininess from material (currently 128)
-	vec3 specular_comp = pow(max(dot(norm, n_half), 0.0), 128.0) * dirLight.color;
+	vec3 specular_comp = pow(max(dot(norm, n_half), 0.0), 128.0) * dirLight.color * vec3(texture(spec_map,uv));
 
 	// Shadow Component
 	float shadow = calculateShadow(frag_pos_light_space, norm, light_dir);
