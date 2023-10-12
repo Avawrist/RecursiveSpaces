@@ -289,7 +289,8 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
-
+    glCullFace(GL_FRONT);
+    
     /////////////////
     // Prep Shader //
     /////////////////
@@ -345,7 +346,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glCullFace(GL_BACK);
+    
     /////////////////////////
     // Set Shader Uniforms //
     /////////////////////////
