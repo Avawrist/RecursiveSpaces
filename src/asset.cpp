@@ -1065,17 +1065,17 @@ AssetTableDir::AssetTableDir()
     table[PLAYER][SOUND03]   = NULL;
     
     // Block Entity
-    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
+    table[BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\brickwall_diffuse.bmp";
     table[BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
-    table[BLOCK][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
+    table[BLOCK][TEXTURE_S] = "..\\data\\assets\\textures\\black.bmp";
     table[BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
     table[BLOCK][SOUND01]   = NULL;
     table[BLOCK][SOUND02]   = NULL;
     table[BLOCK][SOUND03]   = NULL;
     
     // Special Block Entity
-    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
-    table[SPECIAL_BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\brickwall_normal.bmp";
+    table[SPECIAL_BLOCK][TEXTURE_D] = "..\\data\\assets\\textures\\tile_diffuse.bmp";
+    table[SPECIAL_BLOCK][TEXTURE_N] = "..\\data\\assets\\textures\\tile_normal.bmp";
     table[SPECIAL_BLOCK][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
     table[SPECIAL_BLOCK][MESH01]    = "..\\data\\assets\\meshes\\block.obj";
     table[SPECIAL_BLOCK][SOUND01]   = NULL;
