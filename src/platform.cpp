@@ -308,7 +308,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   20.0f);
+					  ortho_height * 3.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
 
     //////////////////////////
@@ -365,7 +365,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   20.0f);
+					   ortho_height * 3.0f);
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
@@ -456,7 +456,7 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   20.0f);
+					   ortho_height * 3.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
     ///////////////////////////

@@ -203,8 +203,8 @@ typedef struct ActiveEntities
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 25,
-    MAX_LENGTH = 25,
+    MAX_WIDTH  = 15,
+    MAX_LENGTH = 15,
     MAX_HEIGHT = 4
 } GridMeasurements;
 
@@ -217,8 +217,8 @@ typedef enum EntityCodes
 typedef struct LevelGrid
 {
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
-    float dimensions = 0.5f;
-    Vec3F center = Vec3F(MAX_WIDTH * dimensions * 0.5f, 0.0f, MAX_LENGTH * dimensions * 0.5f);
+    float unit_length = 1.0f;
+    Vec3F center = Vec3F(MAX_WIDTH * unit_length * 0.5f, 0.0f, MAX_LENGTH * unit_length * 0.5f);
     LevelGrid();
 } LevelGrid;
 

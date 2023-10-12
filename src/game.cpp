@@ -90,11 +90,11 @@ int main()
 							 false);
     frameTextureDataToGPU(ftexture_non_msaa_p);
     // Create Debug Grid Object
-    DebugGrid* grid_p = new DebugGrid(level_p->grid.dimensions,
+    DebugGrid* grid_p = new DebugGrid(level_p->grid.unit_length,
 				      MAX_WIDTH + 1,
 				      MAX_LENGTH + 1,
-				      Vec3F(-level_p->grid.dimensions * 0.5f, 0.0f,
-					    -level_p->grid.dimensions * 0.5f));
+				      Vec3F(-level_p->grid.unit_length * 0.5f, -0.5f,
+					    -level_p->grid.unit_length * 0.5f));
 
     ///////////////////
     // Test Entities //
@@ -108,7 +108,7 @@ int main()
 	    activeEntitiesCreateEntity(*active_entities_p, level_p->grid,
 				       Vec3F((float)x, 0.0f, (float)z), BLOCK);	    
 	}
-    }
+    } 
 
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(4.0f, 1.0f, 4.0f),  BLOCK);
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(9.0f, 1.0f, 9.0f),  BLOCK);
@@ -122,13 +122,13 @@ int main()
     // DirLight
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  level_p->grid,
-						  level_p->grid.center + Vec3F(-8.0f, 4.0f, -8.0f), DIR_LIGHT);
+						  level_p->grid.center + Vec3F(-11.0f, 4.0f, -11.0f), DIR_LIGHT);
     active_entities_p->dir_lights[dir_light_id].dir = (level_p->grid.center -
 				 		       active_entities_p->transforms[dir_light_id].position);
 
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(8.0f, 6.0f, 8.0f), CAMERA);
+    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(11.0f, 6.0f, 11.0f), CAMERA);
     
     ///////////////
     // Game Loop //
@@ -272,7 +272,7 @@ void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
     {
 	if(entities.entity_templates.table[entities.types[i]][COMPONENT_GRID_POSITION])
 	{
-	    entities.transforms[i].position = entities.grid_positions[i].position * grid.dimensions;
+	    entities.transforms[i].position = entities.grid_positions[i].position * grid.unit_length;
 	}
     }
 }
