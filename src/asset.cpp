@@ -599,6 +599,12 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
 	    normals.push_back(v_y);
 	    normals.push_back(v_z);
 	}
+	else if(buf[0] == 's' || buf[0] == '#') // Ignore/eat these lines
+	{
+	    c_int EAT_LINE_SIZE = 50;
+	    char line_buf[EAT_LINE_SIZE];
+	    fgets(line_buf, EAT_LINE_SIZE, file_p);
+	}
 
 	///////////////////////////
 	// Fill mesh data vector //
@@ -1059,7 +1065,7 @@ AssetTableDir::AssetTableDir()
     table[PLAYER][TEXTURE_D] = "..\\data\\assets\\textures\\rock_diffuse.bmp";
     table[PLAYER][TEXTURE_N] = "..\\data\\assets\\textures\\rock_normal.bmp";
     table[PLAYER][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
-    table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\cube.obj";
+    table[PLAYER][MESH01]    = "..\\data\\assets\\meshes\\torus.obj";
     table[PLAYER][SOUND01]   = NULL;
     table[PLAYER][SOUND02]   = NULL;
     table[PLAYER][SOUND03]   = NULL;
