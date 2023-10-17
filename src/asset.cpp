@@ -1047,7 +1047,7 @@ AssetTableDir::AssetTableDir()
     table[CHEST][TEXTURE_D] = "..\\data\\assets\\textures\\white.bmp";
     table[CHEST][TEXTURE_N] = "..\\data\\assets\\textures\\flat_normal.bmp";
     table[CHEST][TEXTURE_S] = "..\\data\\assets\\textures\\white.bmp";
-    table[CHEST][MESH01]    = "..\\data\\assets\\meshes\\chest.obj";
+    table[CHEST][MESH01]    = "..\\data\\assets\\meshes\\cube.obj";
     table[CHEST][SOUND01]   = "..\\data\\assets\\sfx\\taunt.wav";
     table[CHEST][SOUND02]   = NULL;
     table[CHEST][SOUND03]   = NULL;

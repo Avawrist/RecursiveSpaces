@@ -93,7 +93,7 @@ int main()
     DebugGrid* grid_p = new DebugGrid(level_p->grid.unit_length,
 				      MAX_WIDTH + 1,
 				      MAX_LENGTH + 1,
-				      Vec3F(-level_p->grid.unit_length * 0.5f, -0.5f,
+				      Vec3F(-level_p->grid.unit_length * 0.5f, 0.0f,
 					    -level_p->grid.unit_length * 0.5f));
 
     ///////////////////
