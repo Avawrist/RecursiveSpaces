@@ -109,6 +109,7 @@ float calculateShadow(vec4 frag_pos_light_space, vec3 norm, vec3 light_dir)
 	float current_depth = proj_coords.z;
 	// Check whether current frag pos is in shadow using PCF filtering for higher resolution
 	//float bias = max(0.05 * (1.0 - dot(norm, light_dir)), 0.005);
+	float bias = -0.0005;
 	float shadow = 0.0;
 	vec2 texel_size = 1.0 / textureSize(shadow_map, 0);
 
@@ -117,7 +118,7 @@ float calculateShadow(vec4 frag_pos_light_space, vec3 norm, vec3 light_dir)
 		for(int y = -1; y <= 1; y++)
 		{
 			float neighbor_depth = texture(shadow_map, proj_coords.xy + vec2(x, y) * texel_size).r;
-			shadow += current_depth > neighbor_depth ? 0.0 : 1.0;
+			shadow += current_depth - bias > neighbor_depth ? 0.0 : 1.0;
 		}
 	}
 	shadow /= 9.0;

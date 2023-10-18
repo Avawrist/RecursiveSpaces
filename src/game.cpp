@@ -8,6 +8,7 @@
 
 // C Libs
 #include "cstdlib"
+#include "cmath"
 
 // Game libs
 #include "input.hpp"
@@ -36,6 +37,11 @@ void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
 
 uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 		       InputManager& input_manager);
+
+uint gameUpdateDirLights(ActiveEntities& active_entities,
+			 const LevelGrid& grid,
+			 GameWindow& game_window,
+			 double time);
 
 int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
 			ActiveEntities& active_entities, AssetManager& asset_manager,
@@ -93,7 +99,7 @@ int main()
     DebugGrid* grid_p = new DebugGrid(level_p->grid.unit_length,
 				      MAX_WIDTH + 1,
 				      MAX_LENGTH + 1,
-				      Vec3F(-level_p->grid.unit_length * 0.5f, 0.0f,
+				      Vec3F(-level_p->grid.unit_length * 0.5f, -0.5f,
 					    -level_p->grid.unit_length * 0.5f));
 
     ///////////////////
@@ -339,7 +345,10 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
     return entity_id;
 }
 
-uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_window)
+uint gameUpdateDirLights(ActiveEntities& active_entities,
+			 const LevelGrid& grid,
+			 GameWindow& game_window,
+			 double time)
 {
     uint entity_id = 0;
     
@@ -347,7 +356,15 @@ uint gameUpdateDirLights(ActiveEntities& active_entities, GameWindow& game_windo
     {
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_DIR_LIGHT])
 	{
+	    // Get ID for use by later functions in the loop
 	    entity_id = i;
+
+	    // Update Position & Direction
+	    // TODO: Remove magic numbers
+	    active_entities.transforms[i].position = grid.center + Vec3F(-11.0f * (float)sin(time * 0.25f),
+									 4.0f,
+									 -11.0f * (float)cos(time * 0.25f));
+	    active_entities.dir_lights[i].dir = grid.center - active_entities.transforms[i].position;
 	}
     }
 
@@ -382,7 +399,8 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
 
     // Update Lights - TODO: Should eventually store an array of all lights
-    uint dir_light_id = gameUpdateDirLights(active_entities, game_window);
+    // TODO: Remove glfwGetTime from implementation - this is platform code
+    uint dir_light_id = gameUpdateDirLights(active_entities, level.grid, game_window, glfwGetTime());
    
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level.grid);
