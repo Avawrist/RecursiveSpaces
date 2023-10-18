@@ -25,34 +25,54 @@ using namespace std;
 // Function Prototpes //
 ////////////////////////
 
-void gameInit(GameWindow& game_window, uint width, uint height, InputManager& input_manager);
+void gameInit(GameWindow& game_window,
+	      uint width,
+	      uint height,
+	      InputManager& input_manager);
 
 void gameUpdateStates(ActiveEntities& entities);
 
-void gameUpdatePlayer(ActiveEntities& entities, Level& level, InputManager& input_manager);
+void gameUpdatePlayer(ActiveEntities& entities,
+		      Level& level,
+		      InputManager& input_manager);
 
-void gameUpdateAI(ActiveEntities& entities, Level& level);
+void gameUpdateAI(ActiveEntities& entities,
+		  Level& level);
 
-void gameUpdateTransforms(ActiveEntities& active_entities, LevelGrid& grid);
+void gameUpdateTransforms(ActiveEntities& active_entities,
+			  LevelGrid& grid);
 
-uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
-		       InputManager& input_manager);
+uint gameUpdateCameras(ActiveEntities& active_entities);
 
 uint gameUpdateDirLights(ActiveEntities& active_entities,
-			 const LevelGrid& grid,
 			 GameWindow& game_window,
-			 double time);
+			 float time);
 
-int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p,
-			FrameTexture* ftexture_non_msaa_p, Level& level,
-			DebugGrid* grid_p);
+int gameUpdate(SoundStream* sound_stream_p,
+	       GameWindow&  game_window,
+	       InputManager& input_manager,
+	       ActiveEntities& active_entities,
+	       Level& level,
+	       int& cam_id,
+	       int& dir_light_id);
 
-void gameUpdateInputs(InputManager& im, GameWindow& game_window);
+int gameRender(ActiveEntities& active_entities,
+	       AssetManager& asset_manager,
+	       GameWindow& game_window,
+	       FrameTexture* depth_ftexture_p,
+	       FrameTexture* ftexture_msaa_p,
+	       FrameTexture* ftexture_non_msaa_p,
+	       DebugGrid* grid_p,
+	       uint cam_id,
+	       uint dir_light_id);
 
-int gameMoveEntitiesOnGrid(LevelGrid& grid, ActiveEntities& entities,
-			   Vec3F cur_grid_position, Vec3F new_grid_position);
+void gameUpdateInputs(InputManager& im,
+		      GameWindow& game_window);
+
+int gameMoveEntitiesOnGrid(LevelGrid& grid,
+			   ActiveEntities& entities,
+			   Vec3F cur_grid_position,
+			   Vec3F new_grid_position);
 
 //////////
 // Main //
@@ -126,32 +146,50 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p, level_p->grid, Vec3F(0.0f, 1.0f, 1.0f), PLAYER);
     
     // DirLight
+    Vec3F dirlight_target = level_p->grid.center;
+    Vec3F dirlight_offset = Vec3F(11.0f, 10.0f, -11.0f);
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  level_p->grid,
-						  level_p->grid.center + Vec3F(-11.0f, 4.0f, -11.0f), DIR_LIGHT);
-    active_entities_p->dir_lights[dir_light_id].dir = (level_p->grid.center -
-				 		       active_entities_p->transforms[dir_light_id].position);
+						  dirlight_target + dirlight_offset,
+						  DIR_LIGHT);
+    active_entities_p->dir_lights[dir_light_id].target = dirlight_target;
+    active_entities_p->dir_lights[dir_light_id].offset = dirlight_offset;
+    active_entities_p->dir_lights[dir_light_id].dir = (dirlight_target - (dirlight_target + dirlight_offset));
 
     
     // Camera
-    activeEntitiesCreateEntity(*active_entities_p, level_p->grid, level_p->grid.center + Vec3F(11.0f, 6.0f, 11.0f), CAMERA);
+    int cam_id = activeEntitiesCreateEntity(*active_entities_p,
+					    level_p->grid,
+					    level_p->grid.center + Vec3F(11.0f, 11.0f, 11.0f),
+					    CAMERA);
+    active_entities_p->cameras[cam_id].target = level_p->grid.center;
     
     ///////////////
     // Game Loop //
     ///////////////
+    
     while(!game_window.close)
     {	
-	gameUpdateAndRender(test_soundStream_p,
-			    game_window,
-			    input_manager,
-			    *active_entities_p,
-			    asset_manager,
-			    depth_ftexture_p,
-			    ftexture_msaa_p,
-			    ftexture_non_msaa_p,
-			    *level_p,
-			    grid_p);
-        gameUpdateInputs(input_manager, game_window); // Store all inputs received this cycle
+        gameUpdate(test_soundStream_p,
+		   game_window,
+		   input_manager,
+		   *active_entities_p,
+		   *level_p,
+		   cam_id,
+		   dir_light_id);
+
+	gameRender(*active_entities_p,
+		   asset_manager,
+		   game_window,
+		   depth_ftexture_p,
+		   ftexture_msaa_p,
+		   ftexture_non_msaa_p,
+		   grid_p,
+		   cam_id,
+		   dir_light_id);
+
+	gameUpdateInputs(input_manager,
+			 game_window);
 	
 	// Close condition
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ESC] == KEY_DOWN) { game_window.close = true;}
@@ -283,61 +321,14 @@ void gameUpdateTransforms(ActiveEntities& entities, LevelGrid& grid)
     }
 }
 
-uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
-		       InputManager& input_manager)
+uint gameUpdateCameras(ActiveEntities& active_entities)
 {
-    float speed       = 8.0f;
-    float z_speed     = 20.0f;
-    float sensitivity = 1.0f;
-    uint  entity_id   = 0;
-    
+    uint entity_id = 0;
     for(uint i = 0; i < active_entities.count; i++)
     {
-	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM] &&
-	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_CAMERA])
+	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_CAMERA])
 	{
-	    Mat4F V          = cameraGetView(active_entities.cameras[i],
-		                             active_entities.transforms[i].position);
-	    float d_time_spd = game_window.d_time * speed;
-	    Vec2F distance   = cursorGetDistance(input_manager.cursor);  
-
-	    // Camera Strafing
-
-	    // Move forward
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
-	    {
-		active_entities.transforms[i].position -= (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
-							  * d_time_spd);
-	    }
-	    // Move back
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
-	    {
-		active_entities.transforms[i].position += (normalize(Vec3F(V(0, 2), V(1, 2), V(2, 2)))
-							  * d_time_spd);
-	    }
-	    // Move right
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
-	    {
-	        active_entities.transforms[i].position += (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
-							  * d_time_spd);
-	    }
-	    // Move left
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
-	    {
-	        active_entities.transforms[i].position -= (normalize(Vec3F(V(0, 0), V(1, 0), V(2, 0)))
-							  * d_time_spd);
-	    }
-
-	    ////////////////////
-	    // Camera Looking //
-	    ////////////////////
-	    cameraOffsetAngles(active_entities.cameras[i],
-			       sensitivity * distance.x,
-			       sensitivity * distance.y);
-
-	    /////////////////////////////
-	    // Set ID to Render Camera //
-	    /////////////////////////////
+	    // Set ID to Render Camera
 	    if(active_entities.cameras[i].is_selected) { entity_id = i; }
 	}
     }
@@ -346,9 +337,8 @@ uint gameUpdateCameras(ActiveEntities& active_entities, GameWindow& game_window,
 }
 
 uint gameUpdateDirLights(ActiveEntities& active_entities,
-			 const LevelGrid& grid,
 			 GameWindow& game_window,
-			 double time)
+			 float time)
 {
     uint entity_id = 0;
     
@@ -358,23 +348,30 @@ uint gameUpdateDirLights(ActiveEntities& active_entities,
 	{
 	    // Get ID for use by later functions in the loop
 	    entity_id = i;
-
+	    
 	    // Update Position & Direction
-	    // TODO: Remove magic numbers
-	    active_entities.transforms[i].position = grid.center + Vec3F(-11.0f * (float)sin(time * 0.25f),
-									 4.0f,
-									 -11.0f * (float)cos(time * 0.25f));
-	    active_entities.dir_lights[i].dir = grid.center - active_entities.transforms[i].position;
+	    Vec3F offset = active_entities.dir_lights[i].offset;
+	    float rotate_speed = active_entities.dir_lights[i].speed;
+	    if(rotate_speed)
+	    {
+		active_entities.transforms[i].position = active_entities.dir_lights[i].target + Vec3F(offset.x * sin(time),
+												      offset.y,
+												      offset.z * cos(time));
+		active_entities.dir_lights[i].dir = active_entities.dir_lights[i].target - active_entities.transforms[i].position;
+	    }
 	}
     }
 
     return entity_id;
 }
 
-int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, InputManager& input_manager,
-			ActiveEntities& active_entities, AssetManager& asset_manager,
-			FrameTexture* depth_ftexture_p, FrameTexture* ftexture_msaa_p,
-			FrameTexture* ftexture_non_msaa_p, Level& level, DebugGrid* grid_p)
+int gameUpdate(SoundStream* sound_stream_p,
+	       GameWindow& game_window,
+	       InputManager& input_manager,
+	       ActiveEntities& active_entities,
+	       Level& level,
+	       int& cam_id,
+	       int& dir_light_id)
 {
     ////////////
     // Update //
@@ -396,22 +393,33 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
     soundStreamUpdate(sound_stream_p);
     
     // Update Cameras
-    uint cam_id = gameUpdateCameras(active_entities, game_window, input_manager);
+    cam_id = gameUpdateCameras(active_entities);
 
-    // Update Lights - TODO: Should eventually store an array of all lights
-    // TODO: Remove glfwGetTime from implementation - this is platform code
-    uint dir_light_id = gameUpdateDirLights(active_entities, level.grid, game_window, glfwGetTime());
+    // Update Lights - TODO: store an array of all lights
+    dir_light_id = gameUpdateDirLights(active_entities, game_window, (float)platformGetTime());
    
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(active_entities, level.grid);
 
+    return 1;
+}
+
+int gameRender(ActiveEntities& active_entities,
+	       AssetManager& asset_manager,
+	       GameWindow& game_window,
+	       FrameTexture* depth_ftexture_p,
+	       FrameTexture* ftexture_msaa_p,
+	       FrameTexture* ftexture_non_msaa_p,
+	       DebugGrid* grid_p,
+	       uint cam_id,
+	       uint dir_light_id)
+{
     // Render Pass 1 - Shadow Map
     platformRenderShadowMapToBuffer(active_entities,
 				    *depth_ftexture_p,
 				    asset_manager,
 				    game_window,
-				    active_entities.transforms[dir_light_id].position,
-				    level.grid.center);
+				    dir_light_id);
     
     // Render Pass 2 -  Entities
     platformRenderEntitiesToBuffer(active_entities,
@@ -419,24 +427,28 @@ int gameUpdateAndRender(SoundStream* sound_stream_p, GameWindow& game_window, In
 				   *depth_ftexture_p,
 				   game_window,
 				   asset_manager,
-				   active_entities.transforms[dir_light_id].position,
-				   active_entities.transforms[cam_id].position,
-				   level.grid.center,
-				   active_entities.dir_lights[dir_light_id]);
+				   dir_light_id,
+				   cam_id);
     
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,
 					asset_manager,
 					active_entities.transforms[cam_id].position,
-					level.grid.center,
+				        active_entities.cameras[cam_id].target,
 					grid_p);
 
 
     // Render Pass 4 - Post Processing
     platformBlitBufferToBuffer(*ftexture_msaa_p,
 			       *ftexture_non_msaa_p,
-			       0, 0, ftexture_msaa_p->width, ftexture_msaa_p->height,
-			       0, 0, ftexture_non_msaa_p->width, ftexture_non_msaa_p->height);
+			       0,
+			       0,
+			       ftexture_msaa_p->width,
+			       ftexture_msaa_p->height,
+			       0,
+			       0,
+			       ftexture_non_msaa_p->width,
+			       ftexture_non_msaa_p->height);
     platformRenderPP(asset_manager, *ftexture_non_msaa_p);
 
     //////////////////

@@ -88,12 +88,7 @@ typedef struct Transform
 typedef struct Camera
 {
     bool  is_selected;
-    float pitch;
-    float yaw;
-    float n;
-    float f;
-    float fov;
-    float ar;
+    Vec3F target;
     Camera();
 } Camera;
 
@@ -105,6 +100,9 @@ typedef struct DirLight
 {
     Vec3F color;
     Vec3F dir;
+    Vec3F target;
+    Vec3F offset;
+    float speed;
     float ambient_strength;
     DirLight();
 } DirLight;
@@ -248,12 +246,6 @@ Mat4F transformGetModel(const Transform& transform);
 
 // Camera Function Prototypes
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
-
-Mat4F cameraGetView(const Camera& cam, Vec3F cam_pos);
-
-Mat4F cameraGetPerspective(const Camera& cam, float ar);
-
-Mat4F cameraGetOrthographic(const Camera& cam, int win_width, int win_height);
 
 // LevelGrid Function Prototypes
 int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos);

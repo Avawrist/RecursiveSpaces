@@ -237,6 +237,11 @@ void platformSwapBuffers(GameWindow& game_window)
     game_window.cycle_start_time_secs = glfwGetTime();
 }
 
+double platformGetTime()
+{
+    return glfwGetTime();
+}
+
 void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
 {
     glfwPollEvents(); // Processes all input events that occurred this cycle
@@ -279,8 +284,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
-				     const Vec3F& light_pos,
-				     const Vec3F& look_at)
+				     uint dir_light_id)
 {
     //////////////////
     // Set GL state //
@@ -298,7 +302,9 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
     glUseProgram(shadowmap_shader_p->program_id);
 
     // View Mat
-    Mat4F view = lookAt(light_pos, look_at, Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F view = lookAt(active_entities.transforms[dir_light_id].position,
+		        active_entities.dir_lights[dir_light_id].target,
+			Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
 
     // Projection Mat
@@ -322,7 +328,10 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 	{
 	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
-	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager, active_entities.types[i], MESH01, 0);
+	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager,
+							   active_entities.types[i],
+							   MESH01,
+							   0);
 	    glBindVertexArray(mesh_01_p->vao);
 	    glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_01_p->data.size());
 	}
@@ -334,10 +343,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
-				    Vec3F light_pos,
-				    Vec3F cam_pos,
-				    Vec3F cam_target,
-				    const DirLight& dir_light)
+				    uint dir_light_id,
+				    uint cam_id)
 {
     //////////////////
     // Set GL state //
@@ -354,10 +361,14 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // Light View Mat
-    Mat4F light_view = lookAt(light_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F light_view = lookAt(active_entities.transforms[dir_light_id].position,
+			      active_entities.cameras[cam_id].target,
+			      Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "light_view", light_view.getPointer());    
     // Cam View Mat
-    Mat4F cam_view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
+    Mat4F cam_view = lookAt(active_entities.transforms[cam_id].position,
+			    active_entities.cameras[cam_id].target,
+			    Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "cam_view", cam_view.getPointer());
     // Projection Mat
     float ortho_height = 20.0f;
@@ -370,11 +381,17 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 					   ortho_height * 3.0f);
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
-    shaderAddVec3Uniform(bp_shader_p, "cam_pos", cam_pos);
+    shaderAddVec3Uniform(bp_shader_p, "cam_pos", active_entities.transforms[cam_id].position);
     // Single Dir Light (TODO: Make DirLight a component)
-    shaderAddVec3Uniform(bp_shader_p,  "dirLight.color", dir_light.color);
-    shaderAddVec3Uniform(bp_shader_p,  "dirLight.dir",   dir_light.dir);
-    shaderAddFloatUniform(bp_shader_p, "dirLight.ambient_strength", dir_light.ambient_strength);
+    shaderAddVec3Uniform(bp_shader_p,
+			 "dirLight.color",
+			 active_entities.dir_lights[dir_light_id].color);
+    shaderAddVec3Uniform(bp_shader_p,
+			 "dirLight.dir",
+			 active_entities.dir_lights[dir_light_id].dir);
+    shaderAddFloatUniform(bp_shader_p,
+			  "dirLight.ambient_strength",
+			  active_entities.dir_lights[dir_light_id].ambient_strength);
     // Textures
     shaderAddIntUniform(bp_shader_p, "diffuse_map", 0);
     shaderAddIntUniform(bp_shader_p, "normal_map", 1);

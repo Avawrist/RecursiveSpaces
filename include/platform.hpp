@@ -61,6 +61,8 @@ void platformFreeWindow(GameWindow& game_window);
 
 void platformSwapBuffers(GameWindow& game_window);
 
+double platformGetTime();
+
 void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 
 void platformRenderShadowMapToScreen(AssetManager& asset_manager,
@@ -71,18 +73,15 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
-				     const Vec3F& light_pos,
-				     const Vec3F& look_at);
+				     uint dir_light_id);
 
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
-				    Vec3F light_pos,
-				    Vec3F cam_pos,
-				    Vec3F cam_target,
-				    const DirLight& dir_light);
+				    uint dir_light_id,
+				    uint cam_id);
 
 void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
