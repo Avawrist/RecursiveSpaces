@@ -55,7 +55,7 @@ DirLight::DirLight()
     dir    = Vec3F(1.0f, -1.0f, 1.0f);
     target = Vec3F(0.0f, 0.0f, 0.0f);
     offset = Vec3F(0.0f, 0.0f, 0.0f);
-    speed  = 0.0f;
+    speed  = 0.2f;
     ambient_strength = 0.4f;
 }
 

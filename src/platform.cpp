@@ -382,7 +382,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", active_entities.transforms[cam_id].position);
-    // Single Dir Light (TODO: Make DirLight a component)
+    // Single Dir Light
     shaderAddVec3Uniform(bp_shader_p,
 			 "dirLight.color",
 			 active_entities.dir_lights[dir_light_id].color);
