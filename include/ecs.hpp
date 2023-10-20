@@ -33,6 +33,7 @@ typedef enum EntityType
     PLAYER,
     BLOCK,
     SPECIAL_BLOCK,
+    BLOCK_ROOM,
     TOTAL_ENTITY_TYPES
 } EntityType;
 
@@ -54,6 +55,7 @@ typedef enum Component
     COMPONENT_COLLISION,
     COMPONENT_PUSHABLE,
     COMPONENT_AI,
+    COMPONENT_ROOM_GRID,
     TOTAL_COMPONENT_TYPES
 } Component;
 
@@ -173,6 +175,32 @@ typedef struct AI
     AI();
 } AI;
 
+////////////////////////
+// Component RoomGrid //
+////////////////////////
+
+typedef enum GridMeasurements
+{
+    MAX_WIDTH  = 20,
+    MAX_LENGTH = 20,
+    MAX_HEIGHT = 20
+} GridMeasurements;
+
+typedef enum EntityCodes
+{
+    NO_ENTITY     = -1,
+    INVALID_RANGE = -2
+} EntityCodes;
+
+typedef struct RoomGrid
+{
+    int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
+    float unit_length = 1.0f;
+    Vec3F center = Vec3F(MAX_WIDTH * unit_length * 0.5f, 0.0f, MAX_LENGTH * unit_length * 0.5f);
+    RoomGrid();
+} RoomGrid;
+
+
 ////////////////////////////////
 // Struct of Component Arrays //
 ////////////////////////////////
@@ -191,55 +219,22 @@ typedef struct ActiveEntities
     GridPosition grid_positions[MAX_ENTITIES];
     State        states[MAX_ENTITIES];
     AI           ai[MAX_ENTITIES];
+    RoomGrid     roomgrids[MAX_ENTITIES];
     uint         count;
     ActiveEntities();
 } ActiveEntities;
-
-//////////////////////
-// Struct LevelGrid //
-//////////////////////
-
-typedef enum GridMeasurements
-{
-    MAX_WIDTH  = 15,
-    MAX_LENGTH = 15,
-    MAX_HEIGHT = 4
-} GridMeasurements;
-
-typedef enum EntityCodes
-{
-    NO_ENTITY     = -1,
-    INVALID_RANGE = -2
-} EntityCodes;
-
-typedef struct LevelGrid
-{
-    int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
-    float unit_length = 1.0f;
-    Vec3F center = Vec3F(MAX_WIDTH * unit_length * 0.5f, 0.0f, MAX_LENGTH * unit_length * 0.5f);
-    LevelGrid();
-} LevelGrid;
-
-//////////////////
-// Struct Level //
-//////////////////
-
-typedef struct Level
-{
-    LevelGrid grid;
-} Level;
 
 /////////////////////////
 // Function Prototypes //
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
+int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid& room_grid,
 			       Vec3F origin, uint entity_type);
 
 void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid);
+void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGrid& room_grid);
 
 // Transform Function Prototypes
 Mat4F transformGetModel(const Transform& transform);
@@ -247,17 +242,17 @@ Mat4F transformGetModel(const Transform& transform);
 // Camera Function Prototypes
 void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 
-// LevelGrid Function Prototypes
-int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos);
+// RoomGrid Function Prototypes
+int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos);
 
-void levelGridSetEntity(LevelGrid& level_grid, Vec3F pos, int entity_ID);
+void roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID);
 
-void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos);
+void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos);
 
-Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
+Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type);
 
 // AI Function Prototypes
-Vec3F aStarFindPath(LevelGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
+Vec3F aStarFindPath(RoomGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
 
 #endif

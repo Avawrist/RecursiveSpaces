@@ -139,7 +139,7 @@ EntityTemplates::EntityTemplates()
 // Struct LevelGrid //
 //////////////////////
 
-LevelGrid::LevelGrid()
+RoomGrid::RoomGrid()
 {
     memset(grid, -1, MAX_WIDTH * MAX_HEIGHT * MAX_LENGTH * sizeof(int));
 }
@@ -160,7 +160,7 @@ ActiveEntities::ActiveEntities()
     count = 0;
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
+int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid& room_grid,
 			       Vec3F origin, uint entity_type)
 {
     // Returns entity ID on success, -1 on failure
@@ -178,7 +178,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, LevelGrid& level_grid,
 	// if entity has a grid_position component, add to grid and set grid position
 	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
 	{
-	    levelGridSetEntity(level_grid, origin, entities.count);
+	    roomGridSetEntity(room_grid, origin, entities.count);
 	    entities.grid_positions[entities.count].position = origin;
 	}
 	// Increase entity count
@@ -198,7 +198,7 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
     entities.states[entity_ID].inactive = true;
 }
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_grid)
+void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGrid& room_grid)
 {
     // Should be run after all other entity updates. Searches for inactive entities,
     // if found, overwrites the inactive with the active entity on the end of the arrays,
@@ -214,14 +214,14 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 	    if(entities.entity_templates.table[entities.types[i]][COMPONENT_GRID_POSITION])
 	    {
 		Vec3F inactive_grid_position = entities.grid_positions[i].position;
-		levelGridRemoveEntity(level_grid, inactive_grid_position);
+		roomGridRemoveEntity(room_grid, inactive_grid_position);
 	    }
 	    // If replacement entity is on the grid, update ID of last active
 	    // entity in the grid, since it has changed
 	    if(entities.entity_templates.table[entities.types[entities.count - 1]][COMPONENT_GRID_POSITION])
 	    {
 		Vec3F active_grid_position = entities.grid_positions[entities.count - 1].position;
-		levelGridSetEntity(level_grid, active_grid_position, i);
+		roomGridSetEntity(room_grid, active_grid_position, i);
 	    }
 	    // Safe to copy grid position component now 
 	    entities.grid_positions[i] = entities.grid_positions[entities.count - 1];
@@ -232,7 +232,8 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
 	    entities.point_lights[i]   = entities.point_lights[entities.count - 1];
 	    entities.states[i]         = entities.states[entities.count - 1];
 	    entities.ai[i]             = entities.ai[entities.count - 1];
-	    // Copy replacement entity's type last
+	    entities.roomgrids[i]      = entities.roomgrids[entities.count - 1];
+            // Copy replacement entity's type last
 	    entities.types[i] = entities.types[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability
 	    entities.types[entities.count - 1] = NONE;
@@ -243,11 +244,11 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, LevelGrid& level_gr
     }
 }
 
-/////////////////////////
-// LevelGrid Functions //
-/////////////////////////
+////////////////////////
+// RoomGrid Functions //
+////////////////////////
 
-int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos)
+int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
 {
     // Returns entity on success. Returns -1 if no entity. Returns -2 if out of bounds.
     
@@ -259,28 +260,28 @@ int levelGridGetEntity(LevelGrid& level_grid, Vec3F pos)
 	return INVALID_RANGE;
     }
 
-    return level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z];
+    return room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z];
 }
 
-void levelGridSetEntity(LevelGrid& level_grid, Vec3F pos, int entity_ID)
+void roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID)
 {
     _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
     _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
     _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
     
-    level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
+    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
 }
 
-void levelGridRemoveEntity(LevelGrid& level_grid, Vec3F pos)
+void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos)
 {
     _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
     _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
     _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
     
-    level_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
+    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
 }
 
-Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
+Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type)
 {
     // Parses all entities on the grid, and returns the grid position of
@@ -295,7 +296,7 @@ Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
 	{
 	    for(uint z = 0; z < MAX_LENGTH; z++)
 	    {
-		int id = level_grid.grid[x][y][z];
+		int id = room_grid.grid[x][y][z];
 		if(id > -1)
 		{
 		    uint type = entities.types[id]; 
@@ -319,11 +320,11 @@ Vec3F levelGridFindNearestType(LevelGrid& level_grid, ActiveEntities& entities,
 }
 
 // AI Functions
-Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
+Vec3F aStarFindPath(RoomGrid& room_grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
 {
     // TODO: Add exception handling if target is unreachable
 
-    // TODO: Level_grid and vector positions I'm using are not aligned - entities on 0 height,
+    // TODO: room_grid and vector positions I'm using are not aligned - entities on 0 height,
     // but I am searching at height 1
     
     _assert(target_grid_pos.x >= 0 && target_grid_pos.x < MAX_WIDTH);
@@ -354,7 +355,7 @@ Vec3F aStarFindPath(LevelGrid& level_grid, Vec3F cur_grid_pos, Vec3F target_grid
 					&closed[closed.size() - 1]);
 		    // If there is no entity occupying the node, add it to the node grid
 		    // as a candidate
-		    if(levelGridGetEntity(level_grid, node_pos) == NO_ENTITY || node_pos == target_grid_pos)
+		    if(roomGridGetEntity(room_grid, node_pos) == NO_ENTITY || node_pos == target_grid_pos)
 		    {
 			// If the node pos is found in closed, don't add the node to open
 			uint found = 0;
