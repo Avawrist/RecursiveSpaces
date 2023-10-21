@@ -898,6 +898,11 @@ Quaternion slerp(const Quaternion& q1, const Quaternion& q2, float t)
 // Misc. //
 ///////////
 
+float lerp(float a, float b, float t)
+{
+    return a + (b - a) * t;
+}
+
 float clamp(float n, float min, float max)
 {
     float t = n < min ? min : n;

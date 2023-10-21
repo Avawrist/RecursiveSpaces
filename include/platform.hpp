@@ -69,8 +69,9 @@ void platformRenderShadowMapToScreen(AssetManager& asset_manager,
 				     GameWindow& game_window,
 				     FrameTexture& depth_framebuffer);
 
-void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
+void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
+				     const RoomGrid& room,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
 				     uint dir_light_id);
@@ -78,6 +79,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
+				    const RoomGrid& room,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,

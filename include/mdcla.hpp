@@ -204,6 +204,8 @@ Quaternion slerp(const Quaternion& q1, const Quaternion& q2, double t);
 // Misc. //
 ///////////
 
+float lerp(float a, float b, float t);
+
 float clamp(float n, float min, float max);
 
 float degToRads(float d);

@@ -280,8 +280,9 @@ void platformRenderShadowMapToScreen(AssetManager& asset_manager,
     glDrawArrays(GL_TRIANGLES, 0, 6);    
 }
 
-void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
+void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
+				     const RoomGrid& room,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
 				     uint dir_light_id)
@@ -326,6 +327,14 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
 	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM])
 	{
+	    // Update transform scale and get model -
+	    // TODO: Move this up into update loop
+	    active_entities.transforms[i].x_scale = room.current_scale;
+	    active_entities.transforms[i].y_scale = room.current_scale;
+	    active_entities.transforms[i].z_scale = room.current_scale;
+
+	    // TODO: Need to translate also, not just scale for zoom effect to work
+	    
 	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
 	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager,
@@ -341,6 +350,7 @@ void platformRenderShadowMapToBuffer(const ActiveEntities& active_entities,
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
+				    const RoomGrid& room,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,

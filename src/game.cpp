@@ -35,6 +35,8 @@ uint gameUpdateCameras();
 
 uint gameUpdateDirLights(float time);
 
+void gameUpdateRoomGrid(RoomGrid& rg);
+
 int gameUpdate(SoundStream* sound_stream_p,
 	       RoomGrid& grid,
 	       int& cam_id,
@@ -43,6 +45,7 @@ int gameUpdate(SoundStream* sound_stream_p,
 int gameRender(FrameTexture* depth_ftexture_p,
 	       FrameTexture* ftexture_msaa_p,
 	       FrameTexture* ftexture_non_msaa_p,
+	       const RoomGrid& room,
 	       DebugGrid* grid_p,
 	       uint cam_id,
 	       uint dir_light_id);
@@ -101,11 +104,11 @@ int main()
 							 false);
     frameTextureDataToGPU(ftexture_non_msaa_p);
     // Create Debug Grid Object
-    DebugGrid* grid_p = new DebugGrid(base_room_grid_p->unit_length,
+    DebugGrid* grid_p = new DebugGrid(base_room_grid_p->current_scale,
 				      MAX_WIDTH + 1,
 				      MAX_LENGTH + 1,
-				      Vec3F(-base_room_grid_p->unit_length * 0.5f, -0.5f,
-					    -base_room_grid_p->unit_length * 0.5f));
+				      Vec3F(-base_room_grid_p->current_scale * 0.5f, -0.5f,
+					    -base_room_grid_p->current_scale * 0.5f));
 
     ///////////////////
     // Test Entities //
@@ -183,6 +186,7 @@ int main()
 	gameRender(depth_ftexture_p,
 		   ftexture_msaa_p,
 		   ftexture_non_msaa_p,
+		   *base_room_grid_p,
 		   grid_p,
 		   cam_id,
 		   dir_light_id);
@@ -311,7 +315,7 @@ void gameUpdateTransforms(RoomGrid& grid)
     {
 	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_GRID_POSITION])
 	{
-	    active_entities_p->transforms[i].position = active_entities_p->grid_positions[i].position * grid.unit_length;
+	    active_entities_p->transforms[i].position = active_entities_p->grid_positions[i].position * grid.current_scale;
 	}
     }
 }
@@ -360,6 +364,36 @@ uint gameUpdateDirLights(float time)
     return entity_id;
 }
 
+void gameUpdateRoomGrid(RoomGrid& rg)
+{
+    // TODO: Clean up whole function:
+    // -Use lerp properly
+    // -Update all RoomGrid components
+    if(rg.cooldown) {rg.cooldown -= 1;}   
+    if(abs(rg.current_scale - rg.target_scale) > 0.001f)
+    {
+	rg.current_scale = lerp(rg.current_scale, rg.target_scale, 0.05f);
+    }
+    else
+    {
+	rg.current_scale = rg.target_scale;
+    }
+    
+    if(rg.cooldown == 0)
+    {
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+	{
+	    rg.target_scale *= MAX_WIDTH;
+	    rg.cooldown = 10;
+	}
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+	{
+	    rg.target_scale /= MAX_WIDTH;
+	    rg.cooldown = 10;
+	}
+    }
+}
+
 int gameUpdate(SoundStream* sound_stream_p,
 	       RoomGrid& grid,
 	       int& cam_id,
@@ -378,6 +412,9 @@ int gameUpdate(SoundStream* sound_stream_p,
     // Update AI
     gameUpdateAI(grid);
 
+    // Update Room Grids
+    gameUpdateRoomGrid(grid);
+    
     // Update Transforms
     gameUpdateTransforms(grid);
     
@@ -399,6 +436,7 @@ int gameUpdate(SoundStream* sound_stream_p,
 int gameRender(FrameTexture* depth_ftexture_p,
 	       FrameTexture* ftexture_msaa_p,
 	       FrameTexture* ftexture_non_msaa_p,
+	       const RoomGrid& room,
 	       DebugGrid* grid_p,
 	       uint cam_id,
 	       uint dir_light_id)
@@ -406,6 +444,7 @@ int gameRender(FrameTexture* depth_ftexture_p,
     // Render Pass 1 - Shadow Map
     platformRenderShadowMapToBuffer(*active_entities_p,
 				    *depth_ftexture_p,
+				    room,
 				    asset_manager,
 				    game_window,
 				    dir_light_id);
@@ -414,6 +453,7 @@ int gameRender(FrameTexture* depth_ftexture_p,
     platformRenderEntitiesToBuffer(*active_entities_p,
 				   *ftexture_msaa_p,
 				   *depth_ftexture_p,
+				   room,
 				   game_window,
 				   asset_manager,
 				   dir_light_id,
