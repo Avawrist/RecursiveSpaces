@@ -35,7 +35,7 @@ uint gameUpdateCameras();
 
 uint gameUpdateDirLights(float time);
 
-void gameUpdateRoomGrid(RoomGrid& rg);
+void gameUpdateRoomGrid();
 
 int gameUpdate(SoundStream* sound_stream_p,
 	       RoomGrid& grid,
@@ -78,11 +78,13 @@ int main()
     SoundInterface  sound_interface;
     platformLoadEntityTemplatesFromTxt(*active_entities_p, "..\\data\\templates\\entity_templates.txt");
 
-    ////////////////
-    // Level Grid //
-    ////////////////
-    //Level* level_p = new Level();
-    RoomGrid* base_room_grid_p = new RoomGrid();
+    ////////////////////
+    // Base Room Grid //
+    ////////////////////
+
+    // Base BlockRoom
+    int br_id = activeEntitiesCreateEntity(*active_entities_p, NULL, Vec3F(0.0f, 0.0f, 0.0f), BLOCK_ROOM);
+    RoomGrid* base_room_grid_p = &active_entities_p->roomgrids[br_id];
     
     /////////////////
     // Temp Assets //
@@ -120,37 +122,37 @@ int main()
 	for(int z = 0; z < MAX_LENGTH; z++)
 	{
 	    activeEntitiesCreateEntity(*active_entities_p,
-				       *base_room_grid_p,
+				       base_room_grid_p,
 				       Vec3F((float)x, 0.0f, (float)z),
 				       BLOCK);	    
 	}
     } 
-
+    
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(4.0f, 1.0f, 4.0f),
 			       BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(9.0f, 1.0f, 9.0f),
 			       BLOCK);
 
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(MAX_WIDTH - 2, 1.0f, MAX_LENGTH - 2),
 			       SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(1.0f, 1.0f, MAX_LENGTH - 2), SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
     
     // Player
     activeEntitiesCreateEntity(*active_entities_p,
-			       *base_room_grid_p,
+			       base_room_grid_p,
 			       Vec3F(0.0f, 1.0f, 1.0f),
 			       PLAYER);
 
@@ -158,7 +160,7 @@ int main()
     Vec3F dirlight_target = base_room_grid_p->center;
     Vec3F dirlight_offset = Vec3F(11.0f, 10.0f, -11.0f);
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
-						  *base_room_grid_p,
+						  base_room_grid_p,
 						  dirlight_target + dirlight_offset,
 						  DIR_LIGHT);
     active_entities_p->dir_lights[dir_light_id].target = dirlight_target;
@@ -167,7 +169,7 @@ int main()
 
     // Camera
     int cam_id = activeEntitiesCreateEntity(*active_entities_p,
-					    *base_room_grid_p,
+					    base_room_grid_p,
 					    base_room_grid_p->center + Vec3F(11.0f, 11.0f, 11.0f),
 					    CAMERA);
     active_entities_p->cameras[cam_id].target = base_room_grid_p->center;
@@ -364,32 +366,34 @@ uint gameUpdateDirLights(float time)
     return entity_id;
 }
 
-void gameUpdateRoomGrid(RoomGrid& rg)
+void gameUpdateRoomGrids()
 {
-    // TODO: Clean up whole function:
-    // -Use lerp properly
-    // -Update all RoomGrid components
-    if(rg.cooldown) {rg.cooldown -= 1;}   
-    if(abs(rg.current_scale - rg.target_scale) > 0.001f)
+    for(uint i = 0; i < active_entities_p->count; i++)
     {
-	rg.current_scale = lerp(rg.current_scale, rg.target_scale, 0.05f);
-    }
-    else
-    {
-	rg.current_scale = rg.target_scale;
-    }
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_ROOM_GRID])
+	{
+	    RoomGrid& rg = active_entities_p->roomgrids[i];
+
+	    if(rg.cooldown) {rg.cooldown -= 1;}
+	    if(rg.t < 1.0f) {rg.t += 0.01f;}
     
-    if(rg.cooldown == 0)
-    {
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
-	{
-	    rg.target_scale *= MAX_WIDTH;
-	    rg.cooldown = 10;
-	}
-	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
-	{
-	    rg.target_scale /= MAX_WIDTH;
-	    rg.cooldown = 10;
+	    rg.current_scale = lerp(rg.current_scale, rg.target_scale, rg.t);
+	    
+	    if(rg.cooldown == 0)
+	    {
+		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+		{
+		    rg.target_scale *= MAX_WIDTH;
+		    rg.t = 0.01f;
+		    rg.cooldown = 10;
+		}
+		if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+		{
+		    rg.target_scale /= MAX_WIDTH;
+		    rg.t = 0.01f;
+		    rg.cooldown = 10;
+		}
+	    }
 	}
     }
 }
@@ -413,7 +417,7 @@ int gameUpdate(SoundStream* sound_stream_p,
     gameUpdateAI(grid);
 
     // Update Room Grids
-    gameUpdateRoomGrid(grid);
+    gameUpdateRoomGrids();
     
     // Update Transforms
     gameUpdateTransforms(grid);

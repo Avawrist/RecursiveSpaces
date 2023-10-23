@@ -160,7 +160,7 @@ ActiveEntities::ActiveEntities()
     count = 0;
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid& room_grid,
+int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid* room_grid_p,
 			       Vec3F origin, uint entity_type)
 {
     // Returns entity ID on success, -1 on failure
@@ -178,7 +178,10 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid& room_grid,
 	// if entity has a grid_position component, add to grid and set grid position
 	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
 	{
-	    roomGridSetEntity(room_grid, origin, entities.count);
+	    if(room_grid_p)
+	    {
+		roomGridSetEntity(*room_grid_p, origin, entities.count);
+	    }
 	    entities.grid_positions[entities.count].position = origin;
 	}
 	// Increase entity count

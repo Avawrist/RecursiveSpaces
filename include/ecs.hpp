@@ -197,6 +197,7 @@ typedef struct RoomGrid
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
     float current_scale = 1.0f;
     float target_scale = 1.0f;
+    float t = 1.0f;
     uint cooldown = 0;
     Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
     RoomGrid();
@@ -231,7 +232,7 @@ typedef struct ActiveEntities
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid& room_grid,
+int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid* room_grid_p,
 			       Vec3F origin, uint entity_type);
 
 void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
