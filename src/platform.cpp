@@ -282,7 +282,7 @@ void platformRenderShadowMapToScreen(AssetManager& asset_manager,
 
 void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
-				     const RoomGrid& room,
+				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
 				     uint dir_light_id)
@@ -328,12 +328,17 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM])
 	{
 	    // Update transform scale and get model -
-	    // TODO: Move this up into update loop
-	    active_entities.transforms[i].x_scale = room.current_scale;
-	    active_entities.transforms[i].y_scale = room.current_scale;
-	    active_entities.transforms[i].z_scale = room.current_scale;
-
-	    // TODO: Need to translate also, not just scale for zoom effect to work
+	    // TODO: instead of updating the transform's scale values, derive model matrix
+	    // here using the entities transform pos/rot/scale/trans + the gridrooms current scale,
+	    // and current offset values
+	    int roomgrid_id = active_entities.grid_positions[i].roomgrid_owner_id;
+	    if(roomgrid_id > -1)
+	    {
+		RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+		active_entities.transforms[i].x_scale = grid_p->current_scale;
+		active_entities.transforms[i].y_scale = grid_p->current_scale;
+		active_entities.transforms[i].z_scale = grid_p->current_scale;
+	    }
 	    
 	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
@@ -350,7 +355,7 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
-				    const RoomGrid& room,
+				    const RoomGridLookup& roomgrid_lookup,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,

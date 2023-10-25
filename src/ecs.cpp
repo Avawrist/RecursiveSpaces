@@ -160,8 +160,11 @@ ActiveEntities::ActiveEntities()
     count = 0;
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid* room_grid_p,
-			       Vec3F origin, uint entity_type)
+int activeEntitiesCreateEntity(ActiveEntities& entities,
+			       const RoomGridLookup& roomgrid_lookup,
+			       int room_grid_owner_id,
+			       Vec3F origin,
+			       uint entity_type)
 {
     // Returns entity ID on success, -1 on failure
     
@@ -178,11 +181,14 @@ int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid* room_grid_p,
 	// if entity has a grid_position component, add to grid and set grid position
 	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
 	{
-	    if(room_grid_p)
-	    {
-		roomGridSetEntity(*room_grid_p, origin, entities.count);
-	    }
+	    entities.grid_positions[entities.count].roomgrid_owner_id = room_grid_owner_id;
 	    entities.grid_positions[entities.count].position = origin;
+	    if(room_grid_owner_id > -1)
+	    {
+		roomGridSetEntity(*roomgrid_lookup.roomgrid_pointers[room_grid_owner_id],
+				  origin,
+				  entities.count);
+	    }
 	}
 	// Increase entity count
 	entities.count++;
@@ -201,7 +207,7 @@ void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
     entities.states[entity_ID].inactive = true;
 }
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGrid& room_grid)
+void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup)
 {
     // Should be run after all other entity updates. Searches for inactive entities,
     // if found, overwrites the inactive with the active entity on the end of the arrays,
@@ -211,21 +217,46 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGrid& room_grid
     for(int i = entities.count - 1; i >= 0; i--)
     {
 	if(entities.states[i].inactive)
-	{
+	{	    
 	    // If inactive entity is on the grid, set ID of removed entity
 	    // back to -1 in the level grid:
 	    if(entities.entity_templates.table[entities.types[i]][COMPONENT_GRID_POSITION])
 	    {
-		Vec3F inactive_grid_position = entities.grid_positions[i].position;
-		roomGridRemoveEntity(room_grid, inactive_grid_position);
+		int roomgrid_id = entities.grid_positions[i].roomgrid_owner_id;
+		if(roomgrid_id > -1)
+		{
+		    RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+		    Vec3F inactive_grid_position = entities.grid_positions[i].position;
+		    roomGridRemoveEntity(*grid_p, inactive_grid_position);
+		}
 	    }
 	    // If replacement entity is on the grid, update ID of last active
 	    // entity in the grid, since it has changed
 	    if(entities.entity_templates.table[entities.types[entities.count - 1]][COMPONENT_GRID_POSITION])
 	    {
-		Vec3F active_grid_position = entities.grid_positions[entities.count - 1].position;
-		roomGridSetEntity(room_grid, active_grid_position, i);
+		int roomgrid_id = entities.grid_positions[entities.count - 1].roomgrid_owner_id;
+		if(roomgrid_id > -1)
+		{
+		    RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+		    Vec3F active_grid_position = entities.grid_positions[entities.count - 1].position;
+		    roomGridSetEntity(*grid_p, active_grid_position, i);
+		}
 	    }
+	    // If the inactive entity had a room grid component, update the lookup table
+	    // so it no longer points to the invalid room grid data
+	    if(entities.entity_templates.table[entities.types[i]][COMPONENT_ROOM_GRID])
+	    {
+		int roomgrid_id = entities.roomgrids[i].roomgrid_id;
+		if(roomgrid_id > -1)
+		{
+		    roomgrid_lookup.roomgrid_pointers[roomgrid_id] = NULL;
+		}
+
+		// TODO: Removing a blockroom entity requires removing all of the entities
+		//       it contains as well. But, those entities can't all be removed on this pass.
+		//       Rewrite ECS code so inactive entities aren't updated?
+	    }
+	    
 	    // Safe to copy grid position component now 
 	    entities.grid_positions[i] = entities.grid_positions[entities.count - 1];
 	    // Copy remaining component data from last active entity and fill inactive slot 
@@ -320,6 +351,14 @@ Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
     }
 
     return target_pos;
+}
+
+void roomGridLookupInit(RoomGridLookup& rgl)
+{
+    for(uint i = 0; i < TOTAL_ROOMGRIDS; i++)
+    {
+	rgl.roomgrid_pointers[i] = NULL;
+    }
 }
 
 // AI Functions

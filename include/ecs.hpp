@@ -127,6 +127,7 @@ typedef struct PointLight
 typedef struct GridPosition
 {
     Vec3F position;
+    int roomgrid_owner_id = -1; 
     GridPosition();
     GridPosition(Vec3F _position);
 } GridPosition;
@@ -192,17 +193,32 @@ typedef enum EntityCodes
     INVALID_RANGE = -2
 } EntityCodes;
 
+typedef enum RoomGridCodes
+{
+    ROOMGRID_A = 0,
+    ROOMGRID_B,
+    ROOMGRID_C,
+    ROOMGRID_D,
+    ROOMGRID_E,
+    TOTAL_ROOMGRIDS
+} RoomGridCodes;
+
 typedef struct RoomGrid
 {
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
+    Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
     float current_scale = 1.0f;
     float target_scale = 1.0f;
     float t = 1.0f;
     uint cooldown = 0;
-    Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
+    int roomgrid_id = -1; 
     RoomGrid();
 } RoomGrid;
 
+typedef struct RoomGridLookup
+{
+    RoomGrid* roomgrid_pointers[TOTAL_ROOMGRIDS];
+} RoomGridLookup;
 
 ////////////////////////////////
 // Struct of Component Arrays //
@@ -232,12 +248,15 @@ typedef struct ActiveEntities
 /////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities, RoomGrid* room_grid_p,
-			       Vec3F origin, uint entity_type);
+int activeEntitiesCreateEntity(ActiveEntities& entities,
+			       const RoomGridLookup& roomgrid_lookup,
+			       int room_grid_owner_id, 
+			       Vec3F origin,
+			       uint entity_type);
 
 void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGrid& room_grid);
+void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup);
 
 // Transform Function Prototypes
 Mat4F transformGetModel(const Transform& transform);
@@ -254,6 +273,8 @@ void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos);
 
 Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type);
+
+void roomGridLookupInit(RoomGridLookup& rgl);
 
 // AI Function Prototypes
 Vec3F aStarFindPath(RoomGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
