@@ -23,17 +23,31 @@
 
 void gameInit(uint width, uint height);
 
+void gameUpdateStatesTest(int i);
+
 void gameUpdateStates(ActiveEntities& entities);
+
+void gameUpdatePlayerTest(int i);
 
 void gameUpdatePlayer();
 
+void gameUpdateAITest(int i);
+
 void gameUpdateAI();
+
+void gameUpdateTransformsTest(int i);
 
 void gameUpdateTransforms();
 
+uint gameUpdateCamerasTest(int i);
+
 uint gameUpdateCameras();
 
+uint gameUpdateDirLightsTest(float time, int i);
+
 uint gameUpdateDirLights(float time);
+
+void gameUpdateRoomGridTest(int i);
 
 void gameUpdateRoomGrid();
 
@@ -238,6 +252,58 @@ void gameInit(uint width, uint height)
     gameUpdateInputs();
 }
 
+void gameUpdatePlayerTest(int i)
+{
+    // Current and target positions
+    Vec3F cur_grid_pos = active_entities_p->grid_positions[i].position;
+    Vec3F new_grid_pos = cur_grid_pos;
+
+    // Set target position based on input
+    if(active_entities_p->states[i].input_cooldown == 0)
+    {
+	// Down
+	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_DOWN] == KEY_DOWN)
+	{
+	    new_grid_pos = Vec3F(cur_grid_pos.x,
+				 cur_grid_pos.y,
+				 cur_grid_pos.z + 1);
+	    active_entities_p->states[i].input_cooldown = INPUT_COOLDOWN_DUR;
+	}
+	// Up
+	else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_UP] == KEY_DOWN)
+	{
+	    new_grid_pos = Vec3F(cur_grid_pos.x,
+				 cur_grid_pos.y,
+				 cur_grid_pos.z - 1);
+	    active_entities_p->states[i].input_cooldown = INPUT_COOLDOWN_DUR;
+	}
+	// Left
+	else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_LEFT] == KEY_DOWN)
+	{
+	    new_grid_pos = Vec3F(cur_grid_pos.x - 1,
+				 cur_grid_pos.y,
+				 cur_grid_pos.z);
+	    active_entities_p->states[i].input_cooldown = INPUT_COOLDOWN_DUR;
+	}
+	// Right
+	else if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_ARROW_RIGHT] == KEY_DOWN)
+	{
+	    new_grid_pos = Vec3F(cur_grid_pos.x + 1,
+				 cur_grid_pos.y,
+				 cur_grid_pos.z);
+	    active_entities_p->states[i].input_cooldown = INPUT_COOLDOWN_DUR;
+	}
+    }
+
+    // Attempt to move player and subsequent entities based on target
+    int roomgrid_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
+    if(roomgrid_id > -1)
+    {
+	RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+	gameMoveEntitiesOnGrid(*grid_p, cur_grid_pos, new_grid_pos);
+    }
+}
+
 void gameUpdatePlayer()
 {
     for(uint i = 0; i < active_entities_p->count; i++)
@@ -296,6 +362,26 @@ void gameUpdatePlayer()
     }
 }
 
+void gameUpdateAITest(int i)
+{
+    // If walk, then walk
+    if(active_entities_p->ai[i].next_move == MOVE_WALK)
+    {
+	int new_x = (rand() % 3) - 1; // x will be -1, 0 or 1
+	int new_z = ((rand() % 3) - 1) * (new_x == 0);
+	Vec3F move_dir = Vec3F((float)new_x, 0.0f, (float)new_z);
+	Vec3F cur_pos = active_entities_p->grid_positions[i].position;
+
+	// Assumes Entity with AI component ALSO has a GridPosition component
+	int roomgrid_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
+	if(roomgrid_id > -1)
+	{
+	    RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+	    gameMoveEntitiesOnGrid(*grid_p, cur_pos, cur_pos + move_dir);
+	}
+    }
+}
+
 void gameUpdateAI()
 {
     for(uint i = 0; i < active_entities_p->count; i++)
@@ -322,6 +408,11 @@ void gameUpdateAI()
     }
 }
 
+void gameUpdateStatesTest(int i)
+{
+
+}
+
 void gameUpdateStates()
 {
     for(uint i = 0; i < active_entities_p->count; i++)
@@ -333,6 +424,11 @@ void gameUpdateStates()
 						           0, INPUT_COOLDOWN_DUR);
 	}
     }
+}
+
+void gameUpdateTransformsTest(int i)
+{
+
 }
 
 void gameUpdateTransforms()
@@ -352,6 +448,11 @@ void gameUpdateTransforms()
     }
 }
 
+uint gameUpdateCamerasTest(int i)
+{
+
+}
+
 uint gameUpdateCameras()
 {
     uint entity_id = 0;
@@ -367,7 +468,12 @@ uint gameUpdateCameras()
     return entity_id;
 }
 
-uint gameUpdateDirLights(float time)
+uint gameUpdateDirLightsTest(float time, int i)
+{
+
+}
+
+uint gameUpdateDirLights(float time, int i)
 {
     uint entity_id = 0;
     
@@ -394,6 +500,11 @@ uint gameUpdateDirLights(float time)
     }
 
     return entity_id;
+}
+
+void gameUpdateRoomGridsTest(int i)
+{
+
 }
 
 void gameUpdateRoomGrids()
@@ -436,6 +547,8 @@ int gameUpdate(SoundStream* sound_stream_p,
     // Update //
     ////////////
 
+    // TODO: Profile: Which update loop is faster??
+    /*
     // Update States
     gameUpdateStates();
     
@@ -459,7 +572,55 @@ int gameUpdate(SoundStream* sound_stream_p,
 
     // Update Lights - TODO: store an array of all lights
     dir_light_id = gameUpdateDirLights((float)platformGetTime());
-   
+    */
+
+    for(uint i = 0; i < active_entities_p->count; i++)
+    {
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_STATE])
+	{
+	    // Update State
+	    gameUpdateStatesTest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_PLAYER])
+	{
+	    // Update Player
+	    gameUpdatePlayerTest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_AI])
+	{
+	    // Update AI
+	    gameUpdateAITest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_ROOM_GRID])
+	{
+	    // Update RoomGrids
+	    gameUpdateRoomGridsTest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_GRID_POSITION])
+	{
+	    // Update Transforms
+	    gameUpdateTransformsTest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_CAMERA])
+	{
+	    // Update Camera
+	    gameUpdateCamerasTest(i);
+	}
+
+	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_DIR_LIGHT])
+	{
+	    // Update dir light
+	    gameUpdateDirLightsTest(i);
+	}
+
+    }
+    soundStreamUpdate(sound_stream_p);
+    
     // Remove Inactive Entities - Must be run after all other entity updates
     activeEntitiesRemoveInactives(*active_entities_p, roomgrid_lookup);
 

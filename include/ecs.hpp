@@ -206,10 +206,10 @@ typedef enum RoomGridCodes
 typedef struct RoomGrid
 {
     int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
-    Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
     float current_scale = 1.0f;
     float target_scale = 1.0f;
     float t = 1.0f;
+    Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
     uint cooldown = 0;
     int roomgrid_id = -1; 
     RoomGrid();
