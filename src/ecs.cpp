@@ -100,8 +100,8 @@ State::State()
 Node::Node()
 {
     grid_pos = Vec3F(0.0f, 0.0f, 0.0f);
-    g_cost = MAX_WIDTH * MAX_LENGTH * 3;
-    h_cost = MAX_WIDTH * MAX_LENGTH * 3;
+    g_cost = RG_MAX_WIDTH * RG_MAX_LENGTH * 3;
+    h_cost = RG_MAX_WIDTH * RG_MAX_LENGTH * 3;
     f_cost = g_cost + h_cost;
     parent_p = NULL;
 }
@@ -141,7 +141,7 @@ EntityTemplates::EntityTemplates()
 
 RoomGrid::RoomGrid()
 {
-    memset(grid, -1, MAX_WIDTH * MAX_HEIGHT * MAX_LENGTH * sizeof(int));
+    memset(grid, -1, RG_MAX_WIDTH * RG_MAX_HEIGHT * RG_MAX_LENGTH * sizeof(int));
 }
 
 //////////////////
@@ -287,9 +287,9 @@ int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
     // Returns entity on success. Returns -1 if no entity. Returns -2 if out of bounds.
     
     // Check that target position is valid (within the grid)
-    if(pos.x < 0.0f || pos.x >= MAX_WIDTH ||
-       pos.y < 0.0f || pos.y >= MAX_HEIGHT ||
-       pos.z < 0.0f || pos.z >= MAX_LENGTH)
+    if(pos.x < 0.0f || pos.x >= RG_MAX_WIDTH ||
+       pos.y < 0.0f || pos.y >= RG_MAX_HEIGHT ||
+       pos.z < 0.0f || pos.z >= RG_MAX_LENGTH)
     {
 	return INVALID_RANGE;
     }
@@ -299,18 +299,18 @@ int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
 
 void roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID)
 {
-    _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
-    _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
-    _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
+    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
     
     room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
 }
 
 void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos)
 {
-    _assert(pos.x >= 0.0f && pos.x < MAX_WIDTH);
-    _assert(pos.y >= 0.0f && pos.y < MAX_HEIGHT);
-    _assert(pos.z >= 0.0f && pos.z < MAX_LENGTH);
+    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
     
     room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
 }
@@ -321,14 +321,14 @@ Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
     // Parses all entities on the grid, and returns the grid position of
     // the nearest sought type. If not found, returns Vec3F(-1.0f).
 
-    Vec3F target_pos(MAX_WIDTH * 2, MAX_HEIGHT * 2, MAX_LENGTH * 2);
+    Vec3F target_pos(RG_MAX_WIDTH * 2, RG_MAX_HEIGHT * 2, RG_MAX_LENGTH * 2);
     Vec3F cur_best_distance = cur_pos - target_pos;
     
-    for(uint x = 0; x < MAX_WIDTH; x++)
+    for(uint x = 0; x < RG_MAX_WIDTH; x++)
     {
-	for(uint y = 0; y < MAX_HEIGHT; y++)
+	for(uint y = 0; y < RG_MAX_HEIGHT; y++)
 	{
-	    for(uint z = 0; z < MAX_LENGTH; z++)
+	    for(uint z = 0; z < RG_MAX_LENGTH; z++)
 	    {
 		int id = room_grid.grid[x][y][z];
 		if(id > -1)
@@ -369,12 +369,12 @@ Vec3F aStarFindPath(RoomGrid& room_grid, Vec3F cur_grid_pos, Vec3F target_grid_p
     // TODO: room_grid and vector positions I'm using are not aligned - entities on 0 height,
     // but I am searching at height 1
     
-    _assert(target_grid_pos.x >= 0 && target_grid_pos.x < MAX_WIDTH);
-    _assert(target_grid_pos.y >= 0 && target_grid_pos.y < MAX_HEIGHT);
-    _assert(target_grid_pos.z >= 0 && target_grid_pos.z < MAX_LENGTH);
+    _assert(target_grid_pos.x >= 0 && target_grid_pos.x < RG_MAX_WIDTH);
+    _assert(target_grid_pos.y >= 0 && target_grid_pos.y < RG_MAX_HEIGHT);
+    _assert(target_grid_pos.z >= 0 && target_grid_pos.z < RG_MAX_LENGTH);
 
-    std::vector<Node> open(MAX_WIDTH * MAX_HEIGHT);
-    std::vector<Node> closed(MAX_WIDTH * MAX_HEIGHT);
+    std::vector<Node> open(RG_MAX_WIDTH * RG_MAX_HEIGHT);
+    std::vector<Node> closed(RG_MAX_WIDTH * RG_MAX_HEIGHT);
     Node cur_cheapest_node(cur_grid_pos, cur_grid_pos, target_grid_pos, NULL);
     
     while(!(cur_cheapest_node.grid_pos == target_grid_pos))

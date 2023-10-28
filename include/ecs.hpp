@@ -182,9 +182,9 @@ typedef struct AI
 
 typedef enum GridMeasurements
 {
-    MAX_WIDTH  = 20,
-    MAX_LENGTH = 20,
-    MAX_HEIGHT = 20
+    RG_MAX_WIDTH  = 20,
+    RG_MAX_LENGTH = 20,
+    RG_MAX_HEIGHT = 20
 } GridMeasurements;
 
 typedef enum EntityCodes
@@ -205,11 +205,11 @@ typedef enum RoomGridCodes
 
 typedef struct RoomGrid
 {
-    int grid[MAX_WIDTH][MAX_HEIGHT][MAX_LENGTH];
+    int grid[RG_MAX_WIDTH][RG_MAX_HEIGHT][RG_MAX_LENGTH];
     float current_scale = 1.0f;
     float target_scale = 1.0f;
     float t = 1.0f;
-    Vec3F center = Vec3F(MAX_WIDTH * current_scale * 0.5f, 0.0f, MAX_LENGTH * current_scale * 0.5f);
+    Vec3F center = Vec3F(RG_MAX_WIDTH * current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * current_scale * 0.5f);
     uint cooldown = 0;
     int roomgrid_id = -1; 
     RoomGrid();
