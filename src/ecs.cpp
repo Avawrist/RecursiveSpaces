@@ -157,12 +157,19 @@ ActiveEntities::ActiveEntities()
     // Initialize all types to 0 (meaning no type, vacancy)
     memset(types, NONE, MAX_ENTITIES * sizeof(uint));
 
+    // Init all roomgrid IDs to -1
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	roomgrid_ids[i] = -1;
+    }
+    
     count = 0;
 }
 
 int activeEntitiesCreateEntity(ActiveEntities& entities,
-			       const RoomGridLookup& roomgrid_lookup,
+			       RoomGridLookup& roomgrid_lookup,
 			       int room_grid_owner_id,
+			       int room_grid_id,
 			       Vec3F origin,
 			       uint entity_type)
 {
@@ -178,6 +185,15 @@ int activeEntitiesCreateEntity(ActiveEntities& entities,
 	entities.types[entities.count] = entity_type;
 	// sets transform even if never used
 	entities.transforms[entities.count] = Transform(origin);
+	// if entity has a roomgrid component, store its lookup id and allocate the roomgrid
+	if(entities.entity_templates.table[entity_type][COMPONENT_ROOM_GRID])
+	{
+	    entities.roomgrid_ids[entities.count] = room_grid_id;
+	    if(room_grid_id > -1)
+	    {
+		roomgrid_lookup.roomgrid_pointers[room_grid_id] = new RoomGrid();
+	    }
+	}
 	// if entity has a grid_position component, add to grid and set grid position
 	if(entities.entity_templates.table[entity_type][COMPONENT_GRID_POSITION])
 	{
@@ -246,7 +262,7 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roo
 	    // so it no longer points to the invalid room grid data
 	    if(entities.entity_templates.table[entities.types[i]][COMPONENT_ROOM_GRID])
 	    {
-		int roomgrid_id = entities.roomgrids[i].roomgrid_id;
+		int roomgrid_id = entities.roomgrid_ids[i];
 		if(roomgrid_id > -1)
 		{
 		    roomgrid_lookup.roomgrid_pointers[roomgrid_id] = NULL;
@@ -266,7 +282,7 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roo
 	    entities.point_lights[i]   = entities.point_lights[entities.count - 1];
 	    entities.states[i]         = entities.states[entities.count - 1];
 	    entities.ai[i]             = entities.ai[entities.count - 1];
-	    entities.roomgrids[i]      = entities.roomgrids[entities.count - 1];
+	    entities.roomgrid_ids[i]   = entities.roomgrid_ids[entities.count - 1];
             // Copy replacement entity's type last
 	    entities.types[i] = entities.types[entities.count - 1];
 	    // Set last active entity type to NONE for memory readability

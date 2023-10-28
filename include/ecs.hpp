@@ -200,6 +200,8 @@ typedef enum RoomGridCodes
     ROOMGRID_C,
     ROOMGRID_D,
     ROOMGRID_E,
+    ROOMGRID_F,
+    ROOMGRID_G,
     TOTAL_ROOMGRIDS
 } RoomGridCodes;
 
@@ -238,7 +240,7 @@ typedef struct ActiveEntities
     GridPosition grid_positions[MAX_ENTITIES];
     State        states[MAX_ENTITIES];
     AI           ai[MAX_ENTITIES];
-    RoomGrid     roomgrids[MAX_ENTITIES];
+    int          roomgrid_ids[MAX_ENTITIES];
     uint         count;
     ActiveEntities();
 } ActiveEntities;
@@ -249,8 +251,9 @@ typedef struct ActiveEntities
 
 // ActiveEntities Function Prototypes
 int activeEntitiesCreateEntity(ActiveEntities& entities,
-			       const RoomGridLookup& roomgrid_lookup,
+			       RoomGridLookup& roomgrid_lookup,
 			       int room_grid_owner_id, 
+			       int room_grid_id,
 			       Vec3F origin,
 			       uint entity_type);
 

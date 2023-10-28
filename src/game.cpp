@@ -96,9 +96,9 @@ int main()
     int br_id = activeEntitiesCreateEntity(*active_entities_p,
 					   roomgrid_lookup,
 					   -1,
+					   ROOMGRID_A,
 					   Vec3F(0.0f, 0.0f, 0.0f),
 					   BLOCK_ROOM);
-    roomgrid_lookup.roomgrid_pointers[ROOMGRID_A] = &active_entities_p->roomgrids[br_id];
         
     /////////////////
     // Temp Assets //
@@ -120,12 +120,14 @@ int main()
 							 false);
     frameTextureDataToGPU(ftexture_non_msaa_p);
     // Create Debug Grid Object
-    DebugGrid* grid_p = new DebugGrid(active_entities_p->roomgrids[br_id].current_scale,
+    int br_rg_id = active_entities_p->roomgrid_ids[br_id];
+    float br_current_scale = roomgrid_lookup.roomgrid_pointers[br_rg_id]->current_scale;
+    DebugGrid* grid_p = new DebugGrid(br_current_scale,
 				      RG_MAX_WIDTH + 1,
 				      RG_MAX_LENGTH + 1,
-				      Vec3F(-active_entities_p->roomgrids[br_id].current_scale * 0.5f,
+				      Vec3F(-br_current_scale * 0.5f,
 					    -0.5f,
-					    -active_entities_p->roomgrids[br_id].current_scale * 0.5f));
+					    -br_current_scale * 0.5f));
 
     ///////////////////
     // Test Entities //
@@ -139,6 +141,7 @@ int main()
 		activeEntitiesCreateEntity(*active_entities_p,
 					   roomgrid_lookup,
 					   ROOMGRID_A,
+					   -1,
 					   Vec3F((float)x, 0.0f, (float)z),
 					   BLOCK);	    
 	    }
@@ -147,11 +150,13 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(4.0f, 1.0f, 4.0f),
 			       BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(9.0f, 1.0f, 9.0f),
 			       BLOCK);
 
@@ -159,15 +164,18 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, RG_MAX_LENGTH - 2),
 			       SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(1.0f, 1.0f, RG_MAX_LENGTH - 2), SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
     
@@ -175,6 +183,7 @@ int main()
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
+			       -1,
 			       Vec3F(0.0f, 1.0f, 1.0f),
 			       PLAYER);
 
@@ -184,6 +193,7 @@ int main()
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  roomgrid_lookup,
 						  ROOMGRID_A,
+						  -1,
 						  dirlight_target + dirlight_offset,
 						  DIR_LIGHT);
     active_entities_p->dir_lights[dir_light_id].target = dirlight_target;
@@ -194,7 +204,8 @@ int main()
     int cam_id = activeEntitiesCreateEntity(*active_entities_p,
 					    roomgrid_lookup,
 					    ROOMGRID_A,
-					    (active_entities_p->roomgrids[br_id].center +
+					    -1,
+					    (roomgrid_lookup.roomgrid_pointers[br_rg_id]->center +
 					     Vec3F(11.0f, 11.0f, 11.0f)),
 					    CAMERA);
     active_entities_p->cameras[cam_id].target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
@@ -227,7 +238,11 @@ int main()
     // Cleanup //
     /////////////
     platformFreeWindow(game_window);
-    
+
+    for(uint i = 0; i < TOTAL_ROOMGRIDS; i++)
+    {
+	delete roomgrid_lookup.roomgrid_pointers[i];
+    }
     delete active_entities_p;
     delete grid_p;
     delete test_soundStream_p;
@@ -370,26 +385,26 @@ uint gameUpdateDirLights(float time, int i)
 
 void gameUpdateRoomGrids(int i)
 {
-    RoomGrid& rg = active_entities_p->roomgrids[i];
+    RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[active_entities_p->roomgrid_ids[i]];
 
-    if(rg.cooldown) {rg.cooldown -= 1;}
-    if(rg.t < 1.0f) {rg.t += 0.01f;}
+    if(rg_p->cooldown) {rg_p->cooldown -= 1;}
+    if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
     
-    rg.current_scale = lerp(rg.current_scale, rg.target_scale, rg.t);
+    rg_p->current_scale = lerp(rg_p->current_scale, rg_p->target_scale, rg_p->t);
 	    
-    if(rg.cooldown == 0)
+    if(rg_p->cooldown == 0)
     {
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
 	{
-	    rg.target_scale *= RG_MAX_WIDTH;
-	    rg.t = 0.01f;
-	    rg.cooldown = 10;
+	    rg_p->target_scale *= RG_MAX_WIDTH;
+	    rg_p->t = 0.01f;
+	    rg_p->cooldown = 10;
 	}
 	if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
 	{
-	    rg.target_scale /= RG_MAX_WIDTH;
-	    rg.t = 0.01f;
-	    rg.cooldown = 10;
+	    rg_p->target_scale /= RG_MAX_WIDTH;
+	    rg_p->t = 0.01f;
+	    rg_p->cooldown = 10;
 	}
     }
 }
