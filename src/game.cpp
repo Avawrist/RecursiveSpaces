@@ -419,47 +419,50 @@ int gameUpdate(SoundStream* sound_stream_p,
 
     for(uint i = 0; i < active_entities_p->count; i++)
     {
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_STATE])
+	if(!active_entities_p->states[i].inactive)
 	{
-	    // Update State
-	    gameUpdateStates(i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_STATE])
+	    {
+		// Update State
+		gameUpdateStates(i);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_PLAYER])
-	{
-	    // Update Player
-	    gameUpdatePlayer(i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_PLAYER])
+	    {
+		// Update Player
+		gameUpdatePlayer(i);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_AI])
-	{
-	    // Update AI
-	    gameUpdateAI(i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_AI])
+	    {
+		// Update AI
+		gameUpdateAI(i);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_ROOM_GRID])
-	{
-	    // Update RoomGrids
-	    gameUpdateRoomGrids(i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_ROOM_GRID])
+	    {
+		// Update RoomGrids
+		gameUpdateRoomGrids(i);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_GRID_POSITION])
-	{
-	    // Update Transforms
-	    gameUpdateTransforms(i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_GRID_POSITION])
+	    {
+		// Update Transforms
+		gameUpdateTransforms(i);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_CAMERA])
-	{
-	    // Update Camera
-	    gameUpdateCameras(i, cam_id);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_CAMERA])
+	    {
+		// Update Camera
+		gameUpdateCameras(i, cam_id);
+	    }
 
-	if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_DIR_LIGHT])
-	{
-	    // Update dir light
-	    dir_light_id = gameUpdateDirLights((float)platformGetTime(), i);
-	}
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_DIR_LIGHT])
+	    {
+		// Update dir light
+		dir_light_id = gameUpdateDirLights((float)platformGetTime(), i);
+	    }
+	}	
     }
     soundStreamUpdate(sound_stream_p);
         

@@ -265,12 +265,12 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roo
 		int roomgrid_id = entities.roomgrid_ids[i];
 		if(roomgrid_id > -1)
 		{
+		    delete roomgrid_lookup.roomgrid_pointers[roomgrid_id];
 		    roomgrid_lookup.roomgrid_pointers[roomgrid_id] = NULL;
 		}
 
 		// TODO: Removing a blockroom entity requires removing all of the entities
-		//       it contains as well. But, those entities can't all be removed on this pass.
-		//       Rewrite ECS code so inactive entities aren't updated?
+		//       it contains as well. 
 	    }
 	    
 	    // Safe to copy grid position component now 
