@@ -468,6 +468,12 @@ void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m)
     glUniformMatrix4fv(loc, 1, GL_FALSE, m);
 }
 
+void shaderAddVec2Uniform(const Shader* shader_p, c_char* name, const Vec2F& v)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform2fv(loc, 1, &v[0]);
+}
+
 void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v)
 {
     int loc = glGetUniformLocation(shader_p->program_id, name);

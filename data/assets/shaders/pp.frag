@@ -8,5 +8,5 @@ uniform sampler2D color_texture;
 
 void main()
 {
-	color = texture(color_texture, uv);
+    color = texture(color_texture, uv);
 }
