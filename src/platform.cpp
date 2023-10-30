@@ -340,7 +340,8 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 		float scale = rg_owner_p->current_scale;
 		Vec3F owner_origin = rg_owner_p->origin;
 		Vec3F entity_pos = active_entities.grid_positions[i].position;
-		Vec3F final_pos = (owner_origin + entity_pos) * scale; 
+		Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
+		Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset); 
 		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
 	    }
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
@@ -454,7 +455,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 		float scale = rg_owner_p->current_scale;
 		Vec3F owner_origin = rg_owner_p->origin;
 		Vec3F entity_pos = active_entities.grid_positions[i].position;
-		Vec3F final_pos = (owner_origin * scale * RG_MAX_WIDTH) + (entity_pos * scale); 
+		Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
+		Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset); 
 		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
 	    }
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());

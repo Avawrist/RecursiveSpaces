@@ -21,7 +21,7 @@
 // Function Prototpes //
 ////////////////////////
 
-c_uint PROFILER_MSG_LENGTH = 30;
+c_uint PROFILER_MSG_LENGTH = 144;
 typedef struct Profiler
 {
     double start_time = 0.0f;
@@ -254,8 +254,8 @@ int main()
 					    -1,
 					    (roomgrid_lookup.roomgrid_pointers[br_rg_id]->center +
 					     Vec3F(RG_MAX_WIDTH * 3.0f,
-						   RG_MAX_WIDTH * 3.0f,
-						   RG_MAX_WIDTH * 3.0f)),
+						   RG_MAX_HEIGHT * 3.0f,
+						   RG_MAX_LENGTH * 3.0f)),
 					     CAMERA);
     active_entities_p->cameras[cam_id].target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
     
@@ -420,6 +420,7 @@ uint gameUpdateDirLights(float time, int i)
     // Update Position & Direction
     Vec3F offset = active_entities_p->dir_lights[i].offset;
     float rotate_speed = active_entities_p->dir_lights[i].speed;
+
     if(rotate_speed)
     {
 	active_entities_p->transforms[i].position = (active_entities_p->dir_lights[i].target +
