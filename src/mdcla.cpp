@@ -950,3 +950,12 @@ Mat4F getOrthoProjection(float l, float r, float b, float t, float n, float f)
 		 0.0f, 0.0f, -2/(f - n), -(f + n) / (f - n),
 		 0.0f, 0.0f, 0.0f, 1.0f);
 }
+
+Mat4F getModelMat(const Vec3F& scale, const Vec3F& translation)
+{
+    Mat4F model = Mat4F(scale.x, 0.0f, 0.0f, translation.x,
+	                0.0f, scale.y, 0.0f, translation.y,
+	                0.0f, 0.0f, scale.z, translation.z,
+	                0.0f, 0.0f, 0.0f, 1.0f);
+    return model;
+}

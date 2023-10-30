@@ -74,7 +74,8 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
-				     uint dir_light_id);
+				     uint dir_light_id,
+				     uint zoom_level);
 
 void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
@@ -83,13 +84,15 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,
-				    uint cam_id);
+				    uint cam_id,
+				    uint zoom_level);
 
 void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
-					 DebugGrid* grid_p);
+					 DebugGrid* grid_p,
+					 uint zoom_level);
 
 void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
 				const FrameTexture& target_framebuffer,

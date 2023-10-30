@@ -216,4 +216,6 @@ Mat4F lookAt(const Vec3F& eye, const Vec3F& at, const Vec3F& up);
 
 Mat4F getOrthoProjection(float l, float r, float b, float t, float n, float f);
 
+Mat4F getModelMat(const Vec3F& scale, const Vec3F& translation);
+
 #endif

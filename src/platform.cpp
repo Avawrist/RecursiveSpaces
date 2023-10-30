@@ -285,7 +285,8 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
-				     uint dir_light_id)
+				     uint dir_light_id,
+				     uint zoom_level)
 {
     //////////////////
     // Set GL state //
@@ -316,7 +317,7 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					  ortho_height * 3.0f);
+					  ortho_height * 4.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
 
     //////////////////////////
@@ -331,16 +332,17 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 	    // TODO: instead of updating the transform's scale values, derive model matrix
 	    // here using the entities transform pos/rot/scale/trans + the gridrooms current scale,
 	    // and current offset values
-	    int roomgrid_id = active_entities.grid_positions[i].roomgrid_owner_id;
-	    if(roomgrid_id > -1)
+	    Mat4F model(1.0f);
+	    int roomgrid_owner_id = active_entities.grid_positions[i].roomgrid_owner_id;
+	    if(roomgrid_owner_id > -1)
 	    {
-		RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
-		active_entities.transforms[i].x_scale = grid_p->current_scale;
-		active_entities.transforms[i].y_scale = grid_p->current_scale;
-		active_entities.transforms[i].z_scale = grid_p->current_scale;
+		RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[roomgrid_owner_id];
+		float scale = rg_owner_p->current_scale;
+		Vec3F owner_origin = rg_owner_p->origin;
+		Vec3F entity_pos = active_entities.grid_positions[i].position;
+		Vec3F final_pos = (owner_origin + entity_pos) * scale; 
+		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
 	    }
-	    
-	    Mat4F model = transformGetModel(active_entities.transforms[i]);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
 	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager,
 							   active_entities.types[i],
@@ -359,7 +361,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,
-				    uint cam_id)
+				    uint cam_id,
+				    uint zoom_level)
 {
     //////////////////
     // Set GL state //
@@ -393,7 +396,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   ortho_height * 3.0f);
+					   ortho_height * 4.0f);
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", active_entities.transforms[cam_id].position);
@@ -443,7 +446,17 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 								   0);
 	    
 	    // Update Model Uniform in Shader
-	    Mat4F model = transformGetModel(active_entities.transforms[i]);
+	    Mat4F model(1.0f);
+	    int roomgrid_owner_id = active_entities.grid_positions[i].roomgrid_owner_id;
+	    if(roomgrid_owner_id > -1)
+	    {
+		RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[roomgrid_owner_id];
+		float scale = rg_owner_p->current_scale;
+		Vec3F owner_origin = rg_owner_p->origin;
+		Vec3F entity_pos = active_entities.grid_positions[i].position;
+		Vec3F final_pos = (owner_origin * scale * RG_MAX_WIDTH) + (entity_pos * scale); 
+		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
+	    }
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());
 	    // Bind Diffuse Texture
 	    glActiveTexture(GL_TEXTURE0);
@@ -469,7 +482,8 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
-					 DebugGrid* grid_p)
+					 DebugGrid* grid_p,
+					 uint zoom_level)
 {
     //////////////////////////////
     // Set Grid Shader Uniforms //
@@ -490,7 +504,7 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   ortho_height * 3.0f);
+					   ortho_height * 4.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
     ///////////////////////////
