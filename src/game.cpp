@@ -253,9 +253,9 @@ int main()
 					    ROOMGRID_A,
 					    -1,
 					    (roomgrid_lookup.roomgrid_pointers[br_rg_id]->center +
-					     Vec3F(RG_MAX_WIDTH,
-						   RG_MAX_WIDTH,
-						   RG_MAX_WIDTH)),
+					     Vec3F(RG_MAX_WIDTH * 3.0f,
+						   RG_MAX_WIDTH * 3.0f,
+						   RG_MAX_WIDTH * 3.0f)),
 					     CAMERA);
     active_entities_p->cameras[cam_id].target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
     
