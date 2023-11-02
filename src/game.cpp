@@ -57,7 +57,8 @@ int gameRender(FrameTexture* depth_ftexture_p,
 	       const RoomGridLookup& roomgrid_lookup,
 	       DebugGrid* grid_p,
 	       uint cam_id,
-	       uint dir_light_id);
+	       uint dir_light_id,
+	       uint track_id);
 
 void gameUpdateInputs();
 
@@ -215,7 +216,7 @@ int main()
     }
 
     // Special Block
-    activeEntitiesCreateEntity(*active_entities_p,
+    uint track_id = activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_B,
 			       -1,
@@ -233,6 +234,53 @@ int main()
 			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
+
+    /////////////////////////////
+    // 3rd Block Room Entities //
+    /////////////////////////////
+
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_B,
+			       ROOMGRID_C,
+			       Vec3F(3.0f, 1.0f, 3.0f),
+			       BLOCK_ROOM);
+
+    
+    // Blocks
+    for(int x = 0; x < RG_MAX_WIDTH; x++)
+    {
+	    for(int z = 0; z < RG_MAX_LENGTH; z++)
+	    {
+		activeEntitiesCreateEntity(*active_entities_p,
+					   roomgrid_lookup,
+					   ROOMGRID_C,
+					   -1,
+					   Vec3F((float)x, 0.0f, (float)z),
+					   BLOCK);	    
+	    }
+    }
+
+    // Special Block
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_C,
+			       -1,
+			       Vec3F(1.0f, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_C,
+			       -1,
+			       Vec3F(1.0f, 1.0f, RG_MAX_LENGTH - 2),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_C,
+			       -1,
+			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+
     
     // DirLight
     Vec3F dirlight_target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
@@ -253,8 +301,8 @@ int main()
 					    ROOMGRID_A,
 					    -1,
 					    (roomgrid_lookup.roomgrid_pointers[br_rg_id]->center +
-					     Vec3F(RG_MAX_WIDTH * 3.0f,
-						   RG_MAX_HEIGHT * 3.0f,
+					     Vec3F(RG_MAX_WIDTH * 0.0f,
+						   RG_MAX_HEIGHT * 0.0f,
 						   RG_MAX_LENGTH * 3.0f)),
 					     CAMERA);
     active_entities_p->cameras[cam_id].target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
@@ -275,7 +323,8 @@ int main()
 		   roomgrid_lookup,
 		   grid_p,
 		   cam_id,
-		   dir_light_id);
+		   dir_light_id,
+		   track_id);
 
 	gameUpdateInputs();
 	
@@ -474,6 +523,9 @@ void gameUpdateRoomGrids(int i)
 
     // Update origin
     rg_p->origin = active_entities_p->grid_positions[i].position;
+
+    // Update view depth offset based on zoom level
+    //Vec3F view_depth_offset = BASE_RG_ORIGIN - roomgrid_lookup.roomgrid_pointers[zoom_level - 1].origin;
 }
 
 int gameUpdate(SoundStream* sound_stream_p,
@@ -545,7 +597,8 @@ int gameRender(FrameTexture* depth_ftexture_p,
 	       const RoomGridLookup& roomgrid_lookup,
 	       DebugGrid* grid_p,
 	       uint cam_id,
-	       uint dir_light_id)
+	       uint dir_light_id,
+	       uint track_id)
 {
     Profiler p;
     p.start_time = platformGetTime();
@@ -567,7 +620,8 @@ int gameRender(FrameTexture* depth_ftexture_p,
 				   asset_manager,
 				   dir_light_id,
 				   cam_id,
-				   zoom_level);
+				   zoom_level,
+				   track_id);
     
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,

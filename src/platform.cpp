@@ -323,6 +323,17 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
     //////////////////////////
     // Render Entity Depths //
     //////////////////////////
+
+    // Get view depth offset based on zoom level
+    uint current_viewed_rg_id = zoom_level - 1;
+    RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[current_viewed_rg_id];
+    float scale = rg_p->current_scale;
+    Vec3F owner_origin = rg_p->origin;
+    Vec3F entity_pos = owner_origin;
+    Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
+    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset);
+    Vec3F view_depth_offset = BASE_RG_ORIGIN - final_pos;
+    
     for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
@@ -363,7 +374,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,
 				    uint cam_id,
-				    uint zoom_level)
+				    uint zoom_level,
+				    uint track_id)
 {
     //////////////////
     // Set GL state //
@@ -420,6 +432,17 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     ///////////////////////////////
     // Render Entities to Buffer //
     ///////////////////////////////
+
+    // Get view depth offset based on zoom level
+    uint current_viewed_rg_id = zoom_level - 1;
+    RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[current_viewed_rg_id];
+    float scale = rg_p->current_scale;
+    Vec3F owner_origin = rg_p->origin;
+    Vec3F entity_pos = owner_origin;
+    Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
+    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset);
+    Vec3F view_depth_offset = BASE_RG_ORIGIN - final_pos;
+    
     for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
@@ -456,7 +479,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 		Vec3F owner_origin = rg_owner_p->origin;
 		Vec3F entity_pos = active_entities.grid_positions[i].position;
 		Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
-		Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset); 
+		Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos)); 
 		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
 	    }
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());

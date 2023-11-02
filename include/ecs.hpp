@@ -193,6 +193,7 @@ typedef enum EntityCodes
     INVALID_RANGE = -2
 } EntityCodes;
 
+const Vec3F BASE_RG_ORIGIN = Vec3F(0.0f, 0.0f, 0.0f);
 typedef enum RoomGridCodes
 {
     ROOMGRID_A = 0,
