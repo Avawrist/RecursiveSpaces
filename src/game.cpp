@@ -57,8 +57,7 @@ int gameRender(FrameTexture* depth_ftexture_p,
 	       const RoomGridLookup& roomgrid_lookup,
 	       DebugGrid* grid_p,
 	       uint cam_id,
-	       uint dir_light_id,
-	       uint track_id);
+	       uint dir_light_id);
 
 void gameUpdateInputs();
 
@@ -216,12 +215,6 @@ int main()
     }
 
     // Special Block
-    uint track_id = activeEntitiesCreateEntity(*active_entities_p,
-			       roomgrid_lookup,
-			       ROOMGRID_B,
-			       -1,
-			       Vec3F(1.0f, 1.0f, 1.0f),
-			       SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_B,
@@ -243,7 +236,7 @@ int main()
 			       roomgrid_lookup,
 			       ROOMGRID_B,
 			       ROOMGRID_C,
-			       Vec3F(3.0f, 1.0f, 3.0f),
+			       Vec3F(1.0f, 1.0f, 1.0f),
 			       BLOCK_ROOM);
 
     
@@ -281,7 +274,6 @@ int main()
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
 
-    
     // DirLight
     Vec3F dirlight_target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
     Vec3F dirlight_offset = Vec3F(11.0f, 10.0f, -11.0f);
@@ -301,8 +293,8 @@ int main()
 					    ROOMGRID_A,
 					    -1,
 					    (roomgrid_lookup.roomgrid_pointers[br_rg_id]->center +
-					     Vec3F(RG_MAX_WIDTH * 0.0f,
-						   RG_MAX_HEIGHT * 0.0f,
+					     Vec3F(RG_MAX_WIDTH * 3.0f,
+						   RG_MAX_HEIGHT * 3.0f,
 						   RG_MAX_LENGTH * 3.0f)),
 					     CAMERA);
     active_entities_p->cameras[cam_id].target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
@@ -323,8 +315,7 @@ int main()
 		   roomgrid_lookup,
 		   grid_p,
 		   cam_id,
-		   dir_light_id,
-		   track_id);
+		   dir_light_id);
 
 	gameUpdateInputs();
 	
@@ -449,12 +440,26 @@ void gameUpdateStates(int i)
 
 void gameUpdateTransforms(int i)
 {
-    int roomgrid_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
-    if(roomgrid_id > -1)
+    int rg_owner_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
+    if(rg_owner_id > -1)
     {
-	RoomGrid* grid_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
-	active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-						     grid_p->current_scale);
+	RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[rg_owner_id];
+	if(rg_p->roomgrid_owner_id > -1)
+	{
+	    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id];
+	    Vec3F offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
+			    (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
+	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
+							  rg_p->current_scale) + offset;
+	    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
+							 rg_owner_p->transform_pos);
+	}
+	else
+	{
+	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
+							 rg_p->current_scale);
+	}
+	rg_p->transform_pos = active_entities_p->transforms[i].position;
     }
 }
 
@@ -519,10 +524,7 @@ void gameUpdateRoomGrids(int i)
 	rg_p->target_scale = rg_owner_p->target_scale / RG_MAX_WIDTH;
 	rg_p->t = rg_owner_p->t;
 	rg_p->cooldown = rg_owner_p->cooldown;
-    }
-
-    // Update origin
-    rg_p->origin = active_entities_p->grid_positions[i].position;
+    } 
 }
 
 int gameUpdate(SoundStream* sound_stream_p,
@@ -554,7 +556,7 @@ int gameUpdate(SoundStream* sound_stream_p,
 		// Update AI
 		gameUpdateAI(i);
 	    }
-
+	    
 	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_ROOM_GRID])
 	    {
 		// Update RoomGrids
@@ -567,6 +569,7 @@ int gameUpdate(SoundStream* sound_stream_p,
 		gameUpdateTransforms(i);
 	    }
 
+	    
 	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_CAMERA])
 	    {
 		// Update Camera
@@ -594,8 +597,7 @@ int gameRender(FrameTexture* depth_ftexture_p,
 	       const RoomGridLookup& roomgrid_lookup,
 	       DebugGrid* grid_p,
 	       uint cam_id,
-	       uint dir_light_id,
-	       uint track_id)
+	       uint dir_light_id)
 {
     Profiler p;
     p.start_time = platformGetTime();
@@ -617,8 +619,7 @@ int gameRender(FrameTexture* depth_ftexture_p,
 				   asset_manager,
 				   dir_light_id,
 				   cam_id,
-				   zoom_level,
-				   track_id);
+				   zoom_level);
     
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,

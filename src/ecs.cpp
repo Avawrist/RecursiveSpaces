@@ -192,6 +192,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities,
 	    if(room_grid_id > -1)
 	    {
 		roomgrid_lookup.roomgrid_pointers[room_grid_id] = new RoomGrid();
+		roomgrid_lookup.roomgrid_pointers[room_grid_id]->roomgrid_owner_id = room_grid_owner_id;
 	    }
 	}
 	// if entity has a grid_position component, add to grid and set grid position

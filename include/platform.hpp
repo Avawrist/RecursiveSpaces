@@ -85,8 +85,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,
 				    uint cam_id,
-				    uint zoom_level,
-    				    uint track_id);
+				    uint zoom_level);
 
 void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,

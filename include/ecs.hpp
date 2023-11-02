@@ -213,9 +213,9 @@ typedef struct RoomGrid
     float target_scale = 1.0f;
     float t = 1.0f;
     Vec3F center = Vec3F(RG_MAX_WIDTH * current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * current_scale * 0.5f);
-    Vec3F origin; 
+    Vec3F transform_pos;
     uint cooldown = 0;
-    int roomgrid_id = -1; 
+    int roomgrid_owner_id = -1; 
     RoomGrid();
 } RoomGrid;
 
