@@ -439,8 +439,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     float scale = rg_p->current_scale;
     Vec3F owner_origin = rg_p->origin;
     Vec3F entity_pos = owner_origin;
-    Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
-    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset);
+    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos));
     Vec3F view_depth_offset = BASE_RG_ORIGIN - final_pos;
     
     for(uint i = 0; i < active_entities.count; i++)
@@ -471,16 +470,22 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 	    
 	    // Update Model Uniform in Shader
 	    Mat4F model(1.0f);
-	    int roomgrid_owner_id = active_entities.grid_positions[i].roomgrid_owner_id;
-	    if(roomgrid_owner_id > -1)
+	    int roomgrid_id = active_entities.grid_positions[i].roomgrid_owner_id;
+	    if(roomgrid_id > -1)
 	    {
-		RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[roomgrid_owner_id];
-		float scale = rg_owner_p->current_scale;
-		Vec3F owner_origin = rg_owner_p->origin;
-		Vec3F entity_pos = active_entities.grid_positions[i].position;
-		Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
-		Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos)); 
-		model = getModelMat(Vec3F(scale, scale, scale), final_pos);
+		RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
+		float rg_owner_scale = 1.0f;
+		if(rg_p->roomgrid_id > -1)
+		{
+		    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_id];
+		    rg_owner_scale = rg_owner_p->current_scale;
+		}
+		float rg_scale = rg_p->current_scale;
+		Vec3F rg_origin_scaled = (rg_p->origin + offset) * rg_owner_scale;
+		Vec3F entity_pos = active_entities.grid_positions[i].position * rg_scale;
+		//Vec3F final_pos = rg_scale * ((rg_origin_scaled * RG_MAX_WIDTH) + (entity_pos));
+		Vec3F final_pos = rg_origin_scaled + entity_pos; 
+		model = getModelMat(Vec3F(rg_scale, rg_scale, rg_scale), final_pos);
 	    }
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());
 	    // Bind Diffuse Texture

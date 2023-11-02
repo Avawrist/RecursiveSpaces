@@ -523,9 +523,6 @@ void gameUpdateRoomGrids(int i)
 
     // Update origin
     rg_p->origin = active_entities_p->grid_positions[i].position;
-
-    // Update view depth offset based on zoom level
-    //Vec3F view_depth_offset = BASE_RG_ORIGIN - roomgrid_lookup.roomgrid_pointers[zoom_level - 1].origin;
 }
 
 int gameUpdate(SoundStream* sound_stream_p,
