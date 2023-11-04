@@ -444,6 +444,12 @@ void gameUpdateTransforms(int i)
     if(rg_owner_id > -1)
     {
 	RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[rg_owner_id];
+	// Update scale
+	active_entities_p->transforms[i].scale = Vec3F(rg_p->current_scale,
+						       rg_p->current_scale,
+						       rg_p->current_scale);
+	
+	// Update position
 	if(rg_p->roomgrid_owner_id > -1)
 	{
 	    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id];

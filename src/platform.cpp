@@ -341,14 +341,7 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
 	   active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_TRANSFORM])
 	{
-	    int roomgrid_id = active_entities.grid_positions[i].roomgrid_owner_id;
-	    float rg_scale = 1.0f;
-	    if(roomgrid_id > -1)
-	    {
-		RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
-		rg_scale = rg_p->current_scale;
-	    }
-	    Mat4F model = getModelMat(Vec3F(rg_scale, rg_scale, rg_scale),
+	    Mat4F model = getModelMat(active_entities.transforms[i].scale,
 				      active_entities.transforms[i].position);
 	    shaderAddMat4Uniform(shadowmap_shader_p, "model", model.getPointer());
 	    Mesh* mesh_01_p = (Mesh*)assetManagerGetAssetP(asset_manager,
@@ -465,14 +458,7 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 								   0);
 	    
 	    // Update Model Uniform in Shader
-	    int roomgrid_id = active_entities.grid_positions[i].roomgrid_owner_id;
-	    float rg_scale = 1.0f;
-	    if(roomgrid_id > -1)
-	    {
-		RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[roomgrid_id];
-		rg_scale = rg_p->current_scale;
-	    }
-	    Mat4F model = getModelMat(Vec3F(rg_scale, rg_scale, rg_scale),
+	    Mat4F model = getModelMat(active_entities.transforms[i].scale,
 				      active_entities.transforms[i].position);
 	    shaderAddMat4Uniform(bp_shader_p, "model", model.getPointer());
 	    // Bind Diffuse Texture

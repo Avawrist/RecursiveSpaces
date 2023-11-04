@@ -76,11 +76,9 @@ typedef struct EntityTemplates
 typedef struct Transform
 {
     Vec3F position;
-    float x_scale;
-    float y_scale;
-    float z_scale;
+    Vec3F scale;
     Transform();
-    Transform(Vec3F _position);
+    Transform(Vec3F _position, Vec3F _scale);
 } Transform;
 
 //////////////////////

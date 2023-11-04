@@ -12,25 +12,21 @@
 Transform::Transform()
 {
     position = Vec3F(0.0f, 0.0f, 0.0f);
-    x_scale = 1.0f;
-    y_scale = 1.0f;
-    z_scale = 1.0f;
+    scale    = Vec3F(1.0f, 1.0f, 1.0f);
 }
 
-Transform::Transform(Vec3F _position)
+Transform::Transform(Vec3F _position, Vec3F _scale)
 {
     position = _position;
-    x_scale = 1.0f;
-    y_scale = 1.0f;
-    z_scale = 1.0f;
+    scale    = _scale;
 }
 
 Mat4F transformGetModel(const Transform& transform)
 {
     // Column Major
-    Mat4F model = Mat4F(transform.x_scale, 0.0f, 0.0f, transform.position.x,
-	                0.0f, transform.y_scale, 0.0f, transform.position.y,
-	                0.0f, 0.0f, transform.z_scale, transform.position.z,
+    Mat4F model = Mat4F(transform.scale.x, 0.0f, 0.0f, transform.position.x,
+	                0.0f, transform.scale.y, 0.0f, transform.position.y,
+	                0.0f, 0.0f, transform.scale.z, transform.position.z,
 	                0.0f, 0.0f, 0.0f, 1.0f);
     return model;
 }
@@ -184,7 +180,7 @@ int activeEntitiesCreateEntity(ActiveEntities& entities,
 	// Set new type
 	entities.types[entities.count] = entity_type;
 	// sets transform even if never used
-	entities.transforms[entities.count] = Transform(origin);
+	entities.transforms[entities.count] = Transform(origin, Vec3F(1.0f, 1.0f, 1.0f));
 	// if entity has a roomgrid component, store its lookup id and allocate the roomgrid
 	if(entities.entity_templates.table[entity_type][COMPONENT_ROOM_GRID])
 	{
