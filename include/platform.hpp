@@ -21,9 +21,7 @@
 #include "asset.hpp"
 #include "draw.hpp"
 
-///////////////////////
 // Struct GameWindow //
-///////////////////////
 
 typedef struct GameWindow
 {
@@ -43,33 +41,42 @@ typedef struct GameWindow
     bool   close;
 } GameWindow;
 
-//////////////////////////////////
 // Platform Function Prototypes //
-//////////////////////////////////
 
-int platformInitAPIs(GameWindow& game_window, uint width, uint height);
+int
+platformInitAPIs(GameWindow& game_window, uint width, uint height);
 
-int platformInitGLFW();
+static int
+platformInitGLFW();
 
-int platformInitOpenGL();
+static int
+platformInitOpenGL();
 
-int platformLoadXAudio2();
+static int
+platformLoadXAudio2();
 
-int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name);
+static int
+platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name);
 
-void platformFreeWindow(GameWindow& game_window);
+void
+platformFreeWindow(GameWindow& game_window);
 
-void platformSwapBuffers(GameWindow& game_window);
+void
+platformSwapBuffers(GameWindow& game_window);
 
-double platformGetTime();
+double
+platformGetTime();
 
-void platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
+void
+platformGetInputsThisFrame(InputManager &im, GameWindow &game_window);
 
-void platformRenderShadowMapToScreen(AssetManager& asset_manager,
+void
+platformRenderShadowMapToScreen(AssetManager& asset_manager,
 				     GameWindow& game_window,
 				     FrameTexture& depth_framebuffer);
 
-void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
+void
+platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
 				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
@@ -77,7 +84,8 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     uint dir_light_id,
 				     uint zoom_level);
 
-void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
+void
+platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
 				    const RoomGridLookup& roomgrid_lookup,
@@ -87,32 +95,36 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    uint cam_id,
 				    uint zoom_level);
 
-void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
+void
+platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
 					 DebugGrid* grid_p,
 					 uint zoom_level);
 
-void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
+void
+platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
 				const FrameTexture& target_framebuffer,
 				uint src_x0, uint src_y0,
 				uint src_x1, uint src_y1,
 				uint dst_x0, uint dst_y0,
 				uint dst_x1, uint dst_y1);
 
-void platformRenderPP(AssetManager& asset_manager,
+void
+platformRenderPP(AssetManager& asset_manager,
 		      const FrameTexture& non_msaa_framebuffer);
     
-int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path);
+int
+platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path);
 
-/////////////////////
 // Debug Functions //
-/////////////////////
 
-void outputGLFWError();
+void
+outputGLFWError();
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
+void
+APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
                        GLsizei length, const char* message, const void* userParam);
 
 

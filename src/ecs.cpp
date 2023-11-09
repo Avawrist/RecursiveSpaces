@@ -5,9 +5,7 @@
 
 #include "ecs.hpp"
 
-////////////////////////////////
 // Struct Component Transform //
-////////////////////////////////
 
 Transform::Transform()
 {
@@ -21,19 +19,7 @@ Transform::Transform(Vec3F _position, Vec3F _scale)
     scale    = _scale;
 }
 
-Mat4F transformGetModel(const Transform& transform)
-{
-    // Column Major
-    Mat4F model = Mat4F(transform.scale.x, 0.0f, 0.0f, transform.position.x,
-	                0.0f, transform.scale.y, 0.0f, transform.position.y,
-	                0.0f, 0.0f, transform.scale.z, transform.position.z,
-	                0.0f, 0.0f, 0.0f, 1.0f);
-    return model;
-}
-
-/////////////////////////////
 // Struct Component Camera //
-/////////////////////////////
 
 Camera::Camera()
 {
@@ -41,9 +27,7 @@ Camera::Camera()
     target      = Vec3F(0.0f, 0.0f, 0.0f);
 }
 
-///////////////////////////////
 // Struct Component DirLight //
-///////////////////////////////
 
 DirLight::DirLight()
 {
@@ -55,9 +39,7 @@ DirLight::DirLight()
     ambient_strength = 0.4f;
 }
 
-/////////////////////////////////
 // Struct Component PointLight //
-/////////////////////////////////
 
 PointLight::PointLight()
 {
@@ -65,9 +47,7 @@ PointLight::PointLight()
     ambient_strength = 0.5f;
 }
 
-///////////////////////////////////
 // Struct Component GridPosition //
-///////////////////////////////////
 
 GridPosition::GridPosition()
 {
@@ -79,9 +59,7 @@ GridPosition::GridPosition(Vec3F _position)
     position = _position; 
 }
 
-////////////////////////////
 // Struct Component State //
-////////////////////////////
 
 State::State()
 {
@@ -89,9 +67,7 @@ State::State()
     input_cooldown = 0;
 }
 
-///////////////
 // Struct AI //
-///////////////
 
 Node::Node()
 {
@@ -121,9 +97,7 @@ AI::AI()
     next_move = MOVE_WALK;
 }
 
-////////////////////////////
 // Struct EntityTemplates //
-////////////////////////////
 
 EntityTemplates::EntityTemplates()
 {
@@ -131,22 +105,14 @@ EntityTemplates::EntityTemplates()
     memset(table, 0, TOTAL_ENTITY_TYPES * TOTAL_COMPONENT_TYPES * sizeof(uint));
 }
 
-//////////////////////
 // Struct LevelGrid //
-//////////////////////
 
 RoomGrid::RoomGrid()
 {
     memset(grid, -1, RG_MAX_WIDTH * RG_MAX_HEIGHT * RG_MAX_LENGTH * sizeof(int));
 }
 
-//////////////////
-// Struct Level //
-//////////////////
-
-//////////////////////////////
 // ActiveEntities Functions //
-//////////////////////////////
 
 ActiveEntities::ActiveEntities()
 {
@@ -162,7 +128,8 @@ ActiveEntities::ActiveEntities()
     count = 0;
 }
 
-int activeEntitiesCreateEntity(ActiveEntities& entities,
+int
+activeEntitiesCreateEntity(ActiveEntities& entities,
 			       RoomGridLookup& roomgrid_lookup,
 			       int room_grid_owner_id,
 			       int room_grid_id,
@@ -212,15 +179,8 @@ int activeEntitiesCreateEntity(ActiveEntities& entities,
     return -1;
 }
 
-void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
-{
-    _assert(entity_ID >= 0 && entity_ID < entities.count);
-    
-    // Sets state to inactive, system knows the entity is free to overwrite
-    entities.states[entity_ID].inactive = true;
-}
-
-void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup)
+void
+activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup)
 {
     // Should be run after all other entity updates. Searches for inactive entities,
     // if found, overwrites the inactive with the active entity on the end of the arrays,
@@ -291,11 +251,10 @@ void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roo
     }
 }
 
-////////////////////////
 // RoomGrid Functions //
-////////////////////////
 
-int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
+int
+roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
 {
     // Returns entity on success. Returns -1 if no entity. Returns -2 if out of bounds.
     
@@ -310,25 +269,8 @@ int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos)
     return room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z];
 }
 
-void roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID)
-{
-    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
-    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
-    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
-    
-    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
-}
-
-void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos)
-{
-    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
-    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
-    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
-    
-    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
-}
-
-Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
+Vec3F
+roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type)
 {
     // Parses all entities on the grid, and returns the grid position of
@@ -366,7 +308,8 @@ Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
     return target_pos;
 }
 
-void roomGridLookupInit(RoomGridLookup& rgl)
+void
+roomGridLookupInit(RoomGridLookup& rgl)
 {
     for(uint i = 0; i < TOTAL_ROOMGRIDS; i++)
     {
@@ -375,7 +318,8 @@ void roomGridLookupInit(RoomGridLookup& rgl)
 }
 
 // AI Functions
-Vec3F aStarFindPath(RoomGrid& room_grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
+Vec3F
+aStarFindPath(RoomGrid& room_grid, Vec3F cur_grid_pos, Vec3F target_grid_pos)
 {
     // TODO: Add exception handling if target is unreachable
 

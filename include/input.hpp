@@ -13,9 +13,7 @@
 #include "utility.hpp"
 #include "mdcla.hpp"
 
-///////////////////
 // Struct Cursor //
-///////////////////
 
 typedef struct Cursor
 {
@@ -26,11 +24,11 @@ typedef struct Cursor
     bool   first_mouse;
     Cursor();
 } Cursor;
-Vec2F cursorGetDistance(Cursor& cursor);
 
-/////////////////////////
+Vec2F
+cursorGetDistance(Cursor& cursor);
+
 // Struct InputManager //
-/////////////////////////
 
 typedef enum Key
 {

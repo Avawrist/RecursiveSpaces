@@ -6,7 +6,8 @@
 
 #include "platform.hpp"
 
-int platformInitAPIs(GameWindow& game_window, uint width, uint height)
+int
+platformInitAPIs(GameWindow& game_window, uint width, uint height)
 {
     // Returns 1 on success, 0 on failure
     
@@ -26,7 +27,8 @@ int platformInitAPIs(GameWindow& game_window, uint width, uint height)
     return 1;
 }
 
-int platformInitGLFW()
+static int
+platformInitGLFW()
 {
     // Init GLFW library
     if(!glfwInit())
@@ -44,7 +46,8 @@ int platformInitGLFW()
     return 1;
 }
 
-int platformInitOpenGL()
+static int
+platformInitOpenGL()
 {
     // Load OpenGL procedures through GLAD
     if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
@@ -70,7 +73,8 @@ int platformInitOpenGL()
     return 1;
 }
 
-int platformLoadXAudio2()
+static int
+platformLoadXAudio2()
 {
     // Returns 1 on success, 0 on failure
     
@@ -122,7 +126,8 @@ int platformLoadXAudio2()
     return 0;
 }
 
-int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name)
+static int
+platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* name)
 {
     // Returns 1 on success, 0 on failure
     
@@ -194,13 +199,15 @@ int platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_cha
     }
 }
 
-void platformFreeWindow(GameWindow& game_window)
+void
+platformFreeWindow(GameWindow& game_window)
 {
     glfwDestroyWindow((GLFWwindow*)game_window.window_p);
     glfwTerminate(); // This will stop all GLFW functions including timer and input
 }
 
-void platformSwapBuffers(GameWindow& game_window)
+void
+platformSwapBuffers(GameWindow& game_window)
 {
     double time_elapsed_this_cycle_secs = glfwGetTime() - game_window.cycle_start_time_secs;
 
@@ -237,12 +244,14 @@ void platformSwapBuffers(GameWindow& game_window)
     game_window.cycle_start_time_secs = glfwGetTime();
 }
 
-double platformGetTime()
+double
+platformGetTime()
 {
     return glfwGetTime();
 }
 
-void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
+void
+platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
 {
     glfwPollEvents(); // Processes all input events that occurred this cycle
     
@@ -263,7 +272,8 @@ void platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
     glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
 
-void platformRenderShadowMapToScreen(AssetManager& asset_manager,
+void
+platformRenderShadowMapToScreen(AssetManager& asset_manager,
 				     GameWindow& game_window,
 				     FrameTexture& depth_framebuffer)
 {
@@ -280,7 +290,8 @@ void platformRenderShadowMapToScreen(AssetManager& asset_manager,
     glDrawArrays(GL_TRIANGLES, 0, 6);    
 }
 
-void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
+void
+platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const FrameTexture& depth_framebuffer,
 				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
@@ -354,7 +365,8 @@ void platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
     }
 }
 
-void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
+void
+platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const FrameTexture& framebuffer,
 				    const FrameTexture& depth_framebuffer,
 				    const RoomGridLookup& roomgrid_lookup,
@@ -481,7 +493,8 @@ void platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     }
 }
 
-void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
+void
+platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
@@ -516,7 +529,8 @@ void platformRenderDebugElementsToBuffer(const GameWindow& game_window,
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
 }
 
-void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
+void
+platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
 				const FrameTexture& target_framebuffer,
 				uint src_x0, uint src_y0,
 				uint src_x1, uint src_y1,
@@ -538,7 +552,8 @@ void platformBlitBufferToBuffer(const FrameTexture& source_framebuffer,
 
 }
 
-void platformRenderPP(AssetManager& asset_manager,
+void
+platformRenderPP(AssetManager& asset_manager,
 		      const FrameTexture& non_msaa_framebuffer)
 {
     //////////////////
@@ -566,7 +581,8 @@ void platformRenderPP(AssetManager& asset_manager,
     glEnable(GL_DEPTH_TEST);
 }
 
-int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path)
+int
+platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* path)
 {
     // Returns 1 on success, 0 on failure
 
@@ -606,11 +622,10 @@ int platformLoadEntityTemplatesFromTxt(ActiveEntities& active_entities, c_char* 
     return 1;
 }
 
-/////////////////////
 // Debug Functions //
-/////////////////////
 
-void outputGLFWError()
+void
+outputGLFWError()
 {
     c_char* errorMsg;
     int errorCode = glfwGetError(&errorMsg);
@@ -624,7 +639,8 @@ void outputGLFWError()
     }
 }
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
+void
+APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, 
                        GLsizei length, c_char *message, c_void *userParam)
 {
     // ignore non-significant error/warning codes

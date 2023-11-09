@@ -5,9 +5,7 @@
 
 #include "input.hpp"
 
-///////////////////
 // Struct Cursor //
-///////////////////
 
 Cursor::Cursor()
 {
@@ -18,7 +16,8 @@ Cursor::Cursor()
     first_mouse = true;
 }
 
-Vec2F cursorGetDistance(Cursor& cursor)
+Vec2F
+cursorGetDistance(Cursor& cursor)
 {
     float x_dist = (float)(cursor.x_pos - cursor.last_x);
     float y_dist = (float)(cursor.y_pos - cursor.last_y);
@@ -35,9 +34,7 @@ Vec2F cursorGetDistance(Cursor& cursor)
     return Vec2F(x_dist, y_dist);
 }
 
-/////////////////////////
 // Struct InputManager //
-/////////////////////////
 
 InputManager::InputManager()
 {

@@ -11,9 +11,7 @@
 #include "asset.hpp"
 #include "mdcla.hpp"
 
-//////////////////////
 // Struct DebugLine //
-//////////////////////
 
 typedef struct DebugLine
 {
@@ -23,11 +21,11 @@ typedef struct DebugLine
     DebugLine(Vec3F start, Vec3F end);
     ~DebugLine();
 } DebugLine;
-void debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size);
 
-//////////////////////
+void
+debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size);
+
 // Struct DebugGrid //
-//////////////////////
 
 typedef struct DebugGrid
 {
@@ -40,6 +38,8 @@ typedef struct DebugGrid
     DebugGrid(float _square_width, uint _width_ct, uint _length_ct, Vec3F ul_corner);
     ~DebugGrid();
 } DebugGrid;
-void debugGridDraw(DebugGrid* grid_p, Shader* shader_p, Vec3F color, float size);
+
+void
+debugGridDraw(DebugGrid* grid_p, Shader* shader_p, Vec3F color, float size);
 
 #endif

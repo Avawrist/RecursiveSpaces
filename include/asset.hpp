@@ -29,9 +29,7 @@
 #include "mdcla.hpp"
 #include "ecs.hpp"
 
-///////////////////////////
 // Struct SoundInterface //
-///////////////////////////
 
 typedef struct SoundInterface
 {
@@ -41,9 +39,7 @@ typedef struct SoundInterface
     ~SoundInterface();
 } SoundInterface;
 
-//////////////////
 // Struct Sound //
-//////////////////
 
 typedef struct Sound
 {
@@ -53,15 +49,35 @@ typedef struct Sound
     Sound(c_char* wav_path, SoundInterface& sound_interface);
     ~Sound();
 } Sound;
-int  soundLoadWav(Sound* sound, c_char* wav_path);
-int  soundPlay(Sound* sound);
-void soundPause(Sound* sound);
-void soundStop(Sound* sound);
-void soundSetVolume(Sound* sound, int volume);
 
-////////////////////////
+int
+soundLoadWav(Sound* sound, c_char* wav_path);
+
+int
+soundPlay(Sound* sound);
+
+inline void
+soundPause(Sound* sound)
+{
+    sound->source_voice_p->Stop();
+}
+
+inline void
+soundStop(Sound* sound)
+{
+    sound->source_voice_p->Stop();
+    sound->source_voice_p->FlushSourceBuffers();
+}
+
+inline void
+soundSetVolume(Sound* sound, int volume)
+{
+    _assert(volume >= 0 && volume <= 100);    
+    float value = (float)(volume * 0.01); 
+    sound->source_voice_p->SetVolume(value);
+}
+
 // Struct SoundStream //
-////////////////////////
 
 #define NUM_BUFFERS 3
 #define BUFFER_SIZE 65536
@@ -79,16 +95,39 @@ typedef struct SoundStream
     SoundStream(c_char* wav_path, SoundInterface& sound_interface);
     ~SoundStream();
 } SoundStream;
-int  soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path);
-int  soundStreamUpdate(SoundStream* sound_stream);
-void soundStreamPlay(SoundStream* sound_stream);
-void soundStreamPause(SoundStream* sound_stream);
-void soundStreamStop(SoundStream* sound_stream);
-void soundSetVolume(SoundStream* sound, int volume);
 
-///////////////////
+int
+soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path);
+
+int
+soundStreamUpdate(SoundStream* sound_stream);
+
+void
+soundStreamStop(SoundStream* sound_stream);
+
+inline void
+soundStreamPlay(SoundStream* sound_stream)
+{
+    sound_stream->buffer.Flags = 0;
+    sound_stream->source_voice_p->Start(0); 
+}
+
+inline void
+soundStreamPause(SoundStream* sound_stream)
+{
+    sound_stream->source_voice_p->Stop();
+}
+
+inline void
+soundSetVolume(SoundStream* sound_stream, int volume)
+{
+    _assert(volume >= 0 && volume <= 100);    
+
+    float value = (float)(volume * 0.01); 
+    sound_stream->source_voice_p->SetVolume(value);
+}
+
 // Struct Shader //
-///////////////////
 
 typedef struct Shader {
     GLuint program_id;
@@ -97,15 +136,43 @@ typedef struct Shader {
     Shader(c_char* _vert_path, c_char* _frag_path);
     ~Shader();
 } Shader;
-void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m);
-void shaderAddVec2Uniform(const Shader* shader_p, c_char* name, const Vec2F& v);
-void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v);
-void shaderAddIntUniform(const Shader* shader_p, c_char* name, int i);
-void shaderAddFloatUniform(const Shader* shader_p, c_char* name, float f);
 
-/////////////////
+inline void
+shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, m);
+}
+
+inline void
+shaderAddVec2Uniform(const Shader* shader_p, c_char* name, const Vec2F& v)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform2fv(loc, 1, &v[0]);
+}
+
+inline void
+shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform3fv(loc, 1, &v[0]);
+}
+
+inline void
+shaderAddIntUniform(const Shader* shader_p, c_char* name, int i)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform1i(loc, i);    
+}
+
+inline void
+shaderAddFloatUniform(const Shader* shader_p, c_char* name, float f)
+{
+    int loc = glGetUniformLocation(shader_p->program_id, name);
+    glUniform1f(loc, f);    
+}
+
 // Struct Mesh //
-/////////////////
 
 #define MESH_INDEX 0
 #define ELE_INDEX  1
@@ -119,13 +186,17 @@ typedef struct Mesh
     Mesh(float* vertices, uint arr_size);
     ~Mesh();
 } Mesh;
-int  meshLoadObj(Mesh* mesh_p, c_char* path);
-void meshCalcTangents(Mesh* mesh_p);
-void meshDataToGPU(Mesh* mesh_p);
 
-////////////////////
+int
+meshLoadObj(Mesh* mesh_p, c_char* path);
+
+void
+meshCalcTangents(Mesh* mesh_p);
+
+void
+meshDataToGPU(Mesh* mesh_p);
+
 // Struct Texture //
-////////////////////
 
 typedef struct Texture
 {
@@ -136,12 +207,13 @@ typedef struct Texture
     Texture(c_char* bmp_path);
     ~Texture();
 } Texture;
-int  textureLoadBmp(Texture* texture_p, c_char* path);
-void textureDataToGPU(Texture* texture_p);
+int
+textureLoadBmp(Texture* texture_p, c_char* path);
 
-/////////////////////////
+void
+textureDataToGPU(Texture* texture_p);
+
 // Struct FrameTexture //
-/////////////////////////
 
 typedef struct FrameTexture
 {
@@ -167,11 +239,11 @@ typedef struct FrameTexture
     FrameTexture(int _width, int _height, bool is_depth_map, bool is_MSAA);
     ~FrameTexture();
 } FrameTexture;
-void frameTextureDataToGPU(FrameTexture* ftexture_p);
 
-/////////////////////////
+void
+frameTextureDataToGPU(FrameTexture* ftexture_p);
+
 // Struct AssetTableID //
-/////////////////////////
 
 typedef enum AssetType
 {
@@ -191,9 +263,7 @@ typedef struct AssetTableID
     AssetTableID();
 } AssetTableID;
 
-//////////////////////////
 // Struct AssetTableDir //
-//////////////////////////
 
 typedef struct AssetTableDir
 {
@@ -201,9 +271,7 @@ typedef struct AssetTableDir
     AssetTableDir();
 } AssetTableDir;
 
-///////////////////////////
 // Struct ActiveTextures //
-///////////////////////////
 
 #define MAX_TEXTURES 60
 typedef struct ActiveTextures
@@ -213,9 +281,7 @@ typedef struct ActiveTextures
     ActiveTextures();
 } ActiveTextures;
 
-/////////////////////////
 // Struct ActiveMeshes //
-/////////////////////////
 
 #define MAX_MESHES 20
 typedef struct ActiveMeshes
@@ -225,9 +291,7 @@ typedef struct ActiveMeshes
     ActiveMeshes();
 } ActiveMeshes;
 
-/////////////////////////
 // Struct ActiveSounds //
-/////////////////////////
 
 #define MAX_SOUNDS 60
 typedef struct ActiveSounds
@@ -237,9 +301,7 @@ typedef struct ActiveSounds
     ActiveSounds();
 } ActiveSounds;
 
-//////////////////////////
 // Struct ShaderTableID //
-//////////////////////////
 
 typedef enum ShaderProgram
 {
@@ -264,9 +326,7 @@ typedef struct ShaderTableID
     ShaderTableID();
 } ShaderTableID;
 
-///////////////////////////
 // Struct ShaderTableDir //
-///////////////////////////
 
 typedef struct ShaderTableDir
 {
@@ -274,9 +334,7 @@ typedef struct ShaderTableDir
     ShaderTableDir();
 } ShaderTableDir;
 
-//////////////////////////
 // Struct ActiveShaders //
-//////////////////////////
 
 #define MAX_SHADERS 20
 
@@ -287,9 +345,7 @@ typedef struct ActiveShaders
     ActiveShaders();
 } ActiveShaders;
 
-//////////////////
 // AssetManager //
-//////////////////
 
 typedef struct AssetManager
 {
@@ -308,48 +364,57 @@ typedef struct AssetManager
     ~AssetManager();
 } AssetManager;
 
-/////////////////////////
 // Function Prototypes //
-/////////////////////////
 
 // AssetManager function prototypes
 
-int assetManagerRegister(AssetManager& asset_manager, int entity_type,
+int
+assetManagerRegister(AssetManager& asset_manager, int entity_type,
 			  int asset_type, void* sound_interface_p);
 
-void assetManagerUnregisterAll(AssetManager& asset_manager);
+void
+assetManagerUnregisterAll(AssetManager& asset_manager);
 
-void* assetManagerGetAssetP(AssetManager& asset_manager, int entity_type,
+void*
+assetManagerGetAssetP(AssetManager& asset_manager, int entity_type,
 			    int asset_type, void* sound_interface_p);
     
 // ActiveTextures function prototypes
 
-int activeTexturesRegister(ActiveTextures& active_textures, AssetManager& asset_manager,
+int
+activeTexturesRegister(ActiveTextures& active_textures, AssetManager& asset_manager,
 			   int entity_type, int asset_type);
 
-void activeTexturesUnregisterAll(ActiveTextures& active_textures);
+void
+activeTexturesUnregisterAll(ActiveTextures& active_textures);
 
 // ActiveMeshes function prototypes
 
-int activeMeshesRegister(ActiveMeshes& active_meshes, AssetManager& asset_manager,
+int
+activeMeshesRegister(ActiveMeshes& active_meshes, AssetManager& asset_manager,
                          int entity_type, int asset_type);
 
-void activeMeshesUnregisterAll(ActiveMeshes& active_meshes);
+void
+activeMeshesUnregisterAll(ActiveMeshes& active_meshes);
 
 // ActiveMeshes function prototypes
 
-int activeSoundsRegister(ActiveSounds& active_sounds, AssetManager& asset_manager,
+int
+activeSoundsRegister(ActiveSounds& active_sounds, AssetManager& asset_manager,
                          int entity_type, int asset_type);
 
 // void activeSoundsUnregisterAll(ActiveSounds &activeSounds);
 
-void* assetManagerGetShaderP(AssetManager& asset_manager, int program_type);
+void*
+assetManagerGetShaderP(AssetManager& asset_manager, int program_type);
 
 // ActiveShaders function prototypes
 
-int activeShadersRegister(ActiveShaders& active_shaders, AssetManager& asset_manager,
+int
+activeShadersRegister(ActiveShaders& active_shaders, AssetManager& asset_manager,
 			   int program_type);
 
-void activeShadersUnregisterAll(ActiveShaders& active_shaders);
+void
+activeShadersUnregisterAll(ActiveShaders& active_shaders);
 
 #endif

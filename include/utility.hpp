@@ -1,16 +1,15 @@
 // ====================================================================================
-// Title: utility.hpp
-// Description: File containing preprocessor directives & typedefs
+// Title: utility.cpp
+// Description: File declaring preprocessor directives & typedefs,
+//              plus other utility functions/structs
 // ====================================================================================
 
 #ifndef UTILITY_H
 #define UTILITY_H
 
-/*
-  ASSERTIONS:
-  1 - Assertions are enabled
-  0 - Assertions are disabled
-*/
+// TO-DO: Remove from release ver:
+#include <stdio.h>  
+#include <windows.h>
 
 #if ASSERTIONS
 #include <assert.h>
@@ -39,5 +38,26 @@ typedef unsigned int  uint;
 // Signed
 typedef short int shint;
 typedef long int  lint;
+
+// Struct Profiler //
+
+c_uint PROFILER_MSG_LENGTH = 144;
+typedef struct Profiler
+{
+    double start_time = 0.0f;
+    double end_time   = 0.0f;
+    char   msg[PROFILER_MSG_LENGTH];
+} Profiler;
+
+inline void
+profilerGetTime(Profiler& p)
+{
+    double time = p.end_time - p.start_time;
+    sprintf_s(p.msg, PROFILER_MSG_LENGTH, "Time (Seconds): %f\n", time);
+    OutputDebugStringA(p.msg);
+}
+
+// Utility Functions //
+
 
 #endif

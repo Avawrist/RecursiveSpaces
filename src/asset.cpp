@@ -6,9 +6,7 @@
 
 #include "asset.hpp"
 
-///////////////////////////
 // Struct SoundInterface //
-///////////////////////////
 
 SoundInterface::SoundInterface()
 {
@@ -42,9 +40,7 @@ SoundInterface::~SoundInterface()
     interface_p->StopEngine();
 }
 
-//////////////////
 // Struct Sound //
-//////////////////
 
 Sound::Sound(c_char* wav_path, SoundInterface& sound_interface)
 {
@@ -70,7 +66,8 @@ Sound::~Sound()
     soundStop(this);
 }
 
-int soundLoadWav(Sound* sound, c_char* wav_path)
+int
+soundLoadWav(Sound* sound, c_char* wav_path)
 {
     // Open file
     FILE* file_p = NULL;
@@ -127,7 +124,8 @@ int soundLoadWav(Sound* sound, c_char* wav_path)
     return 1;
 }
 
-int soundPlay(Sound* sound)
+int
+soundPlay(Sound* sound)
 {
     // Check buffer state
     XAUDIO2_VOICE_STATE state_p; 
@@ -154,30 +152,7 @@ int soundPlay(Sound* sound)
     return 1;
 }
 
-void soundPause(Sound* sound)
-{
-    sound->source_voice_p->Stop();
-}
-
-void soundStop(Sound* sound)
-{
-    sound->source_voice_p->Stop();
-    sound->source_voice_p->FlushSourceBuffers();
-}
-
-void soundSetVolume(Sound* sound, int volume)
-{
-    // Assert value is >= 0 and <= 100
-    _assert(volume >= 0 && volume <= 100);
-    
-    // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
-    float value = (float)(volume * 0.01); 
-    sound->source_voice_p->SetVolume(value);
-}
-
-////////////////////////
 // Struct SoundStream //
-////////////////////////
 
 SoundStream::SoundStream(c_char* wav_path, SoundInterface& sound_interface)
 {
@@ -207,7 +182,8 @@ SoundStream::~SoundStream()
     soundStreamStop(this);
 }
 
-int soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path)
+int
+soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path)
 {
     // Open file
     fopen_s(&sound_stream->file_p, wav_path, "rb");
@@ -258,7 +234,8 @@ int soundStreamReadWavHeader(SoundStream* sound_stream, c_char* wav_path)
     return 1;
 }
 
-int soundStreamUpdate(SoundStream* sound_stream)
+int
+soundStreamUpdate(SoundStream* sound_stream)
 {
     // Get sound state from XAudio2
     XAUDIO2_VOICE_STATE state_p; 
@@ -315,19 +292,8 @@ int soundStreamUpdate(SoundStream* sound_stream)
     return 1;
 }
 
-void soundStreamPlay(SoundStream* sound_stream)
-{
-    sound_stream->buffer.Flags = 0;
-    sound_stream->source_voice_p->Start(0);
-}
-
-void soundStreamPause(SoundStream* sound_stream)
-{
-    // TODO: test
-    sound_stream->source_voice_p->Stop();
-}
-
-void soundStreamStop(SoundStream* sound_stream)
+void
+soundStreamStop(SoundStream* sound_stream)
 {
     // TODO: test
     sound_stream->source_voice_p->Stop();
@@ -343,19 +309,7 @@ void soundStreamStop(SoundStream* sound_stream)
     sound_stream->cw_buffer  = 0;
 }
 
-void soundSetVolume(SoundStream* sound_stream, int volume)
-{
-    // Assert value is >= 0 and <= 100
-    _assert(volume >= 0 && volume <= 100);    
-
-    // Takes a value between 0 and 100, converts it to a float scale of 0 to 1.
-    float value = (float)(volume * 0.01); 
-    sound_stream->source_voice_p->SetVolume(value);
-}
-
-///////////////////
 // Struct Shader //
-///////////////////
 
 Shader::Shader(c_char* _vert_path, c_char* _frag_path)
 {
@@ -462,39 +416,7 @@ Shader::~Shader()
     glDeleteProgram(program_id);
 }
 
-void shaderAddMat4Uniform(const Shader* shader_p, c_char* name, c_float* m)
-{
-    int loc = glGetUniformLocation(shader_p->program_id, name);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, m);
-}
-
-void shaderAddVec2Uniform(const Shader* shader_p, c_char* name, const Vec2F& v)
-{
-    int loc = glGetUniformLocation(shader_p->program_id, name);
-    glUniform2fv(loc, 1, &v[0]);
-}
-
-void shaderAddVec3Uniform(const Shader* shader_p, c_char* name, const Vec3F& v)
-{
-    int loc = glGetUniformLocation(shader_p->program_id, name);
-    glUniform3fv(loc, 1, &v[0]);
-}
-
-void shaderAddIntUniform(const Shader* shader_p, c_char* name, int i)
-{
-    int loc = glGetUniformLocation(shader_p->program_id, name);
-    glUniform1i(loc, i);    
-}
-
-void shaderAddFloatUniform(const Shader* shader_p, c_char* name, float f)
-{
-    int loc = glGetUniformLocation(shader_p->program_id, name);
-    glUniform1f(loc, f);    
-}
-
-/////////////////
 // Struct Mesh //
-/////////////////
 
 Mesh::Mesh(c_char* obj_path)
 {
@@ -555,7 +477,8 @@ Mesh::~Mesh()
     glDeleteBuffers(1, &vbo);
 }
 
-int meshLoadObj(Mesh* mesh_p, c_char* path)
+int
+meshLoadObj(Mesh* mesh_p, c_char* path)
 {
     ///////////////////
     // Get File Data //
@@ -563,9 +486,9 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
     float v_x;
     float v_y;
     float v_z;
-    int   v_ind;
-    int   t_ind;
-    int   n_ind;
+    int v_ind;
+    int t_ind;
+    int n_ind;
     
     std::vector<float> vertices;
     std::vector<float> uvs;
@@ -649,7 +572,8 @@ int meshLoadObj(Mesh* mesh_p, c_char* path)
     return 1;
 }
 
-void meshCalcTangents(Mesh* mesh_p)
+void
+meshCalcTangents(Mesh* mesh_p)
 {
     //   0       1       2      3     4      5       6      7
     //(vert.x, vert.y, vert.z, uv.x, uv.y, norm.x, norm.y, norm.z, 
@@ -697,7 +621,8 @@ void meshCalcTangents(Mesh* mesh_p)
     }
 }
 
-void meshDataToGPU(Mesh* mesh_p)
+void
+meshDataToGPU(Mesh* mesh_p)
 {
     ///////////////////////////////////
     // Configure OpenGL Mesh Objects //
@@ -734,9 +659,7 @@ void meshDataToGPU(Mesh* mesh_p)
     glBindVertexArray(0);
 }
 
-////////////////////
 // Struct Texture //
-////////////////////
 
 Texture::Texture(c_char* bmp_path)
 {
@@ -763,7 +686,8 @@ Texture::~Texture()
     glDeleteTextures(1, &texture_id); // TODO: add deletion for specular & normal maps
 }
 
-int textureLoadBmp(Texture* texture_p, c_char* path)
+int
+textureLoadBmp(Texture* texture_p, c_char* path)
 {
     ////////////////////////////
     // Get bmp data from file //
@@ -796,7 +720,8 @@ int textureLoadBmp(Texture* texture_p, c_char* path)
     return 1;
 }
 
-void textureDataToGPU(Texture* texture_p)
+void
+textureDataToGPU(Texture* texture_p)
 {
     /////////////////////////////////////////////
     // Configure Diffuse Map Texture in OpenGL //
@@ -818,9 +743,7 @@ void textureDataToGPU(Texture* texture_p)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-/////////////////////////
 // Struct FrameTexture //
-/////////////////////////
 
 FrameTexture::FrameTexture(int _width, int _height, bool _is_depth_map, bool _is_MSAA)
 {
@@ -875,7 +798,8 @@ FrameTexture::~FrameTexture()
     glDeleteBuffers(1, &quad_vbo);
 }
 
-void frameTextureDataToGPU(FrameTexture* ftexture_p)
+void
+frameTextureDataToGPU(FrameTexture* ftexture_p)
 {
     //////////////////////////////////////
     // Config Framebuffer with Textures //
@@ -1107,7 +1031,8 @@ ActiveTextures::ActiveTextures()
     memset(textures, 0, sizeof(textures));
 }
 
-int activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_manager,
+int
+activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_manager,
 			   int entity_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
@@ -1136,7 +1061,8 @@ int activeTexturesRegister(ActiveTextures &active_textures, AssetManager &asset_
     return 1;
 }
 
-void activeTexturesUnregisterAll(ActiveTextures &active_textures)
+void
+activeTexturesUnregisterAll(ActiveTextures &active_textures)
 {
     // Delete all pointers
     for(uint i = 0; i < active_textures.registered_count; i++)
@@ -1159,7 +1085,8 @@ ActiveMeshes::ActiveMeshes()
     memset(meshes, 0, sizeof(meshes));
 }
 
-int activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manager,
+int
+activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manager,
                          int entity_type, int asset_type)
 {
     // Returns 1 on success, 0 on failure.
@@ -1188,7 +1115,8 @@ int activeMeshesRegister(ActiveMeshes &active_meshes, AssetManager &asset_manage
     return 1;
 }
 
-void activeMeshesUnregisterAll(ActiveMeshes &active_meshes)
+void
+activeMeshesUnregisterAll(ActiveMeshes &active_meshes)
 {
     // Delete all pointers
     for(uint i = 0; i < active_meshes.registered_count; i++)
@@ -1211,7 +1139,8 @@ ActiveSounds::ActiveSounds()
     memset(sounds, 0, sizeof(sounds));
 }
 
-int activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manager, int entity_type,
+int
+activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manager, int entity_type,
 			 int asset_type, SoundInterface* sound_interface_p)
 {
     // Returns 1 on success, 0 on failure.
@@ -1240,7 +1169,8 @@ int activeSoundsRegister(ActiveSounds &active_sounds, AssetManager &asset_manage
     return 1;
 }
 
-void activeSoundsUnregisterAll(ActiveSounds &active_sounds)
+void
+activeSoundsUnregisterAll(ActiveSounds &active_sounds)
 {
     // Delete all pointers
     for(uint i = 0; i < active_sounds.registered_count; i++)
@@ -1260,7 +1190,8 @@ AssetManager::~AssetManager()
     assetManagerUnregisterAll(*this);
 }
 
-int assetManagerRegister(AssetManager &asset_manager, int entity_type, int asset_type, void *sound_interface_p)
+int
+assetManagerRegister(AssetManager &asset_manager, int entity_type, int asset_type, void *sound_interface_p)
 {
     // Returns 1 on success, 0 on failure
     
@@ -1296,9 +1227,9 @@ int assetManagerRegister(AssetManager &asset_manager, int entity_type, int asset
     }
 }
 
-void assetManagerUnregisterAll(AssetManager &asset_manager)
-{
-    
+void
+assetManagerUnregisterAll(AssetManager &asset_manager)
+{   
     // Unregister Diffuse textures
     activeTexturesUnregisterAll(asset_manager.active_textures_d);
 
@@ -1324,7 +1255,8 @@ void assetManagerUnregisterAll(AssetManager &asset_manager)
     activeShadersUnregisterAll(asset_manager.active_shaders);
 }
 
-void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
+void*
+assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
 			    int asset_type, void *sound_interface_p)
 {
     // Returns void asset pointer on success, NULL on failure.
@@ -1373,7 +1305,8 @@ void* assetManagerGetAssetP(AssetManager &asset_manager, int entity_type,
     return return_p;
 }
 
-void* assetManagerGetShaderP(AssetManager &asset_manager, int program_type)
+void*
+assetManagerGetShaderP(AssetManager &asset_manager, int program_type)
 {
     // Returns void shader pointer on success, NULL on failure
 
@@ -1441,7 +1374,8 @@ ActiveShaders::ActiveShaders()
     memset(shaders, 0, sizeof(shaders));
 }
 
-int activeShadersRegister(ActiveShaders &active_shaders, AssetManager &asset_manager,
+int
+activeShadersRegister(ActiveShaders &active_shaders, AssetManager &asset_manager,
 			   int program_type)
 {
     // Returns 1 on success, 0 on failure
@@ -1471,7 +1405,8 @@ int activeShadersRegister(ActiveShaders &active_shaders, AssetManager &asset_man
     return 1;
 }
 
-void activeShadersUnregisterAll(ActiveShaders &active_shaders)
+void
+activeShadersUnregisterAll(ActiveShaders &active_shaders)
 {
     // Delete all shader structs
     for(uint i = 0; i < active_shaders.registered_count; i++)

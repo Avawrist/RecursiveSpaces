@@ -19,9 +19,7 @@
 #include <vector>
 #include <iostream>
 
-//////////////////
 // Entity Types //
-//////////////////
 
 typedef enum EntityType
 {
@@ -37,9 +35,7 @@ typedef enum EntityType
     TOTAL_ENTITY_TYPES
 } EntityType;
 
-/////////////////////
 // Component Types //
-/////////////////////
 
 typedef enum Component
 {
@@ -59,9 +55,7 @@ typedef enum Component
     TOTAL_COMPONENT_TYPES
 } Component;
 
-//////////////////////
 // Entity Templates //
-//////////////////////
 
 typedef struct EntityTemplates
 {
@@ -69,9 +63,7 @@ typedef struct EntityTemplates
     EntityTemplates();
 } EntityTemplates;
 
-/////////////////////////
 // Component Transform //
-/////////////////////////
 
 typedef struct Transform
 {
@@ -81,9 +73,7 @@ typedef struct Transform
     Transform(Vec3F _position, Vec3F _scale);
 } Transform;
 
-//////////////////////
 // Component Camera //
-//////////////////////
 
 typedef struct Camera
 {
@@ -92,9 +82,7 @@ typedef struct Camera
     Camera();
 } Camera;
 
-////////////////////////
 // Component DirLight //
-////////////////////////
 
 typedef struct DirLight
 {
@@ -107,9 +95,7 @@ typedef struct DirLight
     DirLight();
 } DirLight;
 
-//////////////////////////
 // Component PointLight //
-//////////////////////////
 
 typedef struct PointLight
 {
@@ -118,9 +104,7 @@ typedef struct PointLight
     PointLight();
 } PointLight;
 
-////////////////////////////
 // Component GridPosition //
-////////////////////////////
 
 typedef struct GridPosition
 {
@@ -130,9 +114,7 @@ typedef struct GridPosition
     GridPosition(Vec3F _position);
 } GridPosition;
 
-/////////////////////
 // Component State //
-/////////////////////
 
 typedef enum StateMeta
 {
@@ -146,9 +128,7 @@ typedef struct State
     State();
 } State;
 
-//////////////////
 // Component AI //
-//////////////////
 
 typedef enum Moves
 {
@@ -174,9 +154,7 @@ typedef struct AI
     AI();
 } AI;
 
-////////////////////////
 // Component RoomGrid //
-////////////////////////
 
 typedef enum GridMeasurements
 {
@@ -222,13 +200,11 @@ typedef struct RoomGridLookup
     RoomGrid* roomgrid_pointers[TOTAL_ROOMGRIDS];
 } RoomGridLookup;
 
-////////////////////////////////
 // Struct of Component Arrays //
-////////////////////////////////
 
 #define MAX_COMPONENTS 128
 #define MAX_ENTITIES   10000
-  
+
 typedef struct ActiveEntities
 {
     EntityTemplates entity_templates;
@@ -245,41 +221,81 @@ typedef struct ActiveEntities
     ActiveEntities();
 } ActiveEntities;
 
-/////////////////////////
 // Function Prototypes //
-/////////////////////////
 
 // ActiveEntities Function Prototypes
-int activeEntitiesCreateEntity(ActiveEntities& entities,
+
+int
+activeEntitiesCreateEntity(ActiveEntities& entities,
 			       RoomGridLookup& roomgrid_lookup,
 			       int room_grid_owner_id, 
 			       int room_grid_id,
 			       Vec3F origin,
 			       uint entity_type);
 
-void activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID);
+inline void
+activeEntitiesMarkInactive(ActiveEntities& entities, uint entity_ID)
+{
+   _assert(entity_ID >= 0 && entity_ID < entities.count);
+    
+    // Sets state to inactive, system knows the entity is free to overwrite
+    entities.states[entity_ID].inactive = true;
+}
 
-void activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup);
+void
+activeEntitiesRemoveInactives(ActiveEntities& entities, RoomGridLookup& roomgrid_lookup);
 
 // Transform Function Prototypes
-Mat4F transformGetModel(const Transform& transform);
+
+inline Mat4F
+transformGetModel(const Transform& transform)
+{
+    Mat4F model = Mat4F(transform.scale.x, 0.0f, 0.0f, transform.position.x,
+	                0.0f, transform.scale.y, 0.0f, transform.position.y,
+	                0.0f, 0.0f, transform.scale.z, transform.position.z,
+	                0.0f, 0.0f, 0.0f, 1.0f);
+    return model;
+}
 
 // Camera Function Prototypes
-void  cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
+
+void
+cameraOffsetAngles(Camera& cam, float o_yaw, float o_pitch);
 
 // RoomGrid Function Prototypes
-int roomGridGetEntity(RoomGrid& room_grid, Vec3F pos);
 
-void roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID);
+int
+roomGridGetEntity(RoomGrid& room_grid, Vec3F pos);
 
-void roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos);
+inline void
+roomGridSetEntity(RoomGrid& room_grid, Vec3F pos, int entity_ID)
+{
+    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
+    
+    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = entity_ID;
+}
 
-Vec3F roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
+inline void
+roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos)
+{
+    _assert(pos.x >= 0.0f && pos.x < RG_MAX_WIDTH);
+    _assert(pos.y >= 0.0f && pos.y < RG_MAX_HEIGHT);
+    _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
+    
+    room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
+}
+
+Vec3F
+roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type);
 
-void roomGridLookupInit(RoomGridLookup& rgl);
+void
+roomGridLookupInit(RoomGridLookup& rgl);
 
 // AI Function Prototypes
-Vec3F aStarFindPath(RoomGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
+Vec3F
+aStarFindPath(RoomGrid& grid, Vec3F cur_grid_pos, Vec3F target_grid_pos);
 
 #endif

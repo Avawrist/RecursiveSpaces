@@ -5,9 +5,7 @@
 
 #include "draw.hpp"
 
-//////////////////////
 // Struct DebugLine //
-//////////////////////
 
 DebugLine::DebugLine(Vec3F start, Vec3F end)
 {
@@ -31,7 +29,8 @@ DebugLine::~DebugLine()
     delete mesh_p;
 }
 
-void debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size)
+void
+debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size)
 {
     glUseProgram(shader_p->program_id);
     shaderAddVec3Uniform(shader_p, "color", color);
@@ -40,9 +39,7 @@ void debugLineDraw(DebugLine* line_p, Shader* shader_p, Vec3F color, float size)
     glDrawArrays(GL_LINES, 0, (GLsizei)line_p->mesh_p->data.size());
 }
 
-///////////////////////
 // Struct DebugGrid //
-//////////////////////
 
 DebugGrid::DebugGrid(float _square_width, uint _width_ct, uint _length_ct, Vec3F ul_corner)
 {
@@ -100,7 +97,8 @@ DebugGrid::~DebugGrid()
     delete l_line_arr;
 }
 
-void debugGridDraw(DebugGrid* grid_p, Shader* shader_p, Vec3F color, float size)
+void
+debugGridDraw(DebugGrid* grid_p, Shader* shader_p, Vec3F color, float size)
 {
     glUseProgram(shader_p->program_id);
     shaderAddVec3Uniform(shader_p, "color", color);
