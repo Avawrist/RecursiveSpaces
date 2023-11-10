@@ -291,6 +291,9 @@ Vec3F
 roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
 			       Vec3F cur_pos, uint target_type);
 
+int
+roomGridGetFirstIDByType(const RoomGrid* rg_p, const ActiveEntities* entities_p, uint target_type);
+
 void
 roomGridLookupInit(RoomGridLookup& rgl);
 

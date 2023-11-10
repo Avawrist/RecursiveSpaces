@@ -131,9 +131,7 @@ platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* n
 {
     // Returns 1 on success, 0 on failure
     
-    /////////////////
     // Init Values //
-    /////////////////
     // Set window measurements
     game_window.win_width   = _width;
     game_window.win_height  = _height;
@@ -147,9 +145,7 @@ platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* n
     // Set time fields
     game_window.target_framerate = 0;
 
-    /////////////////////////////
     // Get framerate from GLFW //
-    /////////////////////////////
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     if(monitor)
     {
@@ -169,14 +165,10 @@ platformInitWindow(GameWindow& game_window, uint _width, uint _height, c_char* n
     game_window.cycle_start_time_secs    = 0.0f;
     game_window.d_time                   = 0;
 
-    ///////////////////////////////////
     // Set sleep granularity to 1 MS //
-    ///////////////////////////////////
     game_window.sleep_is_granular = (timeBeginPeriod(1) == TIMERR_NOERROR);
     
-    /////////////////////////////
     // Create window & context //
-    /////////////////////////////
     game_window.window_p = (void*)glfwCreateWindow(game_window.win_width, game_window.win_height,
 						   name, NULL, NULL);
     outputGLFWError();
@@ -296,21 +288,16 @@ platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 				     const RoomGridLookup& roomgrid_lookup,
 				     AssetManager& asset_manager,
 				     const GameWindow& game_window,
-				     uint dir_light_id,
-				     uint zoom_level)
+				     uint dir_light_id)
 {
-    //////////////////
     // Set GL state //
-    //////////////////
     glViewport(0, 0, depth_framebuffer.width, depth_framebuffer.height);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
     glCullFace(GL_FRONT);
     
-    /////////////////
     // Prep Shader //
-    /////////////////
     Shader* shadowmap_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, SHADOWMAP);
     glUseProgram(shadowmap_shader_p->program_id);
 
@@ -331,22 +318,8 @@ platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
 					  ortho_height * 6.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
 
-    //////////////////////////
     // Render Entity Depths //
-    //////////////////////////
-
-    // Get view depth offset based on zoom level
-    /*
-    uint current_viewed_rg_id = zoom_level - 1;
-    RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[current_viewed_rg_id];
-    float scale = rg_p->current_scale;
-    Vec3F owner_origin = rg_p->origin;
-    Vec3F entity_pos = owner_origin;
-    Vec3F offset = Vec3F(0.5f, 0.5f, 0.5f);
-    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos) + offset);
-    Vec3F view_depth_offset = BASE_RG_ORIGIN - final_pos;
-    */
-    
+   
     for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
@@ -373,21 +346,16 @@ platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 				    const GameWindow& game_window,
 				    AssetManager& asset_manager,
 				    uint dir_light_id,
-				    uint cam_id,
-				    uint zoom_level)
+				    uint cam_id)
 {
-    //////////////////
     // Set GL state //
-    //////////////////
     glViewport(0, 0, framebuffer.width, framebuffer.height);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.fbo);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glCullFace(GL_BACK);
     
-    /////////////////////////
     // Set Shader Uniforms //
-    /////////////////////////
     Shader* bp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, BLINNPHONG);
     glUseProgram(bp_shader_p->program_id);
     // Light View Mat
@@ -428,21 +396,8 @@ platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
     shaderAddIntUniform(bp_shader_p, "spec_map", 2);
     shaderAddIntUniform(bp_shader_p, "shadow_map", 3);
     
-    ///////////////////////////////
     // Render Entities to Buffer //
-    ///////////////////////////////
 
-    // Get view depth offset based on zoom level
-/*
-    uint current_viewed_rg_id = zoom_level - 1;
-    RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[current_viewed_rg_id];
-    float scale = rg_p->current_scale;
-    Vec3F owner_origin = rg_p->origin;
-    Vec3F entity_pos = owner_origin;
-    Vec3F final_pos = scale * ((owner_origin * RG_MAX_WIDTH) + (entity_pos));
-    Vec3F view_depth_offset = BASE_RG_ORIGIN - final_pos;
-    */
-    
     for(uint i = 0; i < active_entities.count; i++)
     {
 	if(active_entities.entity_templates.table[active_entities.types[i]][COMPONENT_RENDER] &&
@@ -498,12 +453,9 @@ platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					 AssetManager& asset_manager,
 					 Vec3F cam_pos,
 					 Vec3F cam_target,
-					 DebugGrid* grid_p,
-					 uint zoom_level)
+					 DebugGrid* grid_p)
 {
-    //////////////////////////////
     // Set Grid Shader Uniforms //
-    //////////////////////////////
     Shader* grid_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, DB_GRID);
     glUseProgram(grid_shader_p->program_id);
     // Model
@@ -523,9 +475,7 @@ platformRenderDebugElementsToBuffer(const GameWindow& game_window,
 					   ortho_height * 6.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
-    ///////////////////////////
     // Render Debug Elements //
-    ///////////////////////////
     debugGridDraw(grid_p, grid_shader_p, Vec3F(0.86f, 0.65f, 0.13f), 1.0f);
 }
 
@@ -556,17 +506,13 @@ void
 platformRenderPP(AssetManager& asset_manager,
 		      const FrameTexture& non_msaa_framebuffer)
 {
-    //////////////////
     // Set GL State //
-    //////////////////
     glViewport(0, 0, non_msaa_framebuffer.width, non_msaa_framebuffer.height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0); 
     glClear(GL_COLOR_BUFFER_BIT); 
     glDisable(GL_DEPTH_TEST); // Disable so quad is visible
 
-    /////////////////////////
     // Set Shader Uniforms //
-    /////////////////////////
     Shader* pp_shader_p = (Shader*)assetManagerGetShaderP(asset_manager, POSTPROCESS);
     glUseProgram(pp_shader_p->program_id); // Set post-process shader
     shaderAddIntUniform(pp_shader_p, "color_texture", 0); // Update uniform
@@ -574,9 +520,7 @@ platformRenderPP(AssetManager& asset_manager,
     glBindTexture(GL_TEXTURE_2D, non_msaa_framebuffer.color_text_id); // Bind color texture to pp shader
     glBindVertexArray(non_msaa_framebuffer.quad_vao); // Bind quad vao
 
-    ///////////////////////
     // Render PP Texture //
-    ///////////////////////
     glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertices in the quad data
     glEnable(GL_DEPTH_TEST);
 }

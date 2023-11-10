@@ -308,6 +308,30 @@ roomGridFindNearestType(RoomGrid& room_grid, ActiveEntities& entities,
     return target_pos;
 }
 
+int
+roomGridGetFirstIDByType(const RoomGrid* rg_p, const ActiveEntities* entities_p, uint target_type)
+{
+    _assert(rg_p);
+    _assert(entities_p);
+    
+    for(uint x = 0; x < RG_MAX_WIDTH; x++)
+    {
+	for(uint y = 0; y < RG_MAX_HEIGHT; y++)
+	{
+	    for(uint z = 0; z < RG_MAX_LENGTH; z++)
+	    {
+		int id = rg_p->grid[x][y][z];
+		if(id > -1)
+		{
+		    uint type = entities_p->types[id];
+		    if(type == target_type) {return id;}
+		}
+	    }
+	}
+    }
+    return -1;
+}
+
 void
 roomGridLookupInit(RoomGridLookup& rgl)
 {

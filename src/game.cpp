@@ -24,7 +24,7 @@ GameWindow      game_window;
 AssetManager    asset_manager;
 ActiveEntities* active_entities_p = new ActiveEntities();
 RoomGridLookup  roomgrid_lookup;
-uint            zoom_level = 1;
+RoomGrid*       current_roomgrid_p = NULL;
 
 // Function Definitions //
 
@@ -190,6 +190,11 @@ gameUpdateStates(int i)
 static void
 gameUpdateTransforms(int i)
 {
+    // Calculate depth offset so viewed roomgrid
+    // is back at the origin after scaling all models up
+    Vec3F view_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    view_depth_offset = BASE_RG_ORIGIN - current_roomgrid_p->transform_pos;
+    
     int rg_owner_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
     if(rg_owner_id > -1)
     {
@@ -206,7 +211,7 @@ gameUpdateTransforms(int i)
 	    Vec3F offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
 			    (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-							  rg_p->current_scale) + offset;
+							  rg_p->current_scale) + offset + view_depth_offset;
 	    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
 							 rg_owner_p->transform_pos);
 	}
@@ -250,8 +255,8 @@ gameUpdateRoomGrids(int i)
 {
     RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[active_entities_p->roomgrid_ids[i]];
 
-    int roomgrid_owner_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
-    if(roomgrid_owner_id == -1)
+    // If we have the root roomgrid
+    if(rg_p->roomgrid_owner_id == -1)
     {
 	if(rg_p->cooldown) {rg_p->cooldown -= 1;}
 	if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
@@ -262,23 +267,37 @@ gameUpdateRoomGrids(int i)
 	{
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
 	    {
-		rg_p->target_scale *= RG_MAX_WIDTH;
-		rg_p->t = 0.01f;
-		rg_p->cooldown = 10;
-		zoom_level++;
+		// Find the currently viewed roomgrid's child blockroom ID
+		int child_blockroom_id = roomGridGetFirstIDByType(current_roomgrid_p,
+								  active_entities_p,
+								  BLOCK_ROOM);
+		if(child_blockroom_id > -1)
+		{
+		    int child_rg_id = active_entities_p->roomgrid_ids[child_blockroom_id];
+		    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
+
+		    rg_p->target_scale *= RG_MAX_WIDTH;
+		    rg_p->t = 0.01f;
+		    rg_p->cooldown = 10;
+		}
 	    }
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
 	    {
-		rg_p->target_scale /= RG_MAX_WIDTH;
-		rg_p->t = 0.01f;
-		rg_p->cooldown = 10;
-		zoom_level--;
+		if(current_roomgrid_p->roomgrid_owner_id > -1)
+		{
+		    int parent_rg_id = current_roomgrid_p->roomgrid_owner_id;
+		    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[parent_rg_id];
+		    
+		    rg_p->target_scale /= RG_MAX_WIDTH;
+		    rg_p->t = 0.01f;
+		    rg_p->cooldown = 10;
+		}
 	    }
 	}
     }
     else
     {
-	RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[roomgrid_owner_id]; 
+	RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id]; 
 	rg_p->current_scale = rg_owner_p->current_scale / RG_MAX_WIDTH;
 	rg_p->target_scale = rg_owner_p->target_scale / RG_MAX_WIDTH;
 	rg_p->t = rg_owner_p->t;
@@ -368,8 +387,7 @@ gameRender(FrameTexture* depth_ftexture_p,
 				    roomgrid_lookup,
 				    asset_manager,
 				    game_window,
-				    dir_light_id,
-				    zoom_level);
+				    dir_light_id);
     
     // Render Pass 2 -  Entities
     platformRenderEntitiesToBuffer(*active_entities_p,
@@ -379,16 +397,14 @@ gameRender(FrameTexture* depth_ftexture_p,
 				   game_window,
 				   asset_manager,
 				   dir_light_id,
-				   cam_id,
-				   zoom_level);
+				   cam_id);
     
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,
 					asset_manager,
 					active_entities_p->transforms[cam_id].position,
 				        active_entities_p->cameras[cam_id].target,
-					grid_p,
-					zoom_level);
+					grid_p);
 
 
     // Render Pass 4 - Post Processing
@@ -423,7 +439,6 @@ main()
     platformLoadEntityTemplatesFromTxt(*active_entities_p, "..\\data\\templates\\entity_templates.txt");
     
     // Base Room Grid //
-
     roomGridLookupInit(roomgrid_lookup);
     int br_id = activeEntitiesCreateEntity(*active_entities_p,
 					   roomgrid_lookup,
@@ -431,7 +446,18 @@ main()
 					   ROOMGRID_A,
 					   Vec3F(0.0f, 0.0f, 0.0f),
 					   BLOCK_ROOM);
-        
+    int br_rg_id = active_entities_p->roomgrid_ids[br_id];
+    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[br_rg_id];
+
+    // Create Debug Grid Object
+    float br_current_scale = roomgrid_lookup.roomgrid_pointers[br_rg_id]->current_scale;
+    DebugGrid* grid_p = new DebugGrid(br_current_scale,
+				      RG_MAX_WIDTH + 1,
+				      RG_MAX_LENGTH + 1,
+				      Vec3F(-br_current_scale * 0.5f,
+					    -0.5f,
+					    -br_current_scale * 0.5f));
+
     // Temp Assets //
     
     // Initialize BGM
@@ -449,16 +475,7 @@ main()
 	                                                 false,
 							 false);
     frameTextureDataToGPU(ftexture_non_msaa_p);
-    // Create Debug Grid Object
-    int br_rg_id = active_entities_p->roomgrid_ids[br_id];
-    float br_current_scale = roomgrid_lookup.roomgrid_pointers[br_rg_id]->current_scale;
-    DebugGrid* grid_p = new DebugGrid(br_current_scale,
-				      RG_MAX_WIDTH + 1,
-				      RG_MAX_LENGTH + 1,
-				      Vec3F(-br_current_scale * 0.5f,
-					    -0.5f,
-					    -br_current_scale * 0.5f));
-
+    
     // 1st Block Room Entities //
 
     // Blocks
@@ -658,6 +675,7 @@ main()
     delete depth_ftexture_p;
     delete ftexture_msaa_p;
     delete ftexture_non_msaa_p;
+    delete current_roomgrid_p;
     
     return 0;
 }
