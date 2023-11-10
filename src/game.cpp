@@ -190,10 +190,19 @@ gameUpdateStates(int i)
 static void
 gameUpdateTransforms(int i)
 {
+    Vec3F view_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    #if 0
     // Calculate depth offset so viewed roomgrid
     // is back at the origin after scaling all models up
-    Vec3F view_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
-    view_depth_offset = BASE_RG_ORIGIN - current_roomgrid_p->transform_pos;
+    int current_rg_owner_id = current_roomgrid_p->roomgrid_owner_id;
+    if(current_rg_owner_id > -1)
+    {
+	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];
+	Vec3F origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * current_rg_owner_p->current_scale) +
+			       (Vec3F(0.5f, 0.5f, 0.5f) * current_roomgrid_p->current_scale));
+	view_depth_offset = BASE_RG_ORIGIN - (current_roomgrid_p->transform_pos - origin_offset);
+    }
+    #endif
     
     int rg_owner_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
     if(rg_owner_id > -1)
@@ -208,17 +217,17 @@ gameUpdateTransforms(int i)
 	if(rg_p->roomgrid_owner_id > -1)
 	{
 	    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id];
-	    Vec3F offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
+	    Vec3F origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
 			    (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-							  rg_p->current_scale) + offset + view_depth_offset;
+							  rg_p->current_scale) + origin_offset + view_depth_offset;
 	    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
 							 rg_owner_p->transform_pos);
 	}
 	else
 	{
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-							 rg_p->current_scale);
+							 rg_p->current_scale) + view_depth_offset;
 	}
 	rg_p->transform_pos = active_entities_p->transforms[i].position;
     }
