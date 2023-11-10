@@ -78,6 +78,7 @@ gameMoveEntitiesOnGrid(RoomGrid& grid, Vec3F cur_grid_pos, Vec3F new_grid_pos)
     roomGridRemoveEntity(grid, cur_grid_pos);
     roomGridSetEntity(grid, new_grid_pos, entity_id);
     active_entities_p->grid_positions[entity_id].position = new_grid_pos;
+
     return 1;
 }
 
@@ -190,24 +191,10 @@ gameUpdateStates(int i)
 static void
 gameUpdateTransforms(int i)
 {
-    Vec3F view_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
-    #if 0
-    // Calculate depth offset so viewed roomgrid
-    // is back at the origin after scaling all models up
-    int current_rg_owner_id = current_roomgrid_p->roomgrid_owner_id;
-    if(current_rg_owner_id > -1)
+    int rg_id = active_entities_p->grid_positions[i].roomgrid_owner_id; // Should rename to roomgrid_id
+    if(rg_id > -1)
     {
-	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];
-	Vec3F origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * current_rg_owner_p->current_scale) +
-			       (Vec3F(0.5f, 0.5f, 0.5f) * current_roomgrid_p->current_scale));
-	view_depth_offset = BASE_RG_ORIGIN - (current_roomgrid_p->transform_pos - origin_offset);
-    }
-    #endif
-    
-    int rg_owner_id = active_entities_p->grid_positions[i].roomgrid_owner_id;
-    if(rg_owner_id > -1)
-    {
-	RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[rg_owner_id];
+	RoomGrid* rg_p = roomgrid_lookup.roomgrid_pointers[rg_id];
 	// Update scale
 	active_entities_p->transforms[i].scale = Vec3F(rg_p->current_scale,
 						       rg_p->current_scale,
@@ -218,19 +205,41 @@ gameUpdateTransforms(int i)
 	{
 	    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id];
 	    Vec3F origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
-			    (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
+				   (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-							  rg_p->current_scale) + origin_offset + view_depth_offset;
+							  rg_p->current_scale) + origin_offset;
 	    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
 							 rg_owner_p->transform_pos);
 	}
 	else
 	{
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
-							 rg_p->current_scale) + view_depth_offset;
+							 rg_p->current_scale);
 	}
 	rg_p->transform_pos = active_entities_p->transforms[i].position;
     }
+}
+
+static void
+gameApplyDepthOffsetToTransforms(int i)
+{
+
+    // TODO: LERP the offset vector so transitions aren't jarring
+    Vec3F current_grid_pos;
+    int current_rg_owner_id = current_roomgrid_p->roomgrid_owner_id;
+    if(current_rg_owner_id > -1)
+    {
+	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];  
+	current_grid_pos = (current_rg_owner_p->transform_pos +
+			    (Vec3F(-0.5f, -0.5f, -0.5f) *
+			     current_rg_owner_p->current_scale));
+    }
+    else
+    {
+        current_grid_pos = Vec3F(0.0f, 0.0f, 0.0f);
+    }
+    Vec3F depth_offset = BASE_RG_ORIGIN - current_grid_pos; 
+    active_entities_p->transforms[i].position = active_entities_p->transforms[i].position + depth_offset;
 }
 
 static void
@@ -356,7 +365,6 @@ gameUpdate(SoundStream* sound_stream_p,
 		// Update Transforms
 		gameUpdateTransforms(i);
 	    }
-
 	    
 	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_CAMERA])
 	    {
@@ -366,11 +374,23 @@ gameUpdate(SoundStream* sound_stream_p,
 
 	    if(active_entities_p->entity_templates.table[active_entities_p->types[i]][COMPONENT_DIR_LIGHT])
 	    {
-		// Update dir light
+		// Update DirLight
 		dir_light_id = gameUpdateDirLights((float)platformGetTime(), i);
 	    }
 	}	
     }
+    for(uint j = 0; j < active_entities_p->count; j++)
+    {
+	if(!active_entities_p->states[j].inactive)
+	{
+	    if(active_entities_p->entity_templates.table[active_entities_p->types[j]][COMPONENT_GRID_POSITION])
+	    {
+		// 2nd Pass to Offset Transforms
+		gameApplyDepthOffsetToTransforms(j);
+	    }
+	}
+    }
+    
     soundStreamUpdate(sound_stream_p);
         
     // Remove Inactive Entities - Must be run after all other entity updates
@@ -456,7 +476,7 @@ main()
 					   Vec3F(0.0f, 0.0f, 0.0f),
 					   BLOCK_ROOM);
     int br_rg_id = active_entities_p->roomgrid_ids[br_id];
-    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[br_rg_id];
+    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A];
 
     // Create Debug Grid Object
     float br_current_scale = roomgrid_lookup.roomgrid_pointers[br_rg_id]->current_scale;
