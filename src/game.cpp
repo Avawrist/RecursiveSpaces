@@ -234,7 +234,7 @@ gameUpdateTransforms(int i)
 static void
 gameUpdateDepthOffsets()
 {
-    Vec3F target_grid_pos;
+    Vec3F target_pos;
     int   current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
     // The roomgrids final position from which we calculate the proper depth offset
     // MUST be based on its target scale and NOT its current scale.
@@ -242,16 +242,27 @@ gameUpdateDepthOffsets()
     if(current_rg_owner_id > -1)
     {
 	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];  
-        target_grid_pos = (current_rg_owner_p->target_transform_pos +
+        target_pos = (current_rg_owner_p->target_transform_pos + 
 			   (Vec3F(-0.5f, -0.5f, -0.5f) *
 			    current_rg_owner_p->target_scale));
     }
-    else {target_grid_pos = Vec3F(0.0f, 0.0f, 0.0f);}
+    else {target_pos = Vec3F(0.0f, 0.0f, 0.0f);}
 
-    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - target_grid_pos;
+    // TODO: Need to calculate CURRENT depth offset and apply to all transforms each frame,
+    //       separate from finding the TARGET center offset and interpolating gradually
+    
+    // TODO: Can we separate the target_depth_offset vector into two vectors, one representing
+    //       the depth and one representing the center offset?
+    //       Then we can lock the depth exactly each frame while interpolating the center offset
+    //       gradually for a nice transition animation
+
+    // target_depth_offset contains both the depth and x/y offset:
+    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - target_pos;
     rg_transition_status.current_depth_offset = vlerp(rg_transition_status.previous_depth_offset,
 						      rg_transition_status.target_depth_offset,
 						      rg_transition_status.t);
+    
+    //rg_transition_status.current_depth_offset = BASE_RG_ORIGIN - target_grid_pos;
 }
 
 static void
@@ -543,7 +554,6 @@ main()
     frameTextureDataToGPU(ftexture_non_msaa_p);
     
     // 1st Block Room Entities //
-
     // Blocks
     for(int x = 0; x < RG_MAX_WIDTH; x++)
     {
@@ -557,7 +567,6 @@ main()
 					   BLOCK);	    
 	    }
     }
-    
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
@@ -570,7 +579,6 @@ main()
 			       -1,
 			       Vec3F(9.0f, 1.0f, 9.0f),
 			       BLOCK);
-
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
@@ -589,7 +597,6 @@ main()
 			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
-    
     // Player
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
@@ -599,15 +606,12 @@ main()
 			       PLAYER);
 
     // 2nd Block Room Entities //
-
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
 			       ROOMGRID_B,
 			       Vec3F(1.0f, 1.0f, 1.0f),
 			       BLOCK_ROOM);
-
-    
     // Blocks
     for(int x = 0; x < RG_MAX_WIDTH; x++)
     {
@@ -621,7 +625,6 @@ main()
 					   BLOCK);	    
 	    }
     }
-
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
@@ -635,17 +638,13 @@ main()
 			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
-
     // 3rd Block Room Entities //
-
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_B,
 			       ROOMGRID_C,
 			       Vec3F(1.0f, 1.0f, 1.0f),
 			       BLOCK_ROOM);
-
-    
     // Blocks
     for(int x = 0; x < RG_MAX_WIDTH; x++)
     {
@@ -659,7 +658,6 @@ main()
 					   BLOCK);	    
 	    }
     }
-
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
@@ -679,17 +677,13 @@ main()
 			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
-
     // 4th Block Room Entities //
-
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_C,
 			       ROOMGRID_D,
 			       Vec3F(5.0f, 1.0f, 5.0f),
 			       BLOCK_ROOM);
-
-    
     // Blocks
     for(int x = 0; x < RG_MAX_WIDTH; x++)
     {
@@ -703,7 +697,6 @@ main()
 					   BLOCK);	    
 	    }
     }
-
     // Special Block
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
@@ -723,9 +716,86 @@ main()
 			       -1,
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
-
+    // 5th Block Room Entities //
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_D,
+			       ROOMGRID_E,
+			       Vec3F(8.0f, 1.0f, 5.0f),
+			       BLOCK_ROOM);
+    // Blocks
+    for(int x = 0; x < RG_MAX_WIDTH; x++)
+    {
+	    for(int z = 0; z < RG_MAX_LENGTH; z++)
+	    {
+		activeEntitiesCreateEntity(*active_entities_p,
+					   roomgrid_lookup,
+					   ROOMGRID_E,
+					   -1,
+					   Vec3F((float)x, 0.0f, (float)z),
+					   BLOCK);	    
+	    }
+    }
+    // Special Block
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_E,
+			       -1,
+			       Vec3F(1.0f, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_E,
+			       -1,
+			       Vec3F(1.0f, 1.0f, RG_MAX_LENGTH - 2),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_E,
+			       -1,
+			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+    // 6th Block Room Entities //
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_E,
+			       ROOMGRID_F,
+			       Vec3F(5.0f, 1.0f, 8.0f),
+			       BLOCK_ROOM);
+    // Blocks
+    for(int x = 0; x < RG_MAX_WIDTH; x++)
+    {
+	    for(int z = 0; z < RG_MAX_LENGTH; z++)
+	    {
+		activeEntitiesCreateEntity(*active_entities_p,
+					   roomgrid_lookup,
+					   ROOMGRID_F,
+					   -1,
+					   Vec3F((float)x, 0.0f, (float)z),
+					   BLOCK);	    
+	    }
+    }
+    // Special Block
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_F,
+			       -1,
+			       Vec3F(1.0f, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_F,
+			       -1,
+			       Vec3F(1.0f, 1.0f, RG_MAX_LENGTH - 2),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_F,
+			       -1,
+			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
     
-    // DirLight
+    // DirLight //
     Vec3F dirlight_target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
     Vec3F dirlight_offset = Vec3F(11.0f, 11.0f, -11.0f);
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
@@ -738,7 +808,7 @@ main()
     active_entities_p->dir_lights[dir_light_id].offset = dirlight_offset;
     active_entities_p->dir_lights[dir_light_id].dir = (dirlight_target - (dirlight_target + dirlight_offset));
 
-    // Camera
+    // Camera //
     int cam_id = activeEntitiesCreateEntity(*active_entities_p,
 					    roomgrid_lookup,
 					    ROOMGRID_A,
