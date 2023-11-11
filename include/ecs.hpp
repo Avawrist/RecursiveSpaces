@@ -200,6 +200,14 @@ typedef struct RoomGridLookup
     RoomGrid* roomgrid_pointers[TOTAL_ROOMGRIDS];
 } RoomGridLookup;
 
+typedef struct RoomGridTransitionStatus
+{
+    RoomGrid* current_roomgrid_p = NULL;
+    Vec3F target_depth_offset  = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    float t = 1.0f;
+} RoomGridTransitionStatus;
+
 // Struct of Component Arrays //
 
 #define MAX_COMPONENTS 128

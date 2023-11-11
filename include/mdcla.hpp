@@ -512,6 +512,14 @@ slerp(const Quaternion& q1, const Quaternion& q2, double t);
 inline float
 lerp(float a, float b, float t) {return a + (b - a) * t;}
 
+inline Vec3F
+vlerp(const Vec3F& a, const Vec3F& b, float t)
+{
+    return Vec3F(a.x + (b.x - a.x) * t,
+		 a.y + (b.y - a.y) * t,
+		 a.z + (b.z - a.z) * t);
+}
+
 inline float
 clamp(float n, float min, float max)
 {

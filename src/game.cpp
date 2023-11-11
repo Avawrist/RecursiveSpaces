@@ -18,13 +18,13 @@
 #include "mdcla.hpp"
 
 // Globals //
-
 InputManager    input_manager;
 GameWindow      game_window;
 AssetManager    asset_manager;
 ActiveEntities* active_entities_p = new ActiveEntities();
 RoomGridLookup  roomgrid_lookup;
-RoomGrid*       current_roomgrid_p = NULL;
+
+RoomGridTransitionStatus rg_transition_status;
 
 // Function Definitions //
 
@@ -223,10 +223,9 @@ gameUpdateTransforms(int i)
 static void
 gameApplyDepthOffsetToTransforms(int i)
 {
-
-    // TODO: LERP the offset vector so transitions aren't jarring
     Vec3F current_grid_pos;
-    int current_rg_owner_id = current_roomgrid_p->roomgrid_owner_id;
+    int current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
+
     if(current_rg_owner_id > -1)
     {
 	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];  
@@ -238,8 +237,13 @@ gameApplyDepthOffsetToTransforms(int i)
     {
         current_grid_pos = Vec3F(0.0f, 0.0f, 0.0f);
     }
-    Vec3F depth_offset = BASE_RG_ORIGIN - current_grid_pos; 
-    active_entities_p->transforms[i].position = active_entities_p->transforms[i].position + depth_offset;
+
+    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - current_grid_pos;
+    rg_transition_status.current_depth_offset = vlerp(rg_transition_status.current_depth_offset,
+						      rg_transition_status.target_depth_offset,
+						      rg_transition_status.t);
+    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
+						 rg_transition_status.current_depth_offset);
 }
 
 static void
@@ -278,6 +282,7 @@ gameUpdateRoomGrids(int i)
     {
 	if(rg_p->cooldown) {rg_p->cooldown -= 1;}
 	if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
+	if(rg_transition_status.t < 1.0f) {rg_transition_status.t += 0.01f;}
     
 	rg_p->current_scale = lerp(rg_p->current_scale, rg_p->target_scale, rg_p->t);
 	    
@@ -286,29 +291,35 @@ gameUpdateRoomGrids(int i)
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
 	    {
 		// Find the currently viewed roomgrid's child blockroom ID
-		int child_blockroom_id = roomGridGetFirstIDByType(current_roomgrid_p,
+		int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
 								  active_entities_p,
 								  BLOCK_ROOM);
-		if(child_blockroom_id > -1)
+		if(child_br_id > -1)
 		{
-		    int child_rg_id = active_entities_p->roomgrid_ids[child_blockroom_id];
-		    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
+		    int child_rg_id = active_entities_p->roomgrid_ids[child_br_id];
+		    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
 
 		    rg_p->target_scale *= RG_MAX_WIDTH;
 		    rg_p->t = 0.01f;
 		    rg_p->cooldown = 10;
+
+		    rg_transition_status.t = 0.01f;
+		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
 		}
 	    }
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
 	    {
-		if(current_roomgrid_p->roomgrid_owner_id > -1)
+		if(rg_transition_status.current_roomgrid_p->roomgrid_owner_id > -1)
 		{
-		    int parent_rg_id = current_roomgrid_p->roomgrid_owner_id;
-		    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[parent_rg_id];
+		    int parent_rg_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
+		    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[parent_rg_id];
 		    
 		    rg_p->target_scale /= RG_MAX_WIDTH;
 		    rg_p->t = 0.01f;
 		    rg_p->cooldown = 10;
+
+		    rg_transition_status.t = 0.01f;
+		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
 		}
 	    }
 	}
@@ -476,7 +487,7 @@ main()
 					   Vec3F(0.0f, 0.0f, 0.0f),
 					   BLOCK_ROOM);
     int br_rg_id = active_entities_p->roomgrid_ids[br_id];
-    current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A];
+    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A];
 
     // Create Debug Grid Object
     float br_current_scale = roomgrid_lookup.roomgrid_pointers[br_rg_id]->current_scale;
@@ -704,7 +715,6 @@ main()
     delete depth_ftexture_p;
     delete ftexture_msaa_p;
     delete ftexture_non_msaa_p;
-    delete current_roomgrid_p;
     
     return 0;
 }
