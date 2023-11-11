@@ -185,10 +185,12 @@ typedef enum RoomGridCodes
 typedef struct RoomGrid
 {
     int grid[RG_MAX_WIDTH][RG_MAX_HEIGHT][RG_MAX_LENGTH];
-    float current_scale = 1.0f;
-    float target_scale = 1.0f;
+    float previous_scale = 1.0f;
+    float current_scale  = 1.0f;
+    float target_scale   = 1.0f;
     float t = 1.0f;
     Vec3F center = Vec3F(RG_MAX_WIDTH * current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * current_scale * 0.5f);
+    Vec3F target_transform_pos;
     Vec3F transform_pos;
     uint cooldown = 0;
     int roomgrid_owner_id = -1; 
@@ -203,8 +205,9 @@ typedef struct RoomGridLookup
 typedef struct RoomGridTransitionStatus
 {
     RoomGrid* current_roomgrid_p = NULL;
-    Vec3F target_depth_offset  = Vec3F(0.0f, 0.0f, 0.0f);
-    Vec3F current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F previous_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F current_depth_offset  = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F target_depth_offset   = Vec3F(0.0f, 0.0f, 0.0f);
     float t = 1.0f;
 } RoomGridTransitionStatus;
 

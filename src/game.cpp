@@ -203,6 +203,7 @@ gameUpdateTransforms(int i)
 	// Update position
 	if(rg_p->roomgrid_owner_id > -1)
 	{
+	    // Update current pos
 	    RoomGrid* rg_owner_p = roomgrid_lookup.roomgrid_pointers[rg_p->roomgrid_owner_id];
 	    Vec3F origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->current_scale) +
 				   (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->current_scale));
@@ -210,38 +211,52 @@ gameUpdateTransforms(int i)
 							  rg_p->current_scale) + origin_offset;
 	    active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
 							 rg_owner_p->transform_pos);
+
+	    // Update target pos for use in calculating depth offset
+	    Vec3F target_origin_offset = ((Vec3F(-0.5f, -0.5f, -0.5f) * rg_owner_p->target_scale) +
+					  (Vec3F(0.5f, 0.5f, 0.5f) * rg_p->target_scale));
+	    rg_p->target_transform_pos = (active_entities_p->grid_positions[i].position *
+					  rg_p->target_scale) + origin_offset;
+	    rg_p->target_transform_pos = (rg_p->target_transform_pos +
+					  rg_owner_p->target_transform_pos);
 	}
 	else
 	{
 	    active_entities_p->transforms[i].position = (active_entities_p->grid_positions[i].position *
 							 rg_p->current_scale);
+	    rg_p->target_transform_pos = (active_entities_p->grid_positions[i].position *
+							 rg_p->target_scale);
 	}
 	rg_p->transform_pos = active_entities_p->transforms[i].position;
     }
 }
 
 static void
-gameApplyDepthOffsetToTransforms(int i)
+gameUpdateDepthOffsets()
 {
-    Vec3F current_grid_pos;
-    int current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
-
+    Vec3F target_grid_pos;
+    int   current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
+    // The roomgrids final position from which we calculate the proper depth offset
+    // MUST be based on its target scale and NOT its current scale.
+    // This way we calculate the proper target offset at the start
     if(current_rg_owner_id > -1)
     {
 	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];  
-	current_grid_pos = (current_rg_owner_p->transform_pos +
-			    (Vec3F(-0.5f, -0.5f, -0.5f) *
-			     current_rg_owner_p->current_scale));
+        target_grid_pos = (current_rg_owner_p->target_transform_pos +
+			   (Vec3F(-0.5f, -0.5f, -0.5f) *
+			    current_rg_owner_p->target_scale));
     }
-    else
-    {
-        current_grid_pos = Vec3F(0.0f, 0.0f, 0.0f);
-    }
+    else {target_grid_pos = Vec3F(0.0f, 0.0f, 0.0f);}
 
-    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - current_grid_pos;
-    rg_transition_status.current_depth_offset = vlerp(rg_transition_status.current_depth_offset,
+    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - target_grid_pos;
+    rg_transition_status.current_depth_offset = vlerp(rg_transition_status.previous_depth_offset,
 						      rg_transition_status.target_depth_offset,
 						      rg_transition_status.t);
+}
+
+static void
+gameApplyDepthOffsetToTransforms(int i)
+{
     active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
 						 rg_transition_status.current_depth_offset);
 }
@@ -281,10 +296,21 @@ gameUpdateRoomGrids(int i)
     if(rg_p->roomgrid_owner_id == -1)
     {
 	if(rg_p->cooldown) {rg_p->cooldown -= 1;}
-	if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
-	if(rg_transition_status.t < 1.0f) {rg_transition_status.t += 0.01f;}
+	if(rg_p->t < 1.0f) {rg_p->t += 0.02f;}
+	if(rg_p->t >= 1.0f)
+	{
+	    rg_p->t = 1.0f;
+	    rg_p->previous_scale = rg_p->target_scale;
+	}
+	
+	if(rg_transition_status.t < 1.0f) {rg_transition_status.t += 0.02f;}
+	if(rg_transition_status.t >= 1.0f)
+	{
+	    rg_transition_status.t = 1.0f;
+	    rg_transition_status.previous_depth_offset = rg_transition_status.target_depth_offset;
+	}
     
-	rg_p->current_scale = lerp(rg_p->current_scale, rg_p->target_scale, rg_p->t);
+	rg_p->current_scale = lerp(rg_p->previous_scale, rg_p->target_scale, rg_p->t);
 	    
 	if(rg_p->cooldown == 0)
 	{
@@ -300,10 +326,10 @@ gameUpdateRoomGrids(int i)
 		    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
 
 		    rg_p->target_scale *= RG_MAX_WIDTH;
-		    rg_p->t = 0.01f;
+		    rg_p->t = 0.0f;
 		    rg_p->cooldown = 10;
 
-		    rg_transition_status.t = 0.01f;
+		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
 		}
 	    }
@@ -315,10 +341,10 @@ gameUpdateRoomGrids(int i)
 		    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[parent_rg_id];
 		    
 		    rg_p->target_scale /= RG_MAX_WIDTH;
-		    rg_p->t = 0.01f;
+		    rg_p->t = 0.0f;
 		    rg_p->cooldown = 10;
 
-		    rg_transition_status.t = 0.01f;
+		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
 		}
 	    }
@@ -390,6 +416,9 @@ gameUpdate(SoundStream* sound_stream_p,
 	    }
 	}	
     }
+
+    gameUpdateDepthOffsets();
+    
     for(uint j = 0; j < active_entities_p->count; j++)
     {
 	if(!active_entities_p->states[j].inactive)
@@ -438,15 +467,14 @@ gameRender(FrameTexture* depth_ftexture_p,
 				   asset_manager,
 				   dir_light_id,
 				   cam_id);
-    
+
     // Render Pass 3 - Debug
     platformRenderDebugElementsToBuffer(game_window,
 					asset_manager,
 					active_entities_p->transforms[cam_id].position,
 				        active_entities_p->cameras[cam_id].target,
-					grid_p);
-
-
+                                        grid_p);
+	
     // Render Pass 4 - Post Processing
     platformBlitBufferToBuffer(*ftexture_msaa_p,
 			       *ftexture_non_msaa_p,
@@ -460,9 +488,7 @@ gameRender(FrameTexture* depth_ftexture_p,
 			       ftexture_non_msaa_p->height);
     platformRenderPP(asset_manager, *ftexture_non_msaa_p);
 
-    //////////////////
     // Swap buffers //
-    //////////////////
     platformSwapBuffers(game_window);
     
     p.end_time = platformGetTime();
@@ -654,9 +680,54 @@ main()
 			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
 			       SPECIAL_BLOCK);
 
+    // 4th Block Room Entities //
+
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_C,
+			       ROOMGRID_D,
+			       Vec3F(5.0f, 1.0f, 5.0f),
+			       BLOCK_ROOM);
+
+    
+    // Blocks
+    for(int x = 0; x < RG_MAX_WIDTH; x++)
+    {
+	    for(int z = 0; z < RG_MAX_LENGTH; z++)
+	    {
+		activeEntitiesCreateEntity(*active_entities_p,
+					   roomgrid_lookup,
+					   ROOMGRID_D,
+					   -1,
+					   Vec3F((float)x, 0.0f, (float)z),
+					   BLOCK);	    
+	    }
+    }
+
+    // Special Block
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_D,
+			       -1,
+			       Vec3F(1.0f, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_D,
+			       -1,
+			       Vec3F(1.0f, 1.0f, RG_MAX_LENGTH - 2),
+			       SPECIAL_BLOCK);
+    activeEntitiesCreateEntity(*active_entities_p,
+			       roomgrid_lookup,
+			       ROOMGRID_D,
+			       -1,
+			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, 1.0f),
+			       SPECIAL_BLOCK);
+
+    
     // DirLight
     Vec3F dirlight_target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
-    Vec3F dirlight_offset = Vec3F(11.0f, 10.0f, -11.0f);
+    Vec3F dirlight_offset = Vec3F(11.0f, 11.0f, -11.0f);
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  roomgrid_lookup,
 						  ROOMGRID_A,
