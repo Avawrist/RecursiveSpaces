@@ -254,7 +254,8 @@ gameUpdateDepthOffsets()
     if(rg_transition_status.update_anim_offset)
     {
 	// TODO: Fix this offset. Does offset need to be scaled?
-	rg_transition_status.anim_offset = Vec3F(current_pos.x, 0.0f, current_pos.z);
+	rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
+					    rg_transition_status.current_roomgrid_p->grid_pos);
 	rg_transition_status.update_anim_offset = false;
     }
     rg_transition_status.apply_offset = (current_offset +
@@ -273,6 +274,31 @@ gameApplyDepthOffsetToTransforms(int i)
 static void
 gameUpdateCameras(int i, int& cam_id)
 {
+    // Update dir from transform
+    active_entities_p->cameras[i].dir = (active_entities_p->cameras[i].target -
+					 active_entities_p->transforms[i].position);
+
+    Vec3F zaxis = normalize(active_entities_p->cameras[i].dir);
+    Vec3F xaxis = normalize(cross(zaxis, Vec3F(0.0f, 1.0f, 0.0f)));
+    Vec3F yaxis = cross(xaxis, zaxis);
+
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_D] == KEY_DOWN)
+    {
+	active_entities_p->transforms[i].position += xaxis; 
+    }
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_A] == KEY_DOWN)
+    {
+	active_entities_p->transforms[i].position -= xaxis; 
+    }
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+    {
+	active_entities_p->transforms[i].position += yaxis; 
+    }
+    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+    {
+	active_entities_p->transforms[i].position -= yaxis; 
+    }
+    
     // Set ID to Render Camera
     if(active_entities_p->cameras[i].is_selected) { cam_id = i; }
 }
@@ -305,7 +331,7 @@ gameUpdateRoomGrids(int i)
     if(rg_p->roomgrid_owner_id == -1)
     {
 	if(rg_p->cooldown) {rg_p->cooldown -= 1;}
-	if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
+	if(rg_p->t < 1.0f) {rg_p->t += 0.02f;}
 	if(rg_p->t >= 1.0f)
 	{
 	    rg_p->t = 1.0f;
@@ -322,7 +348,7 @@ gameUpdateRoomGrids(int i)
 	    
 	if(rg_p->cooldown == 0)
 	{
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_W] == KEY_DOWN)
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_I] == KEY_DOWN)
 	    {
 		// Find the currently viewed roomgrid's child blockroom ID
 		int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
@@ -341,7 +367,7 @@ gameUpdateRoomGrids(int i)
 		    rg_transition_status.update_anim_offset = true;
 		}
 	    }
-	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
+	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_O] == KEY_DOWN)
 	    {
 		if(rg_transition_status.current_roomgrid_p->roomgrid_owner_id > -1)
 		{
@@ -365,7 +391,9 @@ gameUpdateRoomGrids(int i)
 	rg_p->target_scale = rg_owner_p->target_scale / RG_MAX_WIDTH;
 	rg_p->t = rg_owner_p->t;
 	rg_p->cooldown = rg_owner_p->cooldown;
-    } 
+    }
+
+    rg_p->grid_pos = active_entities_p->grid_positions[i].position;
 }
 
 static int

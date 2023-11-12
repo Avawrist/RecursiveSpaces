@@ -33,16 +33,18 @@ cursorGetDistance(Cursor& cursor);
 typedef enum Key
 {
     KEY_ARROW_UP    = 0,
-    KEY_ARROW_DOWN  = 1,
-    KEY_ARROW_LEFT  = 2,
-    KEY_ARROW_RIGHT = 3,
-    KEY_SPACE       = 4,
-    KEY_ESC         = 5,
-    KEY_W           = 6,
-    KEY_S           = 7,
-    KEY_A           = 8,
-    KEY_D           = 9,
-    TOTAL_KEYS      = 10
+    KEY_ARROW_DOWN,
+    KEY_ARROW_LEFT,
+    KEY_ARROW_RIGHT,
+    KEY_SPACE,
+    KEY_ESC,
+    KEY_W,
+    KEY_S,
+    KEY_A,
+    KEY_D,
+    KEY_I,
+    KEY_O,
+    TOTAL_KEYS
 } Key;
 
 typedef enum KeyState

@@ -25,6 +25,7 @@ Camera::Camera()
 {
     is_selected = true;
     target      = Vec3F(0.0f, 0.0f, 0.0f);
+    dir         = Vec3F(0.0f, 0.0f, 0.0f);
 }
 
 // Struct Component DirLight //

@@ -79,6 +79,7 @@ typedef struct Camera
 {
     bool  is_selected;
     Vec3F target;
+    Vec3F dir;
     Camera();
 } Camera;
 
@@ -191,6 +192,7 @@ typedef struct RoomGrid
     float t = 1.0f;
     Vec3F center = Vec3F(RG_MAX_WIDTH * current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * current_scale * 0.5f);
     Vec3F target_transform_pos;
+    Vec3F grid_pos;
     Vec3F transform_pos;
     uint cooldown = 0;
     int roomgrid_owner_id = -1; 

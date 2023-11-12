@@ -260,6 +260,9 @@ platformGetInputsThisFrame(InputManager &im, GameWindow &gw)
     im.inputs_on_frame[FRAME_1_PRIOR][KEY_A]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_A);
     im.inputs_on_frame[FRAME_1_PRIOR][KEY_D]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_D);
 
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_I]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_I);
+    im.inputs_on_frame[FRAME_1_PRIOR][KEY_O]           = glfwGetKey((GLFWwindow*)gw.window_p, GLFW_KEY_O);
+
     // Get cursor input
     glfwGetCursorPos((GLFWwindow*)gw.window_p, &im.cursor.x_pos, &im.cursor.y_pos);
 }
