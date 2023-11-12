@@ -311,14 +311,14 @@ platformRenderShadowMapToBuffer(ActiveEntities& active_entities,
     shaderAddMat4Uniform(shadowmap_shader_p, "view", view.getPointer());
 
     // Projection Mat
-    float ortho_height = 20.0f;
+    float ortho_height = 30.0f;
     float ortho_width  = ortho_height * game_window.win_ar;
     Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
 					   ortho_width * 0.5f,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					  ortho_height * 15.0f);
+					  ortho_height * 10.0f);
     shaderAddMat4Uniform(shadowmap_shader_p, "projection", projection.getPointer());
 
     // Render Entity Depths //
@@ -372,14 +372,14 @@ platformRenderEntitiesToBuffer(const ActiveEntities& active_entities,
 			    Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(bp_shader_p, "cam_view", cam_view.getPointer());
     // Projection Mat
-    float ortho_height = 20.0f;
+    float ortho_height = 30.0f;
     float ortho_width = ortho_height * game_window.win_ar;
     Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
 					   ortho_width * 0.5f,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   ortho_height * 15.0f);
+					   ortho_height * 10.0f);
     shaderAddMat4Uniform(bp_shader_p, "projection", projection.getPointer());
     // Cam Pos
     shaderAddVec3Uniform(bp_shader_p, "cam_pos", active_entities.transforms[cam_id].position);
@@ -468,14 +468,14 @@ platformRenderDebugElementsToBuffer(const GameWindow& game_window,
     Mat4F view = lookAt(cam_pos, cam_target, Vec3F(0.0f, 1.0f, 0.0f));
     shaderAddMat4Uniform(grid_shader_p, "view", view.getPointer());
     // Projection
-    float ortho_height = 20.0f;
+    float ortho_height = 30.0f;
     float ortho_width = ortho_height * game_window.win_ar;
     Mat4F projection = getOrthoProjection(-ortho_width * 0.5f,
 					   ortho_width * 0.5f,
 					  -ortho_height * 0.5f,
 					   ortho_height * 0.5f,
 					   0.05f,
-					   ortho_height * 15.0f);
+					   ortho_height * 10.0f);
     shaderAddMat4Uniform(grid_shader_p, "projection", projection.getPointer());
 
     // Render Debug Elements //

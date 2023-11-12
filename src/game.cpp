@@ -251,13 +251,14 @@ gameUpdateDepthOffsets()
     current_offset = BASE_RG_ORIGIN - current_pos;
 
     // Anim offset - lerp down to 0 vector
+    /*
     if(rg_transition_status.update_anim_offset)
     {
 	// TODO: Fix this offset. Does offset need to be scaled?
 	rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
 					    rg_transition_status.current_roomgrid_p->grid_pos);
 	rg_transition_status.update_anim_offset = false;
-    }
+	} */
     rg_transition_status.apply_offset = (current_offset +
 					 vlerp(rg_transition_status.anim_offset,
 					       Vec3F(0.0f, 0.0f, 0.0f),
@@ -365,6 +366,9 @@ gameUpdateRoomGrids(int i)
 
 		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.update_anim_offset = true;
+
+		    rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
+							rg_transition_status.current_roomgrid_p->grid_pos);
 		}
 	    }
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_O] == KEY_DOWN)
@@ -380,6 +384,13 @@ gameUpdateRoomGrids(int i)
 
 		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.update_anim_offset = true;
+
+		    int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
+							       active_entities_p,
+							       BLOCK_ROOM);
+		    rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
+							(-1.0f * RG_MAX_WIDTH *
+							 active_entities_p->grid_positions[child_br_id].position));
 		}
 	    }
 	}
@@ -502,7 +513,7 @@ gameRender(FrameTexture* depth_ftexture_p,
 				   dir_light_id,
 				   cam_id);
 
-    // Render Pass 3 - Debug
+    // Render Pass 3 - Debug 
     platformRenderDebugElementsToBuffer(game_window,
 					asset_manager,
 					active_entities_p->transforms[cam_id].position,
@@ -812,7 +823,7 @@ main()
     
     // DirLight //
     Vec3F dirlight_target = roomgrid_lookup.roomgrid_pointers[ROOMGRID_A]->center;
-    Vec3F dirlight_offset = Vec3F(11.0f, 11.0f, -11.0f);
+    Vec3F dirlight_offset = Vec3F(20.0f, 20.0f, -20.0f);
     int dir_light_id = activeEntitiesCreateEntity(*active_entities_p,
 						  roomgrid_lookup,
 						  ROOMGRID_A,
