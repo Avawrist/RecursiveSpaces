@@ -388,9 +388,8 @@ gameUpdateRoomGrids(int i)
 		    int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
 							       active_entities_p,
 							       BLOCK_ROOM);
-		    rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
-							(-1.0f * RG_MAX_WIDTH *
-							 active_entities_p->grid_positions[child_br_id].position));
+		    rg_transition_status.anim_offset = (-1.0f * RG_MAX_WIDTH *
+							 active_entities_p->grid_positions[child_br_id].position);
 		}
 	    }
 	}
