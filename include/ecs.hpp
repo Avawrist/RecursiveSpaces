@@ -205,9 +205,9 @@ typedef struct RoomGridLookup
 typedef struct RoomGridTransitionStatus
 {
     RoomGrid* current_roomgrid_p = NULL;
-    Vec3F previous_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
-    Vec3F current_depth_offset  = Vec3F(0.0f, 0.0f, 0.0f);
-    Vec3F target_depth_offset   = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F apply_offset = Vec3F(0.0f, 0.0f, 0.0f);
+    Vec3F anim_offset  = Vec3F(0.0f, 0.0f, 0.0f);
+    bool update_anim_offset = false;
     float t = 1.0f;
 } RoomGridTransitionStatus;
 

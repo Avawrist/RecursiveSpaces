@@ -234,42 +234,40 @@ gameUpdateTransforms(int i)
 static void
 gameUpdateDepthOffsets()
 {
-    Vec3F target_pos;
-    int   current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
-    // The roomgrids final position from which we calculate the proper depth offset
-    // MUST be based on its target scale and NOT its current scale.
-    // This way we calculate the proper target offset at the start
+    Vec3F current_pos;
+    Vec3F current_offset;
+    
+    int current_rg_owner_id = rg_transition_status.current_roomgrid_p->roomgrid_owner_id;
+
+    // Current_offset - Distance from the origin after scaling, apply to all transforms
     if(current_rg_owner_id > -1)
     {
 	RoomGrid* current_rg_owner_p = roomgrid_lookup.roomgrid_pointers[current_rg_owner_id];  
-        target_pos = (current_rg_owner_p->target_transform_pos + 
-			   (Vec3F(-0.5f, -0.5f, -0.5f) *
-			    current_rg_owner_p->target_scale));
+        current_pos = (current_rg_owner_p->transform_pos + 
+		       (Vec3F(-0.5f, -0.5f, -0.5f) *
+			current_rg_owner_p->current_scale));
     }
-    else {target_pos = Vec3F(0.0f, 0.0f, 0.0f);}
+    else {current_pos = Vec3F(0.0f, 0.0f, 0.0f);}
+    current_offset = BASE_RG_ORIGIN - current_pos;
 
-    // TODO: Need to calculate CURRENT depth offset and apply to all transforms each frame,
-    //       separate from finding the TARGET center offset and interpolating gradually
-    
-    // TODO: Can we separate the target_depth_offset vector into two vectors, one representing
-    //       the depth and one representing the center offset?
-    //       Then we can lock the depth exactly each frame while interpolating the center offset
-    //       gradually for a nice transition animation
-
-    // target_depth_offset contains both the depth and x/y offset:
-    rg_transition_status.target_depth_offset = BASE_RG_ORIGIN - target_pos;
-    rg_transition_status.current_depth_offset = vlerp(rg_transition_status.previous_depth_offset,
-						      rg_transition_status.target_depth_offset,
-						      rg_transition_status.t);
-    
-    //rg_transition_status.current_depth_offset = BASE_RG_ORIGIN - target_grid_pos;
+    // Anim offset - lerp down to 0 vector
+    if(rg_transition_status.update_anim_offset)
+    {
+	// TODO: Fix this offset. Does offset need to be scaled?
+	rg_transition_status.anim_offset = Vec3F(current_pos.x, 0.0f, current_pos.z);
+	rg_transition_status.update_anim_offset = false;
+    }
+    rg_transition_status.apply_offset = (current_offset +
+					 vlerp(rg_transition_status.anim_offset,
+					       Vec3F(0.0f, 0.0f, 0.0f),
+					       rg_transition_status.t));
 }
 
 static void
 gameApplyDepthOffsetToTransforms(int i)
 {
     active_entities_p->transforms[i].position = (active_entities_p->transforms[i].position +
-						 rg_transition_status.current_depth_offset);
+						 rg_transition_status.apply_offset);
 }
 
 static void
@@ -307,7 +305,7 @@ gameUpdateRoomGrids(int i)
     if(rg_p->roomgrid_owner_id == -1)
     {
 	if(rg_p->cooldown) {rg_p->cooldown -= 1;}
-	if(rg_p->t < 1.0f) {rg_p->t += 0.02f;}
+	if(rg_p->t < 1.0f) {rg_p->t += 0.01f;}
 	if(rg_p->t >= 1.0f)
 	{
 	    rg_p->t = 1.0f;
@@ -318,7 +316,6 @@ gameUpdateRoomGrids(int i)
 	if(rg_transition_status.t >= 1.0f)
 	{
 	    rg_transition_status.t = 1.0f;
-	    rg_transition_status.previous_depth_offset = rg_transition_status.target_depth_offset;
 	}
     
 	rg_p->current_scale = lerp(rg_p->previous_scale, rg_p->target_scale, rg_p->t);
@@ -341,7 +338,7 @@ gameUpdateRoomGrids(int i)
 		    rg_p->cooldown = 10;
 
 		    rg_transition_status.t = 0.0f;
-		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+		    rg_transition_status.update_anim_offset = true;
 		}
 	    }
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_S] == KEY_DOWN)
@@ -356,7 +353,7 @@ gameUpdateRoomGrids(int i)
 		    rg_p->cooldown = 10;
 
 		    rg_transition_status.t = 0.0f;
-		    rg_transition_status.current_depth_offset = Vec3F(0.0f, 0.0f, 0.0f);
+		    rg_transition_status.update_anim_offset = true;
 		}
 	    }
 	}
@@ -376,10 +373,8 @@ gameUpdate(SoundStream* sound_stream_p,
 	       int& cam_id,
 	       int& dir_light_id)
 {
-    ////////////
     // Update //
-    ////////////
-
+    
     for(uint i = 0; i < active_entities_p->count; i++)
     {
 	if(!active_entities_p->states[i].inactive)
@@ -534,8 +529,6 @@ main()
 				      Vec3F(-br_current_scale * 0.5f,
 					    -0.5f,
 					    -br_current_scale * 0.5f));
-
-    // Temp Assets //
     
     // Initialize BGM
     SoundStream* test_soundStream_p = new SoundStream("..\\data\\assets\\bgm\\elephant.wav", sound_interface);
@@ -580,12 +573,6 @@ main()
 			       Vec3F(9.0f, 1.0f, 9.0f),
 			       BLOCK);
     // Special Block
-    activeEntitiesCreateEntity(*active_entities_p,
-			       roomgrid_lookup,
-			       ROOMGRID_A,
-			       -1,
-			       Vec3F(RG_MAX_WIDTH - 2, 1.0f, RG_MAX_LENGTH - 2),
-			       SPECIAL_BLOCK);
     activeEntitiesCreateEntity(*active_entities_p,
 			       roomgrid_lookup,
 			       ROOMGRID_A,
