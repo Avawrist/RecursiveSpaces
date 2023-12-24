@@ -23,7 +23,6 @@ GameWindow      game_window;
 AssetManager    asset_manager;
 ActiveEntities* active_entities_p = new ActiveEntities();
 RoomGridLookup  roomgrid_lookup;
-
 RoomGridTransitionStatus rg_transition_status;
 
 // Function Definitions //
@@ -250,15 +249,6 @@ gameUpdateDepthOffsets()
     else {current_pos = Vec3F(0.0f, 0.0f, 0.0f);}
     current_offset = BASE_RG_ORIGIN - current_pos;
 
-    // Anim offset - lerp down to 0 vector
-    /*
-    if(rg_transition_status.update_anim_offset)
-    {
-	// TODO: Fix this offset. Does offset need to be scaled?
-	rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
-					    rg_transition_status.current_roomgrid_p->grid_pos);
-	rg_transition_status.update_anim_offset = false;
-	} */
     rg_transition_status.apply_offset = (current_offset +
 					 vlerp(rg_transition_status.anim_offset,
 					       Vec3F(0.0f, 0.0f, 0.0f),
@@ -353,12 +343,13 @@ gameUpdateRoomGrids(int i)
 	    {
 		// Find the currently viewed roomgrid's child blockroom ID
 		int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
-								  active_entities_p,
-								  BLOCK_ROOM);
+							   active_entities_p,
+							   BLOCK_ROOM);
 		if(child_br_id > -1)
 		{
 		    int child_rg_id = active_entities_p->roomgrid_ids[child_br_id];
-		    rg_transition_status.current_roomgrid_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
+		    RoomGrid* child_rg_p = roomgrid_lookup.roomgrid_pointers[child_rg_id];
+		    rg_transition_status.current_roomgrid_p = child_rg_p;
 
 		    rg_p->target_scale *= RG_MAX_WIDTH;
 		    rg_p->t = 0.0f;
@@ -366,9 +357,11 @@ gameUpdateRoomGrids(int i)
 
 		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.update_anim_offset = true;
+		    rg_transition_status.is_complete = false;
 
 		    rg_transition_status.anim_offset = (Vec3F(1.0f, 1.0f, 1.0f) +
 							rg_transition_status.current_roomgrid_p->grid_pos);
+
 		}
 	    }
 	    if(input_manager.inputs_on_frame[FRAME_1_PRIOR][KEY_O] == KEY_DOWN)
@@ -384,7 +377,8 @@ gameUpdateRoomGrids(int i)
 
 		    rg_transition_status.t = 0.0f;
 		    rg_transition_status.update_anim_offset = true;
-
+		    rg_transition_status.is_complete = false;
+		    
 		    int child_br_id = roomGridGetFirstIDByType(rg_transition_status.current_roomgrid_p,
 							       active_entities_p,
 							       BLOCK_ROOM);
@@ -404,6 +398,17 @@ gameUpdateRoomGrids(int i)
     }
 
     rg_p->grid_pos = active_entities_p->grid_positions[i].position;
+}
+
+static void
+gameUpdateRoomGridTransition()
+{
+    if(rg_transition_status.is_complete == false && rg_transition_status.t == 1.0f)
+    {
+	roomGridRemoveOwner(*rg_transition_status.current_roomgrid_p,
+			    *active_entities_p);
+        rg_transition_status.is_complete = true;
+    }
 }
 
 static int
@@ -474,7 +479,8 @@ gameUpdate(SoundStream* sound_stream_p,
 	    }
 	}
     }
-    
+
+    gameUpdateRoomGridTransition();
     soundStreamUpdate(sound_stream_p);
         
     // Remove Inactive Entities - Must be run after all other entity updates

@@ -192,7 +192,7 @@ typedef struct RoomGrid
     float t = 1.0f;
     Vec3F center = Vec3F(RG_MAX_WIDTH * current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * current_scale * 0.5f);
     Vec3F target_transform_pos;
-    Vec3F grid_pos;
+    Vec3F grid_pos; // Not used in the position calculation (see active_entities.grid_positions)
     Vec3F transform_pos;
     uint cooldown = 0;
     int roomgrid_owner_id = -1; 
@@ -210,6 +210,7 @@ typedef struct RoomGridTransitionStatus
     Vec3F apply_offset = Vec3F(0.0f, 0.0f, 0.0f);
     Vec3F anim_offset  = Vec3F(0.0f, 0.0f, 0.0f);
     bool update_anim_offset = false;
+    bool is_complete = true;
     float t = 1.0f;
 } RoomGridTransitionStatus;
 
@@ -298,6 +299,33 @@ roomGridRemoveEntity(RoomGrid& room_grid, Vec3F pos)
     _assert(pos.z >= 0.0f && pos.z < RG_MAX_LENGTH);
     
     room_grid.grid[(int)pos.x][(int)pos.y][(int)pos.z] = -1;
+}
+
+inline void
+roomGridRemoveOwner(RoomGrid& rg, ActiveEntities& entities)
+{
+    // Set proper transform and scale
+    // Set owner ID to -1
+
+    rg.previous_scale = 1.0f;
+    rg.current_scale  = 1.0f;
+    rg.target_scale   = 1.0f;
+    rg.t = 1.0f;
+    rg.center = Vec3F(RG_MAX_WIDTH * rg.current_scale * 0.5f, 0.0f, RG_MAX_LENGTH * rg.current_scale * 0.5f);
+
+    // Get owner's entity ID
+    int owner_entity_id = -1;
+    for(uint i = 0; i < MAX_ENTITIES; i++)
+    {
+	if (entities.roomgrid_ids[i] == rg.roomgrid_owner_id)
+	{
+	    owner_entity_id = i;
+	}
+    }
+    
+    activeEntitiesMarkInactive(entities, owner_entity_id); // TODO: We can't remove roomgrids currently,
+                                                           // need to review removeInactives code
+    rg.roomgrid_owner_id = -1; 
 }
 
 Vec3F
